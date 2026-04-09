@@ -1,11 +1,11 @@
-{{-- <div class="sidebar" id="sidebar">
+<div class="sidebar" id="sidebar">
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
                 <li class="menu-title">
                     <span>Main Menu</span>
                 </li>
-                <li class="submenu {{set_active(['setting/page'])}}">
+                {{-- <li class="submenu {{set_active(['setting/page'])}}">
                     <a href="#"><i class="fas fa-cog"></i>
                         <span> Settings</span>
                         <span class="menu-arrow"></span>
@@ -13,7 +13,7 @@
                     <ul>
                         <li><a href="{{ route('setting/page') }}"  class="{{set_active(['setting/page'])}}">General Settings</a></li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="submenu {{set_active(['home','teacher/dashboard','student/dashboard'])}}">
                     <a>
@@ -27,10 +27,36 @@
                         <li><a href="{{ route('student/dashboard') }}" class="{{set_active(['student/dashboard'])}}">Student Dashboard</a></li>
                     </ul>
                 </li>
-                @if (Session::get('role_name') === 'Admin' || Session::get('role_name') === 'Super Admin')
+                @if (Session::get('role_name') === 'verifikator' || Session::get('role_name') === 'Super Admin' || Session::get('role_name') === 'Admin')
                 <li class="submenu {{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">
                     <a href="#">
                         <i class="fas fa-shield-alt"></i>
+                        <span>Unit Verifikasi</span> 
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('billing-verifikasi/list') }}" class="{{set_active(['billing-verifikasi/list'])}} {{ (request()->is('billing/edit/*')) ? 'active' : '' }}">List Billing</a></li>
+                        <li><a href="{{ route('sp3-verifikasi/list') }}" class="{{set_active(['sp3-verifikasi/list'])}} {{ (request()->is('sp3/edit/*')) ? 'active' : '' }}">List SP3</a></li>
+                    </ul>
+                </li>
+                @endif
+                @if (Session::get('role_name') === 'keuangan' || Session::get('role_name') === 'Super Admin' || Session::get('role_name') === 'Admin')
+                <li class="submenu {{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">
+                    <a href="#">
+                        <i class="fas fa-money-bill"></i>
+                        <span>Unit Keuangan</span> 
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('billing-keuangan/list') }}" class="{{set_active(['billing-keuangan/list'])}} {{ (request()->is('billing/edit/*')) ? 'active' : '' }}">List Billing</a></li>
+                        <li><a href="{{ route('sp3-keuangan/list') }}" class="{{set_active(['sp3-keuangan/list'])}} {{ (request()->is('sp3/edit/*')) ? 'active' : '' }}">List SP3</a></li>
+                    </ul>
+                </li>
+                @endif
+                @if (Session::get('role_name') === 'Admin' || Session::get('role_name') === 'Super Admin')
+                <li class="submenu {{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">
+                    <a href="#">
+                        <i class="fas fa-users"></i>
                         <span>User Management</span> 
                         <span class="menu-arrow"></span>
                     </a>
@@ -53,19 +79,21 @@
                     </ul>
                 </li>
 
-                <li class="submenu  {{set_active(['teacher/add/page','teacher/list/page','teacher/grid/page','teacher/edit'])}} {{ (request()->is('teacher/edit/*')) ? 'active' : '' }}">
+                <li class="submenu  {{set_active(['eselon/*'])}} {{ (request()->is('eselon/*')) ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-chalkboard-teacher"></i>
-                        <span> Teachers</span>
+                        <span> Data Master</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="{{ route('teacher/list/page') }}" class="{{set_active(['teacher/list/page','teacher/grid/page'])}}">Teacher List</a></li>
-                        <li><a href="teacher-details.html">Teacher View</a></li>
-                        <li><a href="{{ route('teacher/add/page') }}" class="{{set_active(['teacher/add/page'])}}">Teacher Add</a></li>
-                        <li><a class="{{ (request()->is('teacher/edit/*')) ? 'active' : '' }}">Teacher Edit</a></li>
+                        <li><a href="{{route('eselon/list')}}" class="{{set_active(['eselon/*'])}}">Eselon</a></li>
+                        <li><a href="{{route('layanan/list')}}" class="{{set_active(['layanan/*'])}}">Layanan</a></li>
+                        <li><a href="{{route('sub-layanan/list')}}" class="{{set_active(['sub-layanan/*'])}}">Sub Layanan</a></li>
+    
+                        {{-- <li><a href="{{}}" class="{{set_active(['teacher/add/page'])}}">Teacher Add</a></li>
+                        <li><a class="{{ (request()->is('teacher/edit/*')) ? 'active' : '' }}">Teacher Edit</a></li> --}}
                     </ul>
                 </li>
-                
+                {{--
                 <li class="submenu {{set_active(['department/add/page','department/edit/page'])}} {{ request()->is('department/edit/*') ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-building"></i>
                         <span> Departments</span>
@@ -141,13 +169,13 @@
                 </li>
                 <li>
                     <a href="library.html"><i class="fas fa-book"></i> <span>Library</span></a>
-                </li>
+                </li> --}}
             </ul>
         </div>
     </div>
-</div> --}}
+</div>
 
-<div class="sidebar" id="sidebar">
+{{-- <div class="sidebar" id="sidebar">
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
@@ -182,7 +210,7 @@
             </ul>
         </div>
     </div>
-</div>
+</div> --}}
 
 
 
