@@ -91,9 +91,6 @@ class BillingController extends Controller
         $totalRecords = Billing::doesntHave('sp3')->count();
 
         $totalRecordsWithFilter = Billing::doesntHave('sp3')->where(function ($query) use ($searchValue) {
-            $query->orWhereHas('sp3', function ($subQuery) use ($searchValue) {
-                $subQuery->where('no_sp3', 'like', '%' . $searchValue . '%');
-            });
             $query->orWhereHas('eselon', function ($subQuery) use ($searchValue) {
                 $subQuery->where('nama', 'like', '%' . $searchValue . '%');
             });
@@ -109,17 +106,17 @@ class BillingController extends Controller
 
         $records = Billing::with(['sp3', 'eselon', 'layanan', 'sub_layanan'])
             ->doesntHave('sp3')
-            ->leftJoin('sp3s', 'billings.sp3_id', '=', 'sp3s.id')
-            ->leftJoin('eslons', 'billings.eslon_id', '=', 'eslons.id')
-            ->leftJoin('layanans', 'billings.layanan_id', '=', 'layanans.id')
-            ->leftJoin('sub_layanans', 'billings.sub_layanan_id', '=', 'sub_layanans.id')
+            // Buka tabel relasi agar bisa dipakai orderBy
+            ->leftJoin('eslons', 'eslons.id', '=', 'billings.eslon_id')
+            ->leftJoin('layanans', 'layanans.id', '=', 'billings.layanan_id')
+            ->leftJoin('sub_layanans', 'sub_layanans.id', '=', 'billings.sub_layanan_id')
+            ->select('billings.*') // Ambil kolom billings saja, hindari bentrok nama kolom
             ->where(function ($query) use ($searchValue) {
-                $query->orWhere('sp3s.no_sp3', 'like', '%' . $searchValue . '%');
-                $query->orWhere('eslons.nama', 'like', '%' . $searchValue . '%');
-                $query->orWhere('layanans.nama', 'like', '%' . $searchValue . '%');
-                $query->orWhere('sub_layanans.nama', 'like', '%' . $searchValue . '%');
-                $query->orWhere('billings.keterangan', 'like', '%' . $searchValue . '%');
-                $query->orWhere('billings.no_registrasi', 'like', '%' . $searchValue . '%');
+                $query->orWhere('eslons.nama', 'like', "%$searchValue%")
+                    ->orWhere('layanans.nama', 'like', "%$searchValue%")
+                    ->orWhere('sub_layanans.nama', 'like', "%$searchValue%")
+                    ->orWhere('billings.keterangan', 'like', "%$searchValue%")
+                    ->orWhere('billings.no_registrasi', 'like', "%$searchValue%");
             })
             ->orderBy($this->mapColumn($columnName), $columnSortOrder)
             ->skip($start)
@@ -162,7 +159,7 @@ class BillingController extends Controller
                 "sp3"         => $record->sp3->no_sp3 ?? 'N/A',
                 "keterangan"    => $record->keterangan,
                 "no_registrasi"    => $record->no_registrasi,
-                "eselon"    => $record->eselon->nama ?? 'N/A',
+                "eslon"    => $record->eselon->nama ?? 'N/A',
                 "layanan"    => $record->layanan->nama ?? 'N/A',
                 "sub_layanan"    => $record->sub_layanan->nama ?? 'N/A',
                 "biaya" => $record->biaya,
@@ -179,6 +176,7 @@ class BillingController extends Controller
         // dump($response);
         return response()->json($response);
     }
+
 
     public function getBillingsSp3Data(Request $request, $sp3_slug)
     {
@@ -219,17 +217,19 @@ class BillingController extends Controller
             ->whereHas('sp3', function ($query) use ($sp3_slug) {
                 $query->where('slug', $sp3_slug);
             })
-            ->leftJoin('sp3s', 'billings.sp3_id', '=', 'sp3s.id')
-            ->leftJoin('eslons', 'billings.eslon_id', '=', 'eslons.id')
-            ->leftJoin('layanans', 'billings.layanan_id', '=', 'layanans.id')
-            ->leftJoin('sub_layanans', 'billings.sub_layanan_id', '=', 'sub_layanans.id')
+            // Buka tabel relasi agar bisa dipakai orderBy
+            ->leftJoin('sp3s', 'sp3s.id', '=', 'billings.sp3_id')
+            ->leftJoin('eslons', 'eslons.id', '=', 'billings.eslon_id')
+            ->leftJoin('layanans', 'layanans.id', '=', 'billings.layanan_id')
+            ->leftJoin('sub_layanans', 'sub_layanans.id', '=', 'billings.sub_layanan_id')
+            ->select('billings.*') // Ambil kolom billings saja, hindari bentrok nama kolom
             ->where(function ($query) use ($searchValue) {
-                $query->orWhere('sp3s.no_sp3', 'like', '%' . $searchValue . '%');
-                $query->orWhere('eslons.nama', 'like', '%' . $searchValue . '%');
-                $query->orWhere('layanans.nama', 'like', '%' . $searchValue . '%');
-                $query->orWhere('sub_layanans.nama', 'like', '%' . $searchValue . '%');
-                $query->orWhere('billings.keterangan', 'like', '%' . $searchValue . '%');
-                $query->orWhere('billings.no_registrasi', 'like', '%' . $searchValue . '%');
+                $query->orWhere('sp3s.no_sp3', 'like', "%$searchValue%")
+                    ->orWhere('eslons.nama', 'like', "%$searchValue%")
+                    ->orWhere('layanans.nama', 'like', "%$searchValue%")
+                    ->orWhere('sub_layanans.nama', 'like', "%$searchValue%")
+                    ->orWhere('billings.keterangan', 'like', "%$searchValue%")
+                    ->orWhere('billings.no_registrasi', 'like', "%$searchValue%");
             })
             ->orderBy($this->mapColumn($columnName), $columnSortOrder)
             ->skip($start)
@@ -272,7 +272,7 @@ class BillingController extends Controller
                 "sp3"         => $record->sp3->no_sp3 ?? 'N/A',
                 "keterangan"    => $record->keterangan,
                 "no_registrasi"    => $record->no_registrasi,
-                "eselon"    => $record->eselon->nama ?? 'N/A',
+                "eslon"    => $record->eselon->nama ?? 'N/A',
                 "layanan"    => $record->layanan->nama ?? 'N/A',
                 "sub_layanan"    => $record->sub_layanan->nama ?? 'N/A',
                 "biaya" => $record->biaya,
@@ -293,14 +293,14 @@ class BillingController extends Controller
     private function mapColumn($columnName)
     {
         $map = [
-            'sp3' => 'sp3s.no_sp3',
-            'eselon' => 'eslons.nama',
-            'layanan' => 'layanans.nama',
-            'sub_layanan' => 'sub_layanans.nama',
-            'keterangan' => 'billings.keterangan',
+            'sp3'         => 'sp3s.no_sp3',           // tabel: sp3s
+            'eslon'       => 'eslons.nama',            // tabel: eslons
+            'layanan'     => 'layanans.nama',          // tabel: layanans
+            'sub_layanan' => 'sub_layanans.nama',      // tabel: sub_layanans
+            'keterangan'  => 'billings.keterangan',
             'no_registrasi' => 'billings.no_registrasi',
-            'biaya' => 'billings.biaya',
+            'biaya'       => 'billings.biaya',
         ];
-        return $map[$columnName] ?? 'billings.' . $columnName;
+        return $map[$columnName] ?? $columnName;
     }
 }

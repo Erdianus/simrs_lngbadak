@@ -27,6 +27,10 @@ class Billing extends Model
         'slug'
     ];
 
+    protected $appends = [
+        'biaya_formated'
+    ];
+
     protected static function booted()
     {
         static::creating(function (Billing $billing) {
@@ -47,9 +51,10 @@ class Billing extends Model
         $count = 1;
 
         while (static::where('slug', $slug)
-            ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
-            ->exists()) {
-            $slug = $original.'-'.$count++;
+            ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
+            ->exists()
+        ) {
+            $slug = $original . '-' . $count++;
         }
 
         return $slug;
@@ -60,19 +65,28 @@ class Billing extends Model
         return 'slug';
     }
 
-    public function sp3(){
-        return $this->belongsTo(Sp3::class,'sp3_id', 'id');
+    public function getBiayaFormatedAttribute()
+    {
+        return 'Rp ' . number_format($this->biaya, 0, ',', '.');
     }
 
-    public function eselon(){
-        return $this->belongsTo(Eslon::class,'eslon_id','id');
+    public function sp3()
+    {
+        return $this->belongsTo(Sp3::class, 'sp3_id', 'id');
     }
 
-    public function layanan(){
-        return $this->belongsTo(Layanan::class,'layanan_id','id');
+    public function eselon()
+    {
+        return $this->belongsTo(Eslon::class, 'eslon_id', 'id');
     }
 
-    public function sub_layanan(){
-        return $this->belongsTo(SubLayanan::class,'sub_layanan_id','id');
+    public function layanan()
+    {
+        return $this->belongsTo(Layanan::class, 'layanan_id', 'id');
+    }
+
+    public function sub_layanan()
+    {
+        return $this->belongsTo(SubLayanan::class, 'sub_layanan_id', 'id');
     }
 }

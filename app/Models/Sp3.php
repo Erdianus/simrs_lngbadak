@@ -48,9 +48,10 @@ class Sp3 extends Model
         $count = 1;
 
         while (static::where('slug', $slug)
-            ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
-            ->exists()) {
-            $slug = $original.'-'.$count++;
+            ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
+            ->exists()
+        ) {
+            $slug = $original . '-' . $count++;
         }
 
         return $slug;
@@ -63,12 +64,12 @@ class Sp3 extends Model
 
     public function getTotalBiayaAttribute()
     {
-        return $this->billings()->sum('biaya');
+        $total = $this->billings()->sum('biaya');
+        return 'Rp ' . number_format($total, 0, ',', '.');
     }
 
-    public function billings(){
-        return $this->hasMany(Billing::class, 'sp3_id','id');
+    public function billings()
+    {
+        return $this->hasMany(Billing::class, 'sp3_id', 'id');
     }
-
-
 }

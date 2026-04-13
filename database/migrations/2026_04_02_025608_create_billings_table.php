@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('sp3_id')->nullable();
             $table->string('keterangan')->nullable();
-            $table->string('no_registrasi')->unique();
+            $table->string('no_registrasi');
             $table->foreignId('eslon_id')->references('id')->on('eslons');
             $table->foreignId('layanan_id')->references('id')->on('layanans');
             $table->foreignId('sub_layanan_id')->references('id')->on('sub_layanans')->nullable();

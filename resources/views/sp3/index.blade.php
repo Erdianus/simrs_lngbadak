@@ -139,7 +139,7 @@
                 },
                 columns: [{
                         data: 'no_sp3',
-                        name: 'no_sp3'
+                        name: 'no_sp3',
                     },
                     {
                         data: 'keterangan',
@@ -147,11 +147,15 @@
                     },
                     {
                         data: 'total_biaya',
-                        name: 'total_biaya'
+                        name: 'total_biaya',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'modify',
                         name: 'modify',
+                        orderable: false,
+                        searchable: false
                     },
                 ]
             });

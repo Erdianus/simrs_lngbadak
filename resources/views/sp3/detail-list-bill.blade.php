@@ -154,8 +154,8 @@
                         name: 'no_registrasi'
                     },
                     {
-                        data: 'eselon',
-                        name: 'eselon'
+                        data: 'eslon',
+                        name: 'eslon'
                     },
                     {
                         data: 'layanan',
@@ -168,6 +168,7 @@
                     {
                         data: 'biaya',
                         name: 'biaya'
+                        // orderable: false
                     },
                     {
                         data: 'modify',

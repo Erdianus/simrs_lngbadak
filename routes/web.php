@@ -131,7 +131,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::post('billing/delete', 'destroy')->middleware('auth')->name('billing/delete'); // delete record billing
         Route::get('get-billings-verifikasi-data', 'getBillingsVerifikasiData')->middleware('auth')->name('get-billings-verifikasi-data'); // get data billings
         Route::get('get-billings-billings-sp3/{slug}', 'getBillingsSp3Data')->middleware('auth')->name('get-billings-sp3-data'); // get data billings
-        Route::get('get-billings-keuangan-data', 'getBillingsKeuanganData')->middleware('auth')->name('get-billings-keuangan-data'); // get data billings
     });
 
     // ------------------------ eselon -------------------------------//
