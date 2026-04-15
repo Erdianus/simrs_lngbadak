@@ -3,7 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Sp3Request;
+use App\Models\Eslon;
+use App\Models\Layanan;
+use App\Models\PerihalTagihan;
 use App\Models\Sp3;
+use App\Service\Sp3Service;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 
 class Sp3Controller extends Controller
@@ -11,6 +17,27 @@ class Sp3Controller extends Controller
     public function index()
     {
         return view('sp3.index');
+    }
+
+    public function create()
+    {
+        $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
+        $eselon = Eslon::select(['id', 'nama'])->get();
+        $layanan = Layanan::select(['id', 'nama'])->get();
+        return view('sp3.create', compact('kode_tagihan', 'eselon', 'layanan'));
+    }
+
+    public function store(Sp3Request $request)
+    {
+        $validated = $request->validated();
+        $create = Sp3Service::createSp3($validated);
+        // dd($create);
+        if ($create === true) {
+            Toastr::success('Berhasil Menambahkan SP3 :)', 'Success');
+            return redirect()->route('sp3-verifikasi/list');
+        }
+        Toastr::error($create->getMessage(), 'Error');
+        return redirect()->back();
     }
 
     public function listBillSp3($sp3_slug)
@@ -38,15 +65,29 @@ class Sp3Controller extends Controller
 
         $totalRecords = Sp3::count();
 
-        $totalRecordsWithFilter = Sp3::where(function ($query) use ($searchValue) {
-            $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
-            $query->orWhere('keterangan', 'like', '%' . $searchValue . '%');
-        })->count();
+        $totalRecordsWithFilter = Sp3::where('is_approved_by_verifikator', false)
+            ->where(function ($query) use ($searchValue) {
+                $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
+                $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
+                $query->orWhere('ket_inv_pasien', 'like', '%' . $searchValue . '%');
+                $query->orWhere('ket_inv_rs', 'like', '%' . $searchValue . '%');
+                $query->orWhere('ket_pembayaran', 'like', '%' . $searchValue . '%');
+                $query->orWhere('kota', 'like', '%' . $searchValue . '%');
+                $query->orWhere('nama_rs', 'like', '%' . $searchValue . '%');
+                $query->orWhere('dokter_rujukan', 'like', '%' . $searchValue . '%');
+            })->count();
 
         $records = Sp3::orderBy($columnName, $columnSortOrder)
+            ->where('is_approved_by_verifikator', false)
             ->where(function ($query) use ($searchValue) {
-                $query->where('no_sp3', 'like', '%' . $searchValue . '%');
-                $query->orWhere('keterangan', 'like', '%' . $searchValue . '%');
+                $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
+                $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
+                $query->orWhere('ket_inv_pasien', 'like', '%' . $searchValue . '%');
+                $query->orWhere('ket_inv_rs', 'like', '%' . $searchValue . '%');
+                $query->orWhere('ket_pembayaran', 'like', '%' . $searchValue . '%');
+                $query->orWhere('kota', 'like', '%' . $searchValue . '%');
+                $query->orWhere('nama_rs', 'like', '%' . $searchValue . '%');
+                $query->orWhere('dokter_rujukan', 'like', '%' . $searchValue . '%');
             })
             ->skip($start)
             ->take($rowPerPage)
@@ -91,8 +132,20 @@ class Sp3Controller extends Controller
             ';
 
             $data_arr[] = [
-                "no_sp3"         => $record->no_sp3,
-                "keterangan"     => $record->keterangan,
+                "no_sp3"         => $record->no_sp3 ?? '-',
+                "tgl_sp3"     => $record->tgl_sp3,
+                "nomor_tagihan"    => $record->nomor_tagihan,
+                "tgl_terima_keu"    => $record->tgl_terima_keu,
+                "perihal_tagihan"    => $record->perihalTagihan->kode,
+                "ket_inv_pasien"    => $record->ket_inv_pasien,
+                "ket_inv_rs"    => $record->ket_inv_rs,
+                "eselon"    => $record->eselon->nama,
+                "jumlah_pasien"    => $record->jumlah_pasien,
+                "jumlah_kunjungan"    => $record->jumlah_kunjungan,
+                "ket_pembayaran"    => $record->ket_pembayaran,
+                "layanan"    => $record->layanan->nama,
+                "tgl_masuk"     => $record->tgl_masuk,
+                "tgl_keluar"     => $record->tgl_keluar,
                 "total_biaya"    => $record->total_biaya,
                 "modify"         => $modify,
             ];

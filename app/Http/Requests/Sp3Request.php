@@ -11,7 +11,7 @@ class Sp3Request extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,23 @@ class Sp3Request extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'tgl_sp3' => ['required', 'date'],
+            'jenis_surat' => ['required', 'string'],
+            'nomor_tagihan' => ['required', 'string'],
+            'tgl_terima_keu' => ['required', 'date'],
+            'perihal_tagihan_id' => ['required', 'integer'],
+            'ket_inv_pasien' => ['required', 'string'],
+            'ket_inv_rs' => ['required', 'string'],
+            'eslon_id' => ['required', 'integer'],
+            'jumlah_pasien' => ['required', 'integer'],
+            'jumlah_kunjungan' => ['required', 'integer'],
+            'ket_pembayaran' => ['required', 'string'],
+            'layanan_id' => ['required', 'integer'],
+            'kota' => ['required', 'string'],
+            'nama_rs' => ['required', 'string'],
+            'dokter_rujukan' => ['nullable', 'string'],
+            'tgl_masuk' => ['required', 'date'],
+            'tgl_keluar' => ['required', 'date'],
         ];
     }
 }

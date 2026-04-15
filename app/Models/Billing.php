@@ -24,6 +24,10 @@ class Billing extends Model
         'biaya',
         'is_verified_by_verifikator',
         'is_verified_by_keuangan',
+        'approved_verif_pic_by',
+        'approved_verif_pws_by',
+        'approved_verif_wadir_by',
+        'approved_keu_admin_by',
         'slug'
     ];
 

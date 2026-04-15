@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Str;
+use LaravelPdoOdbc\Flavours\Sybase\Query\Grammar;
 
 return [
 
@@ -92,6 +93,28 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        'odbc' => [
+            'driver'   => 'odbc',
+            'dsn'      => 'Driver={SQL Anywhere 12};' .
+                'CommLinks=tcpip(host=localhost;port=2638);' .
+                'ServerName=rslngbadak;' .
+                'DatabaseName=rs_lngbadak;' .
+                'UID=dba;' .
+                'PWD=rs_B4d4k_012024*;',
+            'host'     => env('DB_HOST_SYBASE'),
+            'port'     => env('DB_PORT_SYBASE'),
+            'database' => env('DB_DATABASE_SYBASE'),
+            'username' => env('DB_USERNAME_SYBASE'),
+            'password' => env('DB_PASSWORD_SYBASE'),
+            'options'  => [
+                'processor' => Illuminate\Database\Query\Processors\Processor::class,
+                'grammar' => [
+                    'query' => \App\Grammars\CustomQueryGrammar::class, // Custom grammar
+                    'schema' => Illuminate\Database\Query\Grammars\SqlServerGrammar::class,
+                ]
+            ],
+            'charset' => 'utf8',
+        ],
 
     ],
 
@@ -125,7 +148,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

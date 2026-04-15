@@ -20,8 +20,7 @@ class DatabaseSeeder extends Seeder
             EslonSeeder::class,
             LayananSeeder::class,
             SubLayananSeeder::class,
-            Sp3Seeder::class,
-            BillingSeeder::class,
+            PerihalTagihanSeeder::class,
         ]);
     }
 }

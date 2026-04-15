@@ -72,7 +72,19 @@
                                         <tr>
 
                                             <th>SP3</th>
-                                            <th>Keterangan</th>
+                                            <th>Tanggal SP3</th>
+                                            <th>Nomor Tagihan</th>
+                                            <th>Tanggal Terima Keu</th>
+                                            <th>Tagihan Kode</th>
+                                            <th>Ketrangan INV Pasien</th>
+                                            <th>Ketrangan INV RS</th>
+                                            <th>Eselon</th>
+                                            <th>Jumlah Pasien</th>
+                                            <th>Jumlah Kunjungan</th>
+                                            <th>Keterangan Pembayaran</th>
+                                            <th>Layanan</th>
+                                            <th>Tanggal Masuk</th>
+                                            <th>Tanggal Keluar</th>
                                             <th>Total Biaya</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -142,8 +154,56 @@
                         name: 'no_sp3',
                     },
                     {
-                        data: 'keterangan',
-                        name: 'keterangan'
+                        data: 'tgl_sp3',
+                        name: 'tgl_sp3'
+                    },
+                    {
+                        data: 'nomor_tagihan',
+                        name: 'nomor_tagihan'
+                    },
+                    {
+                        data: 'tgl_terima_keu',
+                        name: 'tgl_terima_keu'
+                    },
+                    {
+                        data: 'perihal_tagihan',
+                        name: 'perihal_tagihan'
+                    },
+                    {
+                        data: 'ket_inv_pasien',
+                        name: 'ket_inv_pasien'
+                    },
+                    {
+                        data: 'ket_inv_rs',
+                        name: 'ket_inv_rs'
+                    },
+                    {
+                        data: 'eselon',
+                        name: 'eselon'
+                    },
+                    {
+                        data: 'jumlah_pasien',
+                        name: 'jumlah_pasien'
+                    },
+                    {
+                        data: 'jumlah_kunjungan',
+                        name: 'jumlah_kunjungan'
+                    },
+                    {
+                        data: 'ket_pembayaran',
+                        name: 'ket_pembayaran'
+                    },
+                    {
+                        data: 'layanan',
+                        name: 'layanan'
+                    },
+                    {
+                        data: 'tgl_masuk',
+                        name: 'tgl_masuk'
+                    },
+                    {
+                        data: 'tgl_keluar',
+                        name: 'tgl_keluar'
                     },
                     {
                         data: 'total_biaya',

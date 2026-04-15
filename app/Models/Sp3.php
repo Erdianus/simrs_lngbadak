@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Eslon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -15,9 +16,27 @@ class Sp3 extends Model
     protected $fillable = [
         'no_sp3',
         'keterangan',
+        'tgl_sp3',
+        'jenis_surat',
+        'nomor_tagihan',
+        'tgl_terima_keu',
+        'perihal_tagihan_id',
+        'ket_inv_pasien',
+        'ket_inv_rs',
+        'eslon_id',
+        'jumlah_pasien',
+        'jumlah_kunjungan',
+        'ket_pembayaran',
+        'layanan_id',
+        'kota',
+        'nama_rs',
+        'dokter_rujukan',
+        'tgl_masuk',
+        'tgl_keluar',
+        'total_tagihan',
         'is_approved_by_verifikator',
         'is_approved_by_keuangan',
-        'slug'
+        'slug',
     ];
 
     protected $appends = [
@@ -27,18 +46,29 @@ class Sp3 extends Model
     protected static function booted()
     {
         static::creating(function (Sp3 $sp3) {
-            if ($sp3->no_sp3) {
-                $sp3->slug = $sp3->slug ?: static::generateUniqueSlug($sp3->no_sp3);
+            if ($sp3->nomor_tagihan) {
+                $sp3->slug = $sp3->slug ?: static::generateUniqueSlug($sp3->slugSource());
             }
         });
 
         static::updating(function (Sp3 $sp3) {
-            if (($sp3->isDirty('no_sp3') && $sp3->no_sp3) || empty($sp3->slug)) {
-                if ($sp3->no_sp3) {
-                    $sp3->slug = static::generateUniqueSlug($sp3->no_sp3, $sp3->id);
-                }
+            if ((($sp3->isDirty('nomor_tagihan') || $sp3->isDirty('eslon_id')) && $sp3->nomor_tagihan) || empty($sp3->slug)) {
+                $sp3->slug = static::generateUniqueSlug($sp3->slugSource(), $sp3->id);
             }
         });
+    }
+
+    protected function slugSource(): string
+    {
+        $eslonName = null;
+
+        if ($this->eslon_id) {
+            $eslonName = Eslon::find($this->eslon_id)->nama ?? null;
+        }
+
+        $eslonPart = $eslonName ?: $this->eslon_id;
+
+        return trim($this->nomor_tagihan . ' ' . $eslonPart);
     }
 
     protected static function generateUniqueSlug(string $value, int $ignoreId = null): string
@@ -71,5 +101,20 @@ class Sp3 extends Model
     public function billings()
     {
         return $this->hasMany(Billing::class, 'sp3_id', 'id');
+    }
+
+    public function eselon()
+    {
+        return $this->belongsTo(Eslon::class, 'eslon_id', 'id');
+    }
+
+    public function layanan()
+    {
+        return $this->belongsTo(Layanan::class, 'layanan_id', 'id');
+    }
+
+    public function perihalTagihan()
+    {
+        return $this->belongsTo(PerihalTagihan::class, 'perihal_tagihan_id', 'id');
     }
 }

@@ -16,7 +16,9 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SubLayananController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserManagementController;
+use App\Models\Simrs\BillingSimrs;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,6 +52,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('home', function () {
         return view('home');
     });
+});
+Route::get('/test-db', function () {
+    try {
+        $conn = BillingSimrs::select(['reg_no', 'tanggal', 'poli_id', 'tanggal_transaksi'])->whereBetween('tanggal', ['2026-03-01', '2026-03-31'])->get();
+        return $conn;
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });
 
 Auth::routes();
