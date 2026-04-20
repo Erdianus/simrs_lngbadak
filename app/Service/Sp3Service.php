@@ -3,17 +3,25 @@
 namespace App\Service;
 
 use App\Models\Billing;
+use App\Models\Simrs\KipKirimanSimrs;
+use App\Models\Simrs\RegMultiPoliSimrs;
+use App\Models\Simrs\TindakanSimrs;
+use App\Models\Simrs\TransaksiAlkesSimrs;
+use App\Models\Simrs\TransaksiEmbalaceSimrs;
+use App\Models\Simrs\TransaksiKamarSimrs;
+use App\Models\Simrs\TransaksiResepSimrs;
 use App\Models\Sp3;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class Sp3Service
 {
-    public static function createSp3($data)
+
+    public static function createSp3($data, $getDataReg, $eselon)
     {
-        // Logika untuk menyimpan data Eslon ke database
         DB::beginTransaction();
         try {
-            Sp3::create([
+            $sp3 = Sp3::create([
                 'tgl_sp3' => $data['tgl_sp3'],
                 'jenis_surat' => $data['jenis_surat'],
                 'nomor_tagihan' => $data['nomor_tagihan'],
@@ -22,8 +30,6 @@ class Sp3Service
                 'ket_inv_pasien' => $data['ket_inv_pasien'],
                 'ket_inv_rs' => $data['ket_inv_rs'],
                 'eslon_id' => $data['eslon_id'],
-                'jumlah_pasien' => $data['jumlah_pasien'],
-                'jumlah_kunjungan' => $data['jumlah_kunjungan'],
                 'ket_pembayaran' => $data['ket_pembayaran'],
                 'layanan_id' => $data['layanan_id'],
                 'kota' => $data['kota'],
@@ -32,6 +38,12 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
             ]);
+            // dd($getDataReg);
+            foreach ($getDataReg as $bill) {
+                // dd($bill);
+                BillingService::createBilling($bill, $sp3, $eselon);
+            }
+            // dd('test');
             DB::commit();
             return true;
         } catch (\Throwable $th) {

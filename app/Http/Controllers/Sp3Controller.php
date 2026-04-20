@@ -7,13 +7,66 @@ use App\Http\Requests\Sp3Request;
 use App\Models\Eslon;
 use App\Models\Layanan;
 use App\Models\PerihalTagihan;
+use App\Models\Simrs\EselonSimrs;
+use App\Models\Simrs\RegMultiPoliSimrs;
 use App\Models\Sp3;
 use App\Service\Sp3Service;
 use Brian2694\Toastr\Facades\Toastr;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class Sp3Controller extends Controller
 {
+    private $kode_poli = [
+        'MCU01',
+        'RJ002',
+        'RJ004',
+        'RJ006',
+        'RJ008',
+        'RJ010',
+        'RJ012',
+        'RJ014',
+        'RJ016',
+        'RJ018',
+        'FIS01',
+        'RIN01',
+        'LAB01',
+        'ADM02',
+        'HC',
+        'RJ021',
+        'RJ023',
+        'TND01',
+        'RJ025',
+        'RJ027',
+        'RJ029',
+        'RJ030',
+        'TER01',
+        'RJ034',
+        'CSSD',
+        'RJ001',
+        'RJ003',
+        'RJ005',
+        'RJ007',
+        'RJ009',
+        'RJ011',
+        'RJ013',
+        'RJ015',
+        'RJ017',
+        'RJ019',
+        'FAR01',
+        'IGD01',
+        'OK001',
+        'RAD01',
+        'RJ020',
+        'RJ022',
+        'RJ024',
+        'RJ026',
+        'RJ028',
+        'RJ031',
+        'RJ032',
+        'RJ033',
+        'RJ035'
+    ];
     public function index()
     {
         return view('sp3.index');
@@ -22,7 +75,7 @@ class Sp3Controller extends Controller
     public function create()
     {
         $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
-        $eselon = Eslon::select(['id', 'nama'])->get();
+        $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
         $layanan = Layanan::select(['id', 'nama'])->get();
         return view('sp3.create', compact('kode_tagihan', 'eselon', 'layanan'));
     }
@@ -30,12 +83,25 @@ class Sp3Controller extends Controller
     public function store(Sp3Request $request)
     {
         $validated = $request->validated();
-        $create = Sp3Service::createSp3($validated);
-        // dd($create);
+        // dd($validated);
+        $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
+        $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
+        $eslon = Eslon::findOrFail($validated['eslon_id']);
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
+            ->whereIn('kode_poli', $this->kode_poli)
+            ->where('eselon', $eslon->nama)
+            ->get();
+        if ($getDataReg->isEmpty()) {
+            Toastr::error('Data Billing Tidak Ada', 'Error');
+            return redirect()->back();
+        }
+        $create = Sp3Service::createSp3($validated, $getDataReg, $eslon);
         if ($create === true) {
             Toastr::success('Berhasil Menambahkan SP3 :)', 'Success');
             return redirect()->route('sp3-verifikasi/list');
         }
+
         Toastr::error($create->getMessage(), 'Error');
         return redirect()->back();
     }
@@ -77,7 +143,7 @@ class Sp3Controller extends Controller
                 $query->orWhere('dokter_rujukan', 'like', '%' . $searchValue . '%');
             })->count();
 
-        $records = Sp3::orderBy($columnName, $columnSortOrder)
+        $records = Sp3::with('eselon')->orderBy($columnName, $columnSortOrder)
             ->where('is_approved_by_verifikator', false)
             ->where(function ($query) use ($searchValue) {
                 $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
@@ -140,13 +206,13 @@ class Sp3Controller extends Controller
                 "ket_inv_pasien"    => $record->ket_inv_pasien,
                 "ket_inv_rs"    => $record->ket_inv_rs,
                 "eselon"    => $record->eselon->nama,
-                "jumlah_pasien"    => $record->jumlah_pasien,
-                "jumlah_kunjungan"    => $record->jumlah_kunjungan,
+                "jumlah_pasien"    => $record->total_pasien,
+                "jumlah_kunjungan"    => $record->total_kunjungan,
                 "ket_pembayaran"    => $record->ket_pembayaran,
                 "layanan"    => $record->layanan->nama,
                 "tgl_masuk"     => $record->tgl_masuk,
                 "tgl_keluar"     => $record->tgl_keluar,
-                "total_biaya"    => $record->total_biaya,
+                "total_biaya"    => 'Rp ' . number_format($record->total_biaya, 0, ',', '.'),
                 "modify"         => $modify,
             ];
         }

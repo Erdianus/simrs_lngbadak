@@ -19,8 +19,6 @@ return new class extends Migration
             $table->foreignId('perihal_tagihan_id')->nullable()->constrained('perihal_tagihans');
             $table->string('ket_inv_pasien')->nullable()->comment('Nama pasiennya atau nama pasien dari PT(perusahaan) atau asuransi');
             $table->string('ket_inv_rs')->nullable()->comment('Keterangan invoice rumah sakit mana');
-            $table->integer('jumlah_pasien')->nullable();
-            $table->integer('jumlah_kunjungan')->nullable();
             $table->string('ket_pembayaran')->nullable();
             $table->foreignId('layanan_id')->nullable()->constrained('layanans');
             $table->string('kota')->nullable();

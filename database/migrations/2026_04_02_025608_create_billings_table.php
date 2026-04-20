@@ -17,11 +17,10 @@ return new class extends Migration
             $table->string('keterangan')->nullable();
             $table->string('no_registrasi');
             $table->foreignId('eslon_id')->references('id')->on('eslons');
-            $table->foreignId('layanan_id')->references('id')->on('layanans');
-            $table->foreignId('sub_layanan_id')->references('id')->on('sub_layanans')->nullable();
+            $table->foreignId('layanan_id')->nullable();
+            $table->foreignId('sub_layanan_id')->nullable();
             $table->date('tanggal_masuk');
             $table->date('tanggal_keluar');
-            $table->integer('biaya');
             $table->boolean('is_verified_by_verifikator')->default(false);
             $table->boolean('is_verified_by_keuangan')->default(false);
             $table->timestamps();

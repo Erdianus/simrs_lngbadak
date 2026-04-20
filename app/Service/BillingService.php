@@ -4,29 +4,36 @@ namespace App\Service;
 
 use App\Models\Billing;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BillingService
 {
-    public static function createBilling($data)
+    public static function createBilling($value, $sp3, $eselon)
     {
-        // Logika untuk menyimpan data Eslon ke database
         DB::beginTransaction();
         try {
-            Billing::create([
-                'sp3_id' => $data['sp3_id'],
-                'keterangan' => $data['keterangan'],
-                'no_registrasi' => $data['no_registrasi'],
-                'eslon_id' => $data['eslon_id'],
-                'layanan_id' => $data['layanan_id'],
-                'sub_layanan_id' => $data['sub_layanan_id'],
-                'tanggal_masuk' => $data['tanggal_masuk'],
-                'tanggal_keluar' => $data['tanggal_keluar'],
-                'biaya' => $data['biaya'],
-            ]);
+            $data = [
+                'sp3_id'        => $sp3->id,
+                'no_registrasi' => $value->reg_no,
+                'eslon_id'      => $eselon->id,
+                'tanggal_masuk' => $value->tanggal_registrasi,
+                'tanggal_keluar' => $value->tanggal_registrasi
+            ];
+
+            // DEBUG: Cek data sebelum insert
+            Log::info('Data billing akan disimpan:', $data);
+            // dd($data); // ← aktifkan sementara untuk cek
+
+            $billing = Billing::create($data);
+
+            // DEBUG: Cek apakah billing berhasil dibuat
+            Log::info('Billing created:', $billing->toArray());
+
             DB::commit();
             return true;
         } catch (\Throwable $th) {
             DB::rollback();
+            Log::error('Error createBilling: ' . $th->getMessage()); // ← tambahkan log
             return $th->getMessage();
         }
     }

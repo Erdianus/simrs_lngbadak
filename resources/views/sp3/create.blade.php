@@ -137,46 +137,18 @@
                                     </div>
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
-                                            <label>Penjamin / Eselon <span class="login-danger">*</span></label>
+                                            <label>Eselon <span class="login-danger">*</span></label>
                                             <select class="form-control select  @error('eslon_id') is-invalid @enderror"
                                                 name="eslon_id">
-                                                <option selected disabled>Select Penjamin / Eselon</option>
+                                                <option selected disabled>Select Kode Tagihan</option>
                                                 @foreach ($eselon as $item)
-                                                    <option value="{{ $item->id }}"
+                                                    <option value="{{ $item->id }}""
                                                         {{ old('eslon_id') == $item->id ? 'selected' : '' }}>
-                                                        {{ $item->nama }}
+                                                        {{ $item->nama . ' / ' . $item->deskripsi }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                             @error('eslon_id')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-4">
-                                        <div class="form-group local-forms">
-                                            <label>Jumlah Pasien<span class="login-danger">*</span></label>
-                                            <input type="number"
-                                                class="form-control @error('jumlah_pasien') is-invalid @enderror"
-                                                name="jumlah_pasien" placeholder="Enter Jumlah Pasien"
-                                                value="{{ old('jumlah_pasien') }}" min="0">
-                                            @error('jumlah_pasien')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-4">
-                                        <div class="form-group local-forms">
-                                            <label>Jumlah Kunjungan<span class="login-danger">*</span></label>
-                                            <input type="number"
-                                                class="form-control @error('jumlah_kunjungan') is-invalid @enderror"
-                                                name="jumlah_kunjungan" placeholder="Enter Jumlah Kunjungan"
-                                                value="{{ old('jumlah_kunjungan') }}" min="0">
-                                            @error('jumlah_kunjungan')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>

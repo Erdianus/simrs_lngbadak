@@ -30,8 +30,6 @@ class Sp3Request extends FormRequest
             'ket_inv_pasien' => ['required', 'string'],
             'ket_inv_rs' => ['required', 'string'],
             'eslon_id' => ['required', 'integer'],
-            'jumlah_pasien' => ['required', 'integer'],
-            'jumlah_kunjungan' => ['required', 'integer'],
             'ket_pembayaran' => ['required', 'string'],
             'layanan_id' => ['required', 'integer'],
             'kota' => ['required', 'string'],

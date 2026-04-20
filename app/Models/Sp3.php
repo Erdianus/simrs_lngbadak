@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Eslon;
+use App\Models\Simrs\EselonSimrs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -24,8 +25,6 @@ class Sp3 extends Model
         'ket_inv_pasien',
         'ket_inv_rs',
         'eslon_id',
-        'jumlah_pasien',
-        'jumlah_kunjungan',
         'ket_pembayaran',
         'layanan_id',
         'kota',
@@ -40,6 +39,8 @@ class Sp3 extends Model
     ];
 
     protected $appends = [
+        'total_pasien',
+        'total_kunjungan',
         'total_biaya'
     ];
 
@@ -94,9 +95,23 @@ class Sp3 extends Model
 
     public function getTotalBiayaAttribute()
     {
-        $total = $this->billings()->sum('biaya');
-        return 'Rp ' . number_format($total, 0, ',', '.');
+        $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon);
+        return $total;
+        // return 'Rp ' . number_format($total, 0, ',', '.');
     }
+
+    public function getTotalKunjunganAttribute()
+    {
+        $totalKunjungan = $this->billings->count();
+        return $totalKunjungan;
+    }
+
+    public function getTotalPasienAttribute()
+    {
+        $totalPasiens = $this->billings->count();
+        return $totalPasiens;
+    }
+
 
     public function billings()
     {

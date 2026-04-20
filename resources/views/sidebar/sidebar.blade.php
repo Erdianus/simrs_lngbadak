@@ -15,80 +15,105 @@
                     </ul>
                 </li> --}}
 
-                <li class="submenu {{set_active(['home','teacher/dashboard','student/dashboard'])}}">
+                <li class="submenu {{ set_active(['home', 'teacher/dashboard', 'student/dashboard']) }}">
                     <a>
                         <i class="fas fa-tachometer-alt"></i>
-                        <span> Dashboard</span> 
+                        <span> Dashboard</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="{{ route('home') }}" class="{{set_active(['home'])}}">Admin Dashboard</a></li>
-                        <li><a href="{{ route('teacher/dashboard') }}" class="{{set_active(['teacher/dashboard'])}}">Teacher Dashboard</a></li>
-                        <li><a href="{{ route('student/dashboard') }}" class="{{set_active(['student/dashboard'])}}">Student Dashboard</a></li>
+                        <li><a href="{{ route('home') }}" class="{{ set_active(['home']) }}">Admin Dashboard</a></li>
+                        <li><a href="{{ route('teacher/dashboard') }}"
+                                class="{{ set_active(['teacher/dashboard']) }}">Teacher Dashboard</a></li>
+                        <li><a href="{{ route('student/dashboard') }}"
+                                class="{{ set_active(['student/dashboard']) }}">Student Dashboard</a></li>
                     </ul>
                 </li>
-                @if (Session::get('role_name') === 'verifikator' || Session::get('role_name') === 'Super Admin' || Session::get('role_name') === 'Admin')
-                <li class="submenu {{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">
-                    <a href="#">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Unit Verifikasi</span> 
-                        <span class="menu-arrow"></span>
-                    </a>
-                    <ul>
-                        <li><a href="{{ route('billing-verifikasi/list') }}" class="{{set_active(['billing-verifikasi/list'])}} {{ (request()->is('billing/edit/*')) ? 'active' : '' }}">List Billing</a></li>
-                        <li><a href="{{ route('sp3-verifikasi/list') }}" class="{{set_active(['sp3-verifikasi/list'])}} {{ (request()->is('sp3/edit/*')) ? 'active' : '' }}">List SP3</a></li>
-                    </ul>
-                </li>
+                @if (Session::get('role_name') === 'verifikator' ||
+                        Session::get('role_name') === 'Super Admin' ||
+                        Session::get('role_name') === 'Admin')
+                    <li
+                        class="submenu {{ set_active(['list/users']) }} {{ request()->is('view/user/edit/*') ? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Unit Verifikasi</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            {{-- <li><a href="{{ route('billing-verifikasi/list') }}" class="{{set_active(['billing-verifikasi/list'])}} {{ (request()->is('billing/edit/*')) ? 'active' : '' }}">List Billing</a></li> --}}
+                            <li><a href="{{ route('sp3-verifikasi/list') }}"
+                                    class="{{ set_active(['sp3-verifikasi/list']) }} {{ request()->is('sp3/edit/*') ? 'active' : '' }}">List
+                                    SP3</a></li>
+                        </ul>
+                    </li>
                 @endif
-                @if (Session::get('role_name') === 'keuangan' || Session::get('role_name') === 'Super Admin' || Session::get('role_name') === 'Admin')
-                <li class="submenu {{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">
-                    <a href="#">
-                        <i class="fas fa-money-bill"></i>
-                        <span>Unit Keuangan</span> 
-                        <span class="menu-arrow"></span>
-                    </a>
-                    <ul>
-                        <li><a href="{{ route('billing-keuangan/list') }}" class="{{set_active(['billing-keuangan/list'])}} {{ (request()->is('billing/edit/*')) ? 'active' : '' }}">List Billing</a></li>
-                        <li><a href="{{ route('sp3-keuangan/list') }}" class="{{set_active(['sp3-keuangan/list'])}} {{ (request()->is('sp3/edit/*')) ? 'active' : '' }}">List SP3</a></li>
-                    </ul>
-                </li>
+                @if (Session::get('role_name') === 'keuangan' ||
+                        Session::get('role_name') === 'Super Admin' ||
+                        Session::get('role_name') === 'Admin')
+                    <li
+                        class="submenu {{ set_active(['list/users']) }} {{ request()->is('view/user/edit/*') ? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fas fa-money-bill"></i>
+                            <span>Unit Keuangan</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li><a href="{{ route('billing-keuangan/list') }}"
+                                    class="{{ set_active(['billing-keuangan/list']) }} {{ request()->is('billing/edit/*') ? 'active' : '' }}">List
+                                    Billing</a></li>
+                            <li><a href="{{ route('sp3-keuangan/list') }}"
+                                    class="{{ set_active(['sp3-keuangan/list']) }} {{ request()->is('sp3/edit/*') ? 'active' : '' }}">List
+                                    SP3</a></li>
+                        </ul>
+                    </li>
                 @endif
                 @if (Session::get('role_name') === 'Admin' || Session::get('role_name') === 'Super Admin')
-                <li class="submenu {{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">
-                    <a href="#">
-                        <i class="fas fa-users"></i>
-                        <span>User Management</span> 
-                        <span class="menu-arrow"></span>
-                    </a>
-                    <ul>
-                        <li><a href="{{ route('list/users') }}" class="{{set_active(['list/users'])}} {{ (request()->is('view/user/edit/*')) ? 'active' : '' }}">List Users</a></li>
-                    </ul>
-                </li>
+                    <li
+                        class="submenu {{ set_active(['list/users']) }} {{ request()->is('view/user/edit/*') ? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fas fa-users"></i>
+                            <span>User Management</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li><a href="{{ route('list/users') }}"
+                                    class="{{ set_active(['list/users']) }} {{ request()->is('view/user/edit/*') ? 'active' : '' }}">List
+                                    Users</a></li>
+                        </ul>
+                    </li>
                 @endif
 
-                <li class="submenu {{set_active(['student/list','student/grid','student/add/page'])}} {{ (request()->is('student/edit/*')) ? 'active' : '' }} {{ (request()->is('student/profile/*')) ? 'active' : '' }}">
+                <li
+                    class="submenu {{ set_active(['student/list', 'student/grid', 'student/add/page']) }} {{ request()->is('student/edit/*') ? 'active' : '' }} {{ request()->is('student/profile/*') ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-graduation-cap"></i>
                         <span> Students</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="{{ route('student/list') }}"  class="{{set_active(['student/list','student/grid'])}}">Student List</a></li>
-                        <li><a href="{{ route('student/add/page') }}" class="{{set_active(['student/add/page'])}}">Student Add</a></li>
-                        <li><a class="{{ (request()->is('student/edit/*')) ? 'active' : '' }}">Student Edit</a></li>
-                        <li><a href=""  class="{{ (request()->is('student/profile/*')) ? 'active' : '' }}">Student View</a></li>
+                        <li><a href="{{ route('student/list') }}"
+                                class="{{ set_active(['student/list', 'student/grid']) }}">Student List</a></li>
+                        <li><a href="{{ route('student/add/page') }}"
+                                class="{{ set_active(['student/add/page']) }}">Student Add</a></li>
+                        <li><a class="{{ request()->is('student/edit/*') ? 'active' : '' }}">Student Edit</a></li>
+                        <li><a href=""
+                                class="{{ request()->is('student/profile/*') ? 'active' : '' }}">Student View</a>
+                        </li>
                     </ul>
                 </li>
 
-                <li class="submenu  {{set_active(['eselon/*'])}} {{ (request()->is('eselon/*')) ? 'active' : '' }}">
+                <li class="submenu  {{ set_active(['eselon/*']) }} {{ request()->is('eselon/*') ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-chalkboard-teacher"></i>
                         <span> Data Master</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="{{route('eselon/list')}}" class="{{set_active(['eselon/*'])}}">Eselon</a></li>
-                        <li><a href="{{route('layanan/list')}}" class="{{set_active(['layanan/*'])}}">Layanan</a></li>
-                        <li><a href="{{route('sub-layanan/list')}}" class="{{set_active(['sub-layanan/*'])}}">Sub Layanan</a></li>
-    
+                        <li><a href="{{ route('eselon/list') }}" class="{{ set_active(['eselon/*']) }}">Eselon</a>
+                        </li>
+                        <li><a href="{{ route('layanan/list') }}" class="{{ set_active(['layanan/*']) }}">Layanan</a>
+                        </li>
+                        <li><a href="{{ route('sub-layanan/list') }}" class="{{ set_active(['sub-layanan/*']) }}">Sub
+                                Layanan</a></li>
+
                         {{-- <li><a href="{{}}" class="{{set_active(['teacher/add/page'])}}">Teacher Add</a></li>
                         <li><a class="{{ (request()->is('teacher/edit/*')) ? 'active' : '' }}">Teacher Edit</a></li> --}}
                     </ul>
@@ -211,15 +236,3 @@
         </div>
     </div>
 </div> --}}
-
-
-
-
-
-
-
-
-
-
-
-

@@ -72,12 +72,15 @@
                                         <tr>
 
                                             <th>SP3</th>
-                                            <th>Keterangan</th>
                                             <th>No Registrasi</th>
                                             <th>Eselon</th>
-                                            <th>Layanan</th>
-                                            <th>Sub Layanan</th>
-                                            <th>Biaya</th>
+                                            <th>Tindakan</th>
+                                            <th>BMHP</th>
+                                            <th>Resep</th>
+                                            <th>KIP</th>
+                                            <th>PPN</th>
+                                            <th>Total Biaya Eselon</th>
+                                            <th>Total Biaya Kas</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
@@ -146,10 +149,6 @@
                         name: 'sp3'
                     },
                     {
-                        data: 'keterangan',
-                        name: 'keterangan'
-                    },
-                    {
                         data: 'no_registrasi',
                         name: 'no_registrasi'
                     },
@@ -158,17 +157,32 @@
                         name: 'eslon'
                     },
                     {
-                        data: 'layanan',
-                        name: 'layanan'
+                        data: 'total_tindakan',
+                        name: 'total_tindakan'
                     },
                     {
-                        data: 'sub_layanan',
-                        name: 'sub_layanan'
+                        data: 'total_BMHP',
+                        name: 'total_BMHP'
                     },
                     {
-                        data: 'biaya',
-                        name: 'biaya'
-                        // orderable: false
+                        data: 'total_resep',
+                        name: 'total_resep'
+                    },
+                    {
+                        data: 'total_KIP',
+                        name: 'total_KIP'
+                    },
+                    {
+                        data: 'total_PPN',
+                        name: 'total_PPN'
+                    },
+                    {
+                        data: 'total_biaya_eselon',
+                        name: 'total_biaya_eselon'
+                    },
+                    {
+                        data: 'total_biaya_kas',
+                        name: 'total_biaya_kas'
                     },
                     {
                         data: 'modify',

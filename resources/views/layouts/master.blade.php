@@ -17,11 +17,12 @@
     <link rel="stylesheet" href="{{ URL::to('assets/plugins/datatables/datatables.min.css') }}">
     <link rel="stylesheet" href="{{ URL::to('assets/plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ URL::to('assets/css/style.css') }}">
-	{{-- message toastr --}}
-	<link rel="stylesheet" href="{{ URL::to('assets/css/toastr.min.css') }}">
-	<script src="{{ URL::to('assets/js/toastr_jquery.min.js') }}"></script>
-	<script src="{{ URL::to('assets/js/toastr.min.js') }}"></script>
+    {{-- message toastr --}}
+    <link rel="stylesheet" href="{{ URL::to('assets/css/toastr.min.css') }}">
+    <script src="{{ URL::to('assets/js/toastr_jquery.min.js') }}"></script>
+    <script src="{{ URL::to('assets/js/toastr.min.js') }}"></script>
 </head>
+
 <body>
     <div class="main-wrapper">
         <div class="header">
@@ -30,7 +31,8 @@
                     <img src="{{ URL::to('assets/img/Logo RSLNG.png') }}" alt="Logo">
                 </a>
                 <a href="{{ route('home') }}" class="logo logo-small">
-                    <img src="{{ URL::to('assets/img/Logo RS-Transparant.png') }}" alt="Logo" width="30" height="30">
+                    <img src="{{ URL::to('assets/img/Logo RS-Transparant.png') }}" alt="Logo" width="30"
+                        height="30">
                 </a>
             </div>
             <div class="menu-toggle">
@@ -56,7 +58,8 @@
                     <div class="dropdown-menu ">
                         <div class="noti-content">
                             <div>
-                                <a class="dropdown-item" href="javascript:;"><i class="flag flag-lr me-2"></i>English</a>
+                                <a class="dropdown-item" href="javascript:;"><i
+                                        class="flag flag-lr me-2"></i>English</a>
                                 <a class="dropdown-item" href="javascript:;"><i class="flag flag-kh me-2"></i>Khmer</a>
                             </div>
                         </div>
@@ -78,7 +81,8 @@
                                     <a href="#">
                                         <div class="media d-flex">
                                             <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="User Image" src="{{ URL::to('assets/img/logo-small.png') }}">
+                                                <img class="avatar-img rounded-circle" alt="User Image"
+                                                    src="{{ URL::to('assets/img/logo-small.png') }}">
                                             </span>
                                             <div class="media-body flex-grow-1">
                                                 <p class="noti-details"><span class="noti-title">Carlson Tech</span> has
@@ -93,11 +97,13 @@
                                     <a href="#">
                                         <div class="media d-flex">
                                             <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="User Image" src="{{ URL::to('assets/img/logo-small.png') }}">
+                                                <img class="avatar-img rounded-circle" alt="User Image"
+                                                    src="{{ URL::to('assets/img/logo-small.png') }}">
                                             </span>
                                             <div class="media-body flex-grow-1">
                                                 <p class="noti-details">
-                                                    <span class="noti-title">International Software Inc</span> has sent you a invoice in the amount of
+                                                    <span class="noti-title">International Software Inc</span> has sent
+                                                    you a invoice in the amount of
                                                     <span class="noti-title">$218</span>
                                                 </p>
                                                 <p class="noti-time">
@@ -111,10 +117,13 @@
                                     <a href="#">
                                         <div class="media d-flex">
                                             <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="User Image" src="{{ URL::to('assets/img/logo-small.png') }}">
+                                                <img class="avatar-img rounded-circle" alt="User Image"
+                                                    src="{{ URL::to('assets/img/logo-small.png') }}">
                                             </span>
                                             <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">John Hendry</span> sent a cancellation request <span class="noti-title">Apple iPhone XR</span></p>
+                                                <p class="noti-details"><span class="noti-title">John Hendry</span>
+                                                    sent a cancellation request <span class="noti-title">Apple iPhone
+                                                        XR</span></p>
                                                 <p class="noti-time"><span class="notification-time">8 mins ago</span>
                                                 </p>
                                             </div>
@@ -125,11 +134,15 @@
                                     <a href="#">
                                         <div class="media d-flex">
                                             <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="" src="{{ URL::to('assets/img/logo-small.png') }}">
+                                                <img class="avatar-img rounded-circle" alt=""
+                                                    src="{{ URL::to('assets/img/logo-small.png') }}">
                                             </span>
                                             <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Mercury Software Inc</span> added a new product <span class="noti-title">Apple MacBook Pro</span></p>
-                                                <p class="noti-time"><span class="notification-time">12 mins ago</span>
+                                                <p class="noti-details"><span class="noti-title">Mercury Software
+                                                        Inc</span> added a new product <span class="noti-title">Apple
+                                                        MacBook Pro</span></p>
+                                                <p class="noti-time"><span class="notification-time">12 mins
+                                                        ago</span>
                                                 </p>
                                             </div>
                                         </div>
@@ -152,7 +165,8 @@
                 <li class="nav-item dropdown has-arrow new-user-menus">
                     <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
                         <span class="user-img">
-                            <img class="rounded-circle" src="/images/{{ Session::get('avatar') }}" width="31"alt="">
+                            <img class="rounded-circle" src="/images/{{ Session::get('avatar') }}"
+                                width="31"alt="">
                             <div class="user-text">
                                 <h6>{{ Session::get('name') }}</h6>
                                 <p class="text-muted mb-0">{{ Session::get('role_name') }}</p>
@@ -162,7 +176,8 @@
                     <div class="dropdown-menu">
                         <div class="user-header">
                             <div class="avatar avatar-sm">
-                                <img src="/images/{{ Session::get('avatar') }}" alt="" class="avatar-img rounded-circle">
+                                <img src="/images/{{ Session::get('avatar') }}" alt=""
+                                    class="avatar-img rounded-circle">
                             </div>
                             <div class="user-text">
                                 <h6>{{ Session::get('name') }}</h6>
@@ -176,14 +191,14 @@
                 </li>
             </ul>
         </div>
-		{{-- side bar --}}
-		@include('sidebar.sidebar')
-		{{-- content page --}}
+        {{-- side bar --}}
+        @include('sidebar.sidebar')
+        {{-- content page --}}
         @yield('content')
         <footer>
-            <p>Copyright ©  <?php echo date('Y'); ?> Soeng Souy.</p>
+            <p>Copyright © <?php echo date('Y'); ?> RS LNG Badak.</p>
         </footer>
-    
+
     </div>
 
     <script src="{{ URL::to('assets/js/jquery-3.6.0.min.js') }}"></script>
@@ -209,4 +224,5 @@
         });
     </script>
 </body>
+
 </html>
