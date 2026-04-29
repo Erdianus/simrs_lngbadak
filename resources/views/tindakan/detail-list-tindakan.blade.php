@@ -16,6 +16,12 @@
                     </div>
                 </div>
             </div>
+            <div class="row align-items-start mb-3">
+                <div class="col">
+                    <a href="{{ route('sp3/detail', $billing->sp3->slug) }}" type="button" class="btn btn-primary"><i
+                            class="fa fa-arrow-left" aria-hidden="true"></i> Kembali</a>
+                </div>
+            </div>
             {{-- message --}}
             {{-- {!! Toastr::message() !!}
             <div class="student-group-form">
@@ -42,6 +48,46 @@
                     </div>
                 </div>
             </div> --}}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card card-table comman-shadow">
+                        <div class="card-body">
+                            <div class="page-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <table class = "page-title">
+                                            <tr class="mx-3">
+                                                <td><b>No Registrasi</b></td>
+                                                <td>: {{ $billing->no_registrasi }}</td>
+                                            </tr>
+                                            <tr class="mx-3">
+                                                <td><b>Nama Pasien</b></td>
+                                                <td>: {{ $billing->nama_pasien }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Tanggal Registrasi</b></td>
+                                                <td>:
+                                                    {{ \Carbon\Carbon::parse($billing->tgl_masuk)->translatedFormat('d F Y') }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Eselon</b></td>
+                                                <td>: {{ $billing->eselon->deskripsi }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Total Biaya Eselon</b></td>
+                                                <td>:
+                                                    <b>{{ 'Rp ' . number_format($billing->total_biaya_eselon, 0, ',', '.') }}</b>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card card-table comman-shadow">
@@ -248,7 +294,40 @@
                                             </ul>
                                         </div>
                                     @endif
-
+                                    @if (!$dataBiayaAdm == null)
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4 class = "fw-bold">
+                                                    Lain-lain
+                                                </h4>
+                                            </div>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item">
+                                                    <div class="row justify-content-between">
+                                                        <div class="col-8">
+                                                            {{ $dataBiayaAdm['nama_tindakan'] }}
+                                                        </div>
+                                                        <div class="col-1">
+                                                            {{ $dataBiayaAdm['jumlah'] }}
+                                                        </div>
+                                                        <div class="col-3">
+                                                            {{ 'Rp ' . number_format($dataBiayaAdm['biaya'], 0, ',', '.') }}
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <div class="row justify-content-between fw-bold fs-5">
+                                                        <div class="col-9">
+                                                            Total
+                                                        </div>
+                                                        <div class="col-3">
+                                                            {{ 'Rp ' . number_format($dataBiayaAdm['biaya'], 0, ',', '.') }}
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Http\Controllers\Sp3Controller;
 use App\Models\Billing;
 use App\Models\Simrs\KipKirimanSimrs;
 use App\Models\Simrs\RegMultiPoliSimrs;
@@ -13,6 +14,8 @@ use App\Models\Simrs\TransaksiResepSimrs;
 use App\Models\Sp3;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Termwind\Components\Li;
 
 class Sp3Service
 {
@@ -39,10 +42,7 @@ class Sp3Service
                 'tgl_keluar' => $data['tgl_keluar'],
             ]);
             // dd($getDataReg);
-            foreach ($getDataReg as $bill) {
-                // dd($bill);
-                BillingService::createBilling($bill, $sp3, $eselon);
-            }
+            BillingService::createBilling($getDataReg, $sp3, $eselon);
             // dd('test');
             DB::commit();
             return true;
@@ -52,37 +52,65 @@ class Sp3Service
         }
     }
 
-    public static function updateBilling($slug, $data)
+    public static function updateSp3($data, $getDataReg, $eselon, $slug)
     {
-        // Logika untuk menyimpan data Eslon ke database
         DB::beginTransaction();
-        $value = Billing::where('slug', $slug)->first();
         try {
-            $value->update([
-                'sp3_id' => $data['sp3_id'],
-                'keterangan' => $data['keterangan'],
-                'no_registrasi' => $data['no_registrasi'],
+            $sp3 = Sp3::where('slug', $slug)->first();
+            $sp3->update([
+                'tgl_sp3' => $data['tgl_sp3'],
+                'jenis_surat' => $data['jenis_surat'],
+                'nomor_tagihan' => $data['nomor_tagihan'],
+                'tgl_terima_keu' => $data['tgl_terima_keu'],
+                'perihal_tagihan_id' => $data['perihal_tagihan_id'],
+                'ket_inv_pasien' => $data['ket_inv_pasien'],
+                'ket_inv_rs' => $data['ket_inv_rs'],
                 'eslon_id' => $data['eslon_id'],
+                'ket_pembayaran' => $data['ket_pembayaran'],
                 'layanan_id' => $data['layanan_id'],
-                'sub_layanan_id' => $data['sub_layanan_id'],
-                'tanggal_masuk' => $data['tanggal_masuk'],
-                'tanggal_keluar' => $data['tanggal_keluar'],
-                'biaya' => $data['biaya'],
+                'kota' => $data['kota'],
+                'nama_rs' => $data['nama_rs'],
+                'dokter_rujukan' => $data['dokter_rujukan'] ?? null,
+                'tgl_masuk' => $data['tgl_masuk'],
+                'tgl_keluar' => $data['tgl_keluar'],
+                'is_approved_by_verifikator' => false,
             ]);
+            Log::info('Existing billings deleted for SP3 ID: ' . $sp3->billings); // ← tambahkan
+            if ($sp3->billings()->count() > 0) {
+                BillingService::deleteBilling($sp3->id);
+            }
+            BillingService::createBilling($getDataReg, $sp3, $eselon);
+
             DB::commit();
             return true;
         } catch (\Throwable $th) {
             DB::rollback();
+            return $th;
+        }
+    }
+
+    public static function refreshBillSp3($sp3, $getDataReg)
+    {
+        DB::beginTransaction();
+        try {
+            if ($sp3->billings()->count() > 0) {
+                BillingService::deleteBilling($sp3->id);
+            }
+            BillingService::createBilling($getDataReg, $sp3, $sp3->eselon);
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollBack();
             return $th->getMessage();
         }
     }
 
-    public static function deleteBilling($slug)
+    public static function deleteSp3($slug)
     {
         // Logika untuk menghapus data Eslon ke database
         DB::beginTransaction();
         try {
-            $value = Billing::where('slug', $slug)->first();
+            $value = Sp3::where('slug', $slug)->first();
             $value->delete();
             DB::commit();
             return true;
@@ -92,28 +120,17 @@ class Sp3Service
         }
     }
 
-    public static function approveBill($slug)
+    public static function approveSp3($slug, $no_sp3)
     {
         DB::beginTransaction();
         try {
-            $billing = Billing::where('slug', $slug)->firstOrFail();
-
-            $userId = auth()->id();
-            $role   = auth()->user()->role_name;
-
-            // Validasi alur approval (biar tidak loncat)
-            if ($role == 'PIC Verifikator' && !$billing->approved_pic) {
-                $billing->approved_verif_pic_by = $userId;
-            } elseif ($role == 'Pengawas Verifikator' && $billing->approved_pic && !$billing->approved_pengawas) {
-                $billing->approved_verif_pws_by = $userId;
-            } elseif ($role == 'Wakil Direktur' && $billing->approved_pengawas && !$billing->approved_manager) {
-                $billing->approved_verif_wadir_by = $userId;
-            } elseif ($role == 'Keuangan Admin' && $billing->approved_manager && !$billing->approved_wadir) {
-                $billing->approved_keu_admin_by = $userId;
-            } else {
-                return true;
-            }
-            $billing->save();
+            $sp3 = Sp3::where('slug', $slug)->firstOrFail();
+            $no_surat_sp3 = $no_sp3 . '-V/RSBDK1100/' . now()->year . '-S2';
+            $sp3->update([
+                'no_sp3' => $no_sp3,
+                'no_surat_sp3' => $no_surat_sp3,
+                'is_approved_by_verifikator' => true
+            ]);
             DB::commit();
             return true;
         } catch (\Throwable $th) {

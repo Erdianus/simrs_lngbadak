@@ -6,7 +6,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="page-sub-header">
-                            <h3 class="page-title">Detail Billing SP3 / {{ $sp3->no_sp3 }}</h3>
+                            <h3 class="page-title">Detail Billing SP3 / {{ $sp3->no_surat_sp3 }}</h3>
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="{{ route('billing-verifikasi/list') }}">Billing</a></li>
                                 <li class="breadcrumb-item active">All Billing</li>
@@ -17,26 +17,51 @@
             </div>
             {{-- message --}}
             {!! Toastr::message() !!}
-            <div class="student-group-form">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by ID ...">
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by Name ...">
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by Phone ...">
-                        </div>
-                    </div>
-                    <div class="col-lg-2">
-                        <div class="search-student-btn">
-                            <button type="btn" class="btn btn-primary">Search</button>
+            <div class="row align-items-start mb-3">
+                <div class="col">
+                    <a href="{{ route('sp3-verifikasi/list') }}" type="button" class="btn btn-primary"><i
+                            class="fa fa-arrow-left" aria-hidden="true"></i> Kembali</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card card-table comman-shadow">
+                        <div class="card-body">
+                            <div class="page-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <table class = "page-title">
+                                            <tr class="mx-3">
+                                                <td><b>No SP3</b></td>
+                                                <td>: {{ $sp3->no_surat_sp3 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Tanggal SP3</b></td>
+                                                <td>: {{ \Carbon\Carbon::parse($sp3->tgl_sp3)->translatedFormat('d F Y') }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Eselon</b></td>
+                                                <td>: {{ $sp3->eselon->deskripsi }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Tanggal Berobat</b></td>
+                                                <td>:
+                                                    {{ $sp3->tgl_masuk && $sp3->tgl_keluar
+                                                        ? \Carbon\Carbon::parse($sp3->tgl_masuk)->translatedFormat('d F Y') .
+                                                            ' - ' .
+                                                            \Carbon\Carbon::parse($sp3->tgl_keluar)->translatedFormat('d F Y')
+                                                        : null }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Total Tagihan</b></td>
+                                                <td>: {{ 'Rp ' . number_format($sp3->total_tagihan, 0, ',', '.') }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -51,9 +76,9 @@
                                         <h3 class="page-title">Billing</h3>
                                     </div>
                                     <div class="col-auto text-end float-end ms-auto download-grp">
-                                        <a href="{{ route('billing-verifikasi/list') }}"
+                                        <a href="{{ route('sp3/refresh', $sp3->slug) }}"
                                             class="btn btn-outline-gray me-2 active">
-                                            <i class="fa fa-list" aria-hidden="true"></i>
+                                            <i class="fa fa-retweet" aria-hidden="true"></i>
                                         </a>
                                         {{-- <a href="{{ route('student/grid') }}" class="btn btn-outline-gray me-2">
                                             <i class="fa fa-th" aria-hidden="true"></i>
@@ -73,14 +98,17 @@
 
                                             <th>SP3</th>
                                             <th>No Registrasi</th>
+                                            <th>Nama Pasien</th>
                                             <th>Eselon</th>
                                             <th>Tindakan</th>
                                             <th>BMHP</th>
                                             <th>Resep</th>
                                             <th>KIP</th>
+                                            <th>Sewa Kamar</th>
                                             <th>PPN</th>
                                             <th>Total Biaya Eselon</th>
                                             <th>Total Biaya Kas</th>
+                                            <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
@@ -153,6 +181,10 @@
                         name: 'no_registrasi'
                     },
                     {
+                        data: 'nama_pasien',
+                        name: 'nama_pasien'
+                    },
+                    {
                         data: 'eslon',
                         name: 'eslon'
                     },
@@ -173,6 +205,10 @@
                         name: 'total_KIP'
                     },
                     {
+                        data: 'total_sewa_kamar',
+                        name: 'total_sewa_kamar'
+                    },
+                    {
                         data: 'total_PPN',
                         name: 'total_PPN'
                     },
@@ -183,6 +219,10 @@
                     {
                         data: 'total_biaya_kas',
                         name: 'total_biaya_kas'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
                     },
                     {
                         data: 'modify',

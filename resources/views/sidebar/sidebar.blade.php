@@ -58,9 +58,6 @@
                             <span class="menu-arrow"></span>
                         </a>
                         <ul>
-                            <li><a href="{{ route('billing-keuangan/list') }}"
-                                    class="{{ set_active(['billing-keuangan/list']) }} {{ request()->is('billing/edit/*') ? 'active' : '' }}">List
-                                    Billing</a></li>
                             <li><a href="{{ route('sp3-keuangan/list') }}"
                                     class="{{ set_active(['sp3-keuangan/list']) }} {{ request()->is('sp3/edit/*') ? 'active' : '' }}">List
                                     SP3</a></li>
@@ -83,7 +80,7 @@
                     </li>
                 @endif
 
-                <li
+                {{-- <li
                     class="submenu {{ set_active(['student/list', 'student/grid', 'student/add/page']) }} {{ request()->is('student/edit/*') ? 'active' : '' }} {{ request()->is('student/profile/*') ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-graduation-cap"></i>
                         <span> Students</span>
@@ -95,11 +92,11 @@
                         <li><a href="{{ route('student/add/page') }}"
                                 class="{{ set_active(['student/add/page']) }}">Student Add</a></li>
                         <li><a class="{{ request()->is('student/edit/*') ? 'active' : '' }}">Student Edit</a></li>
-                        <li><a href=""
-                                class="{{ request()->is('student/profile/*') ? 'active' : '' }}">Student View</a>
+                        <li><a href="" class="{{ request()->is('student/profile/*') ? 'active' : '' }}">Student
+                                View</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="submenu  {{ set_active(['eselon/*']) }} {{ request()->is('eselon/*') ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-chalkboard-teacher"></i>

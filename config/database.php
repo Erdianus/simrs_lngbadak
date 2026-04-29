@@ -96,9 +96,9 @@ return [
         'odbc' => [
             'driver'   => 'odbc',
             'dsn'      => 'Driver={SQL Anywhere 12};' .
-                'CommLinks=tcpip(host=localhost;port=2638);' .
+                'CommLinks=tcpip(host=10.20.30.232;port=2638);' .
                 'ServerName=rslngbadak;' .
-                'DatabaseName=rs_lngbadak;' .
+                'DatabaseName=rslngbadak;' .
                 'UID=dba;' .
                 'PWD=rs_B4d4k_012024*;',
             'host'     => env('DB_HOST_SYBASE'),

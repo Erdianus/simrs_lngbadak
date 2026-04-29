@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('sp3s', function (Blueprint $table) {
             $table->id();
-            $table->string('no_sp3')->unique()->nullable();
+            $table->integer('no_sp3')->nullable();
+            $table->string('no_surat_sp3')->unique()->nullable();
             $table->text('keterangan')->nullable();
             $table->boolean('is_approved_by_verifikator')->default(false);
             $table->boolean('is_approved_by_keuangan')->default(false);

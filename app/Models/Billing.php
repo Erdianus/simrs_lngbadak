@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Simrs\KipKirimanSimrs;
+use App\Models\Simrs\ReferensiAdmSimrs;
 use App\Models\Simrs\TindakanSimrs;
 use App\Models\Simrs\TransaksiAlkesSimrs;
 use App\Models\Simrs\TransaksiEmbalaceSimrs;
@@ -23,6 +24,7 @@ class Billing extends Model
         'sp3_id',
         'keterangan',
         'no_registrasi',
+        'nama_pasien',
         'eslon_id',
         'layanan_id',
         'sub_layanan_id',
@@ -43,6 +45,7 @@ class Billing extends Model
         'total_BMHP',
         'total_resep',
         'total_KIP',
+        'total_sewa_kamar',
         'total_PPN',
         'total_biaya_eselon',
         'total_biaya_kas',
@@ -119,6 +122,14 @@ class Billing extends Model
         return $resepRawatInap->sum('total_biaya');
     }
 
+    public function getTotalSewaKamarAttribute()
+    {
+        $sewaKamar = TransaksiKamarSimrs::select(['no_reg', 'lama_hari', 'tarif_sewa', 'discount'])
+            ->where('no_reg', $this->no_registrasi)
+            ->get();
+        return $sewaKamar->sum('total_biaya');
+    }
+
     public function getTotalPPNAttribute()
     {
         $embalace = TransaksiEmbalaceSimrs::select(['no_reg', 'ppn', 'discount'])
@@ -133,7 +144,7 @@ class Billing extends Model
             ->where('reg_no', $this->no_registrasi)
             ->where('payment', NULL)
             ->get();
-        $alkes = TransaksiAlkesSimrs::select(['reg_no', 'discount', 'payment', 'jumlah_jual', 'alkes_id'])
+        $alkes = TransaksiAlkesSimrs::select(['reg_no', 'discount', 'payment', 'harga_jual', 'jumlah_jual', 'alkes_id'])
             ->where('reg_no', $this->no_registrasi)
             ->where('payment', NULL)
             ->get();
@@ -154,23 +165,17 @@ class Billing extends Model
             ->where('payment', NULL)
             ->get();
 
-        // ====== DEBUG LOG ======
-        Log::info("=== Billing: {$this->no_registrasi} ===", [
-            'tindakan_count'       => $tindakan->count(),
-            'tindakan_total'       => $tindakan->sum('total_biaya'),
-            'alkes_count'          => $alkes->count(),
-            'alkes_total'          => $alkes->sum('total_biaya'),
-            'resepRJ_count'        => $resepRawatJalan->count(),
-            'resepRJ_total'        => $resepRawatJalan->sum('total_biaya'),
-            'resepRI_count'        => $resepRawatInap->count(),
-            'resepRI_total'        => $resepRawatInap->sum('total_biaya'),
-            'kamar_count'          => $kamar->count(),
-            'kamar_total'          => $kamar->sum('total_biaya'),
-            'embalace_count'       => $embalace->count(),
-            'embalace_ppn_total'   => $embalace->sum('ppn'),
-        ]);
-
         $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + ($embalace->sum('ppn'));
+        if ($resepRawatInap->count() > 0 || $kamar->count() > 0) {
+            $ref_adm = ReferensiAdmSimrs::select(['besar_fee', 'max_besar'])->where('kode_eselon', $this->eselon->nama)->first();
+            $biayaAdm = ceil($totalEselon * ($ref_adm->besar_fee / 100));
+            $total = $totalEselon + $biayaAdm;
+            if ($biayaAdm > $ref_adm->max_besar) {
+                $totalEselon = $totalEselon + ($ref_adm->max_besar);
+            } else {
+                $totalEselon = $total;
+            }
+        }
         return $totalEselon;
     }
 

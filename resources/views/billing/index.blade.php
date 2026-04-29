@@ -72,6 +72,7 @@
                                         <tr>
                                             <th>Keterangan</th>
                                             <th>No Registrasi</th>
+                                            <th>Nama Pasien</th>
                                             <th>Eselon</th>
                                             <th>Layanan</th>
                                             <th>Sub Layanan</th>
@@ -146,6 +147,10 @@
                     {
                         data: 'no_registrasi',
                         name: 'no_registrasi'
+                    },
+                    {
+                        data: 'nama',
+                        name: 'nama'
                     },
                     {
                         data: 'eslon',

@@ -17,6 +17,7 @@ use App\Http\Controllers\SubLayananController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserManagementController;
 use App\Models\Simrs\BillingSimrs;
+use App\Models\Simrs\RegMultiPoliSimrs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -55,8 +56,8 @@ Route::group(['middleware' => 'auth'], function () {
 });
 Route::get('/test-db', function () {
     try {
-        $conn = BillingSimrs::select(['reg_no', 'tanggal', 'poli_id', 'tanggal_transaksi'])->whereBetween('tanggal', ['2026-03-01', '2026-03-31'])->get();
-        return $conn;
+        $conn = RegMultiPoliSimrs::where('reg_no', "A012600138")->get();
+        dd($conn);
     } catch (\Exception $e) {
         return 'Error: ' . $e->getMessage();
     }
@@ -123,11 +124,14 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('sp3/add/page', 'create')->middleware('auth')->name('sp3/add/page'); // page sp3
         Route::post('sp3/add/save', 'store')->middleware('auth')->name('sp3/add/save'); // save record sp3
         Route::get('sp3/edit/{slug}', 'edit')->middleware('auth'); // view for edit
-        Route::get('sp3/detail/{slug}', 'listBillSp3')->middleware('auth')->name('sp3/detail'); // view for edit
+        Route::get('sp3/refresh/{slug}', 'updateDataBilling')->middleware('auth')->name('sp3/refresh'); // update record sp3
         Route::post('sp3/update/{slug}', 'update')->middleware('auth')->name('sp3/update'); // update record sp3
+        Route::get('sp3/detail/{slug}', 'listBillSp3')->middleware('auth')->name('sp3/detail'); // view for edit
         Route::post('sp3/delete', 'destroy')->middleware('auth')->name('sp3/delete'); // delete record sp3
+        Route::get('sp3/approve/{slug}', 'approveSp3')->middleware('auth'); // view for edit
         Route::get('get-sp3-verifikasi-data', 'getSp3VerifikasiData')->middleware('auth')->name('get-sp3-verifikasi-data'); // get data sp3
         Route::get('get-sp3-keuangan-data', 'getSp3KeuanganData')->middleware('auth')->name('get-sp3-keuangan-data'); // get data sp3
+        Route::get('/sp3/{slug}/preview', 'previewSp3')->middleware('auth')->name('preview/pdf');
     });
 
     // ------------------------ billing -------------------------------//
@@ -139,6 +143,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('billing/edit/{slug}', 'edit')->middleware('auth'); // view for edit
         Route::post('billing/update/{slug}', 'update')->middleware('auth')->name('billing/update'); // update record billing
         Route::post('billing/delete', 'destroy')->middleware('auth')->name('billing/delete'); // delete record billing
+        Route::get('billing/approve/{slug}', 'approveBill')->middleware('auth'); // view for edit
         Route::get('get-billings-verifikasi-data', 'getBillingsVerifikasiData')->middleware('auth')->name('get-billings-verifikasi-data'); // get data billings
         Route::get('get-billings-billings-sp3/{slug}', 'getBillingsSp3Data')->middleware('auth')->name('get-billings-sp3-data'); // get data billings
         Route::get('detail-billing/{slug}', 'listTindakanBill')->middleware('auth')->name('detail-billing'); // get data billings

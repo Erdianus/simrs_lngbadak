@@ -88,7 +88,7 @@
                                         <div class="form-group local-forms">
                                             <label>Kode Tagihan <span class="login-danger">*</span></label>
                                             <select
-                                                class="form-control select  @error('perihal_tagihan_id') is-invalid @enderror"
+                                                class="form-control select select2 @error('perihal_tagihan_id') is-invalid @enderror"
                                                 name="perihal_tagihan_id">
                                                 <option selected disabled>Select Kode Tagihan</option>
                                                 @foreach ($kode_tagihan as $item)
@@ -138,9 +138,10 @@
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Eselon <span class="login-danger">*</span></label>
-                                            <select class="form-control select  @error('eslon_id') is-invalid @enderror"
+                                            <select
+                                                class="form-control select select2  @error('eslon_id') is-invalid @enderror"
                                                 name="eslon_id">
-                                                <option selected disabled>Select Kode Tagihan</option>
+                                                <option selected disabled>Select Eselon</option>
                                                 @foreach ($eselon as $item)
                                                     <option value="{{ $item->id }}""
                                                         {{ old('eslon_id') == $item->id ? 'selected' : '' }}>
@@ -177,7 +178,8 @@
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Layanan <span class="login-danger">*</span></label>
-                                            <select class="form-control select  @error('layanan_id') is-invalid @enderror"
+                                            <select
+                                                class="form-control select select2 @error('layanan_id') is-invalid @enderror"
                                                 name="layanan_id">
                                                 <option selected disabled>Select Layanan</option>
                                                 @foreach ($layanan as $item)
@@ -262,4 +264,9 @@
             </div>
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+    </script>
 @endsection

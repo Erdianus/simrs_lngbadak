@@ -11,6 +11,7 @@ use App\Models\Simrs\EselonSimrs;
 use App\Models\Simrs\RegMultiPoliSimrs;
 use App\Models\Sp3;
 use App\Service\Sp3Service;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Brian2694\Toastr\Facades\Toastr;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -87,16 +88,19 @@ class Sp3Controller extends Controller
         $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
         $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
         $eslon = Eslon::findOrFail($validated['eslon_id']);
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
             ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
             ->whereIn('kode_poli', $this->kode_poli)
             ->where('eselon', $eslon->nama)
-            ->get();
+            ->get()
+            ->unique('reg_no');
+        // dd($getDataReg);
+        $billing = $getDataReg->unique('reg_no');
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
         }
-        $create = Sp3Service::createSp3($validated, $getDataReg, $eslon);
+        $create = Sp3Service::createSp3($validated, $billing, $eslon);
         if ($create === true) {
             Toastr::success('Berhasil Menambahkan SP3 :)', 'Success');
             return redirect()->route('sp3-verifikasi/list');
@@ -106,10 +110,147 @@ class Sp3Controller extends Controller
         return redirect()->back();
     }
 
+    public function edit($slug)
+    {
+        $sp3 = Sp3::where('slug', $slug)->first();
+        $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
+        $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
+        $layanan = Layanan::select(['id', 'nama'])->get();
+        return view('sp3.edit', compact('kode_tagihan', 'eselon', 'layanan', 'sp3'));
+    }
+
+    public function update(Sp3Request $request, $slug)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
+        $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
+        $eslon = Eslon::findOrFail($validated['eslon_id']);
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
+            ->whereIn('kode_poli', $this->kode_poli)
+            ->where('eselon', $eslon->nama)
+            ->get()
+            ->unique('reg_no');
+        if ($getDataReg->isEmpty()) {
+            Toastr::error('Data Billing Tidak Ada', 'Error');
+            return redirect()->back();
+        }
+        $create = Sp3Service::updateSp3($validated, $getDataReg, $eslon, $slug);
+        if ($create === true) {
+            Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
+            return redirect()->route('sp3-verifikasi/list');
+        }
+
+        Toastr::error($create->getMessage(), 'Error');
+        return redirect()->back();
+    }
+
+    public function updateDataBilling($slug)
+    {
+        $sp3 = Sp3::where('slug', $slug)->first();
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
+            ->whereIn('kode_poli', $this->kode_poli)
+            ->where('eselon', $sp3->eselon->nama)
+            ->get()
+            ->unique('reg_no');
+        if ($getDataReg->isEmpty()) {
+            Toastr::error('Data Billing Tidak Ada', 'Error');
+            return redirect()->back();
+        }
+        $refresh = Sp3Service::refreshBillSp3($sp3, $getDataReg);
+        if ($refresh === true) {
+            Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
+            return redirect()->back();
+        }
+        Toastr::error($refresh, 'Error');
+        return redirect()->back();
+    }
+
+    public function destroy(Request $request)
+    {
+        $slug = $request->input('slug');
+        $deleteBilling = Sp3Service::deleteSp3($slug);
+        if ($deleteBilling) {
+            Toastr::success('Sp3 berhasil dihapus!', 'Success');
+            return redirect()->back();
+        }
+        Toastr::error('Gagal menghapus Sp3. Silakan coba lagi.', 'Error');
+        return redirect()->back();
+    }
+
     public function listBillSp3($sp3_slug)
     {
         $sp3 = Sp3::where('slug', $sp3_slug)->first();
         return view('sp3.detail-list-bill', compact('sp3'));
+    }
+
+    public function approveSp3($slug)
+    {
+        $sp3 = Sp3::with('billings')->where('slug', $slug)->first();
+
+        // Ambil SP3 terakhir di tahun yang sedang berjalan
+        $latestSp3 = Sp3::select('no_sp3')
+            ->whereNotNull('no_sp3')
+            ->whereYear('created_at', now()->year)
+            ->latest()
+            ->first();
+        // Tentukan no_sp3 berikutnya
+        if ($latestSp3) {
+            // Masih tahun yang sama → lanjut +1
+            $no_sp3 = $latestSp3->no_sp3 + 1;
+        } else {
+            // Tahun baru atau belum ada data → reset ke starter
+            $no_sp3 = env('STARTER_SP3_NUMBER', 1);
+        }
+        $allVerified = $sp3->billings->every(fn($billing) => $billing->is_verified_by_verifikator == true);
+        if (!$allVerified) {
+            Toastr::error('Billing Sp3 ini belum semua disetujui.', 'Error');
+            return redirect()->back();
+        }
+        $approveSp3 = Sp3Service::approveSp3($slug, $no_sp3);
+        if ($approveSp3) {
+            Toastr::success('Sp3 berhasil disetujui!', 'Success');
+            return redirect()->back();
+        }
+        Toastr::error('Gagal menyetujui Sp3. Silakan coba lagi.', 'Error');
+        return redirect()->back();
+    }
+
+    public function previewSp3($slug)
+    {
+        $sp3 = Sp3::where('slug', $slug)->first();
+        // dd($sp3);
+        $data = [
+            'nomor' => $sp3->no_surat_sp3,
+            'tanggal' => \Carbon\Carbon::parse($sp3->tgl_sp3)->translatedFormat('d F Y'),
+            'pasien' => $sp3->eselon->deskripsi,
+            'tagihan' => $sp3->total_tagihan,
+            'kunjungan' => $sp3->total_kunjungan,
+            'hal' => $sp3->perihalTagihan->hal,
+            'ket_pembayaran' => $sp3->perihalTagihan->ket_pembayaran,
+            'disetujui_oleh' => 'dr. RIEN POTU AGUSTINA',
+            'dibuat_oleh' => auth()->user()->rolename != 'Super Admin' ? auth()->user()->name : '',
+            'ttd_path' => ''
+        ];
+
+        $pdf = Pdf::loadView('pdf.sp3', [
+            'data' => $data,
+            'qr' => null,
+        ])->setPaper('a5', 'portrait');
+
+        // Preview di browser
+        return $pdf->stream('preview-sp3.pdf');
+    }
+
+    public function generateNoSp3($slug)
+    {
+        $sp3 = Sp3::where('slug', $slug)->first();
+        if (!$sp3->no_sp3 != null) {
+            Toastr::error('Sp3 sudah memiliki No Sp3.', 'Error');
+            return redirect()->back();
+        }
     }
 
 
@@ -131,20 +272,18 @@ class Sp3Controller extends Controller
 
         $totalRecords = Sp3::count();
 
-        $totalRecordsWithFilter = Sp3::where('is_approved_by_verifikator', false)
-            ->where(function ($query) use ($searchValue) {
-                $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
-                $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
-                $query->orWhere('ket_inv_pasien', 'like', '%' . $searchValue . '%');
-                $query->orWhere('ket_inv_rs', 'like', '%' . $searchValue . '%');
-                $query->orWhere('ket_pembayaran', 'like', '%' . $searchValue . '%');
-                $query->orWhere('kota', 'like', '%' . $searchValue . '%');
-                $query->orWhere('nama_rs', 'like', '%' . $searchValue . '%');
-                $query->orWhere('dokter_rujukan', 'like', '%' . $searchValue . '%');
-            })->count();
+        $totalRecordsWithFilter = Sp3::where(function ($query) use ($searchValue) {
+            $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
+            $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
+            $query->orWhere('ket_inv_pasien', 'like', '%' . $searchValue . '%');
+            $query->orWhere('ket_inv_rs', 'like', '%' . $searchValue . '%');
+            $query->orWhere('ket_pembayaran', 'like', '%' . $searchValue . '%');
+            $query->orWhere('kota', 'like', '%' . $searchValue . '%');
+            $query->orWhere('nama_rs', 'like', '%' . $searchValue . '%');
+            $query->orWhere('dokter_rujukan', 'like', '%' . $searchValue . '%');
+        })->count();
 
         $records = Sp3::with('eselon')->orderBy($columnName, $columnSortOrder)
-            ->where('is_approved_by_verifikator', false)
             ->where(function ($query) use ($searchValue) {
                 $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
                 $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
@@ -157,10 +296,12 @@ class Sp3Controller extends Controller
             })
             ->skip($start)
             ->take($rowPerPage)
+            ->orderBy('is_approved_by_verifikator', 'DESC')
             ->get();
         $data_arr = [];
 
         foreach ($records as $key => $record) {
+            $status = $record->is_approved_by_verifikator ? '<span class="badge bg-success">Terverifikasi</span>' : '<span class="badge bg-secondary">Belum Terverifikasi</span>';
             $modify = '
                 <td class="text-right">
                     <div class="dropdown dropdown-action">
@@ -175,8 +316,16 @@ class Sp3Controller extends Controller
                                 <i class="far fa-eye me-2"></i> Detail
                             </a>
                             <a class="dropdown-item" href="' . url('sp3/delete/' . $record->slug) . '">
-                            <i class="fas fa-trash-alt m-r-5"></i> Delete
-                        </a>
+                                <i class="fas fa-trash-alt m-r-5"></i> Delete
+                            </a>
+                            ' . (!$record->is_approved_by_verifikator ? '
+                            <a class="dropdown-item" href="' . url('/sp3/approve/' . $record->slug) . '">
+                                <i class="fa fa-check me-2"></i> Approve
+                            </a>' : '') . '
+                            ' . ($record->is_approved_by_verifikator ? '
+                            <a class="dropdown-item" href="' . url('/sp3/' . $record->slug . '/preview') . '">
+                                <i class="fa fa-print me-2"></i> Print
+                            </a>' : '') . '
                         </div>
                     </div>
                 </td>
@@ -190,15 +339,23 @@ class Sp3Controller extends Controller
                         <a href="' . url('sp3/edit/' . $record->slug) . '" class="btn btn-sm bg-danger-light">
                             <i class="far fa-edit me-2"></i>
                         </a>
+                        ' . ($record->is_approved_by_verifikator != true ? '
+                        <a href="' . url('/sp3/approve/' . $record->slug) . '" class="btn btn-sm bg-success-light">
+                            <i class="fa fa-check me-2"></i>
+                        </a>' : '') . '
                         <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
                         <i class="fe fe-trash-2"></i>
                         </a>
+                        ' . ($record->is_approved_by_verifikator == true ? '
+                        <a href="' . url('/sp3/' . $record->slug . '/preview') . '" class="btn btn-sm bg-success-light">
+                            <i class="fa fa-print me-2"></i>
+                        </a>' : '') . '
                     </div>
                 </td>
             ';
-
+            // dd($record);
             $data_arr[] = [
-                "no_sp3"         => $record->no_sp3 ?? '-',
+                "no_sp3"         => $record->no_surat_sp3 ?? '-',
                 "tgl_sp3"     => $record->tgl_sp3,
                 "nomor_tagihan"    => $record->nomor_tagihan,
                 "tgl_terima_keu"    => $record->tgl_terima_keu,
@@ -210,9 +367,10 @@ class Sp3Controller extends Controller
                 "jumlah_kunjungan"    => $record->total_kunjungan,
                 "ket_pembayaran"    => $record->ket_pembayaran,
                 "layanan"    => $record->layanan->nama,
-                "tgl_masuk"     => $record->tgl_masuk,
-                "tgl_keluar"     => $record->tgl_keluar,
-                "total_biaya"    => 'Rp ' . number_format($record->total_biaya, 0, ',', '.'),
+                "tgl_berobat"     => $record->tgl_masuk && $record->tgl_keluar ? \Carbon\Carbon::parse($record->tgl_masuk)->translatedFormat('d F Y')
+                    . ' - ' . \Carbon\Carbon::parse($record->tgl_keluar)->translatedFormat('d F Y') : null,
+                "total_biaya"    => 'Rp ' . number_format($record->total_tagihan, 0, ',', '.'),
+                "status"         => $status,
                 "modify"         => $modify,
             ];
         }

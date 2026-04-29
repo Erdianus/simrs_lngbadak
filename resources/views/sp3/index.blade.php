@@ -83,9 +83,9 @@
                                             <th>Jumlah Kunjungan</th>
                                             <th>Keterangan Pembayaran</th>
                                             <th>Layanan</th>
-                                            <th>Tanggal Masuk</th>
-                                            <th>Tanggal Keluar</th>
+                                            <th>Tanggal Berobat</th>
                                             <th>Total Biaya</th>
+                                            <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
@@ -98,18 +98,18 @@
         </div>
     </div>
 
-    {{-- model student delete --}}
+    {{-- modal sp3 delete --}}
     <div class="modal custom-modal fade" id="delete" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="form-header">
-                        <h3>Delete Billing</h3>
+                        <h3>Delete Sp3</h3>
                         <p>Are you sure want to delete?</p>
                     </div>
                     <div class="modal-btn delete-action">
                         <div class="row">
-                            <form action="{{ route('billing/delete') }}" method="POST">
+                            <form action="{{ route('sp3/delete') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="slug" class="e_slug" value="">
                                 <div class="row">
@@ -198,18 +198,18 @@
                         name: 'layanan'
                     },
                     {
-                        data: 'tgl_masuk',
-                        name: 'tgl_masuk'
-                    },
-                    {
-                        data: 'tgl_keluar',
-                        name: 'tgl_keluar'
+                        data: 'tgl_berobat',
+                        name: 'tgl_berobat'
                     },
                     {
                         data: 'total_biaya',
                         name: 'total_biaya',
                         orderable: false,
                         searchable: false
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
                     },
                     {
                         data: 'modify',

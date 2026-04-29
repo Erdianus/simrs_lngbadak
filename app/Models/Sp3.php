@@ -16,6 +16,7 @@ class Sp3 extends Model
 
     protected $fillable = [
         'no_sp3',
+        'no_surat_sp3',
         'keterangan',
         'tgl_sp3',
         'jenis_surat',
@@ -41,7 +42,7 @@ class Sp3 extends Model
     protected $appends = [
         'total_pasien',
         'total_kunjungan',
-        'total_biaya'
+        // 'total_biaya'
     ];
 
     protected static function booted()
@@ -93,12 +94,12 @@ class Sp3 extends Model
         return 'slug';
     }
 
-    public function getTotalBiayaAttribute()
-    {
-        $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon);
-        return $total;
-        // return 'Rp ' . number_format($total, 0, ',', '.');
-    }
+    // public function getTotalBiayaAttribute()
+    // {
+    //     $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon);
+    //     return $total;
+    //     // return 'Rp ' . number_format($total, 0, ',', '.');
+    // }
 
     public function getTotalKunjunganAttribute()
     {

@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('billings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sp3_id')->nullable();
+            $table->foreignId('sp3_id')->references('id')->on('sp3s')->onDelete('cascade');
             $table->string('keterangan')->nullable();
-            $table->string('no_registrasi');
+            $table->string('no_registrasi')->unique();
+            $table->string('nama_pasien');
             $table->foreignId('eslon_id')->references('id')->on('eslons');
             $table->foreignId('layanan_id')->nullable();
             $table->foreignId('sub_layanan_id')->nullable();
