@@ -109,6 +109,7 @@
                                             <th>Total Biaya Eselon</th>
                                             <th>Total Biaya Kas</th>
                                             <th>Status</th>
+                                            <th>Keterangan</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
@@ -223,6 +224,10 @@
                     {
                         data: 'status',
                         name: 'status',
+                    },
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan',
                     },
                     {
                         data: 'modify',

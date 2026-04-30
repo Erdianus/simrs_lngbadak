@@ -16,10 +16,11 @@ class BillingService
             $billingData = $getDataReg->map(fn($value) => [
                 'sp3_id'         => $sp3->id,
                 'no_registrasi'  => $value->reg_no,
-                'nama_pasien'  => $value->nama,   // ✅ already aliased
+                'nama_pasien'  => $value->nama,
                 'eslon_id'       => $eselon->id,
-                'tanggal_masuk'  => $value->tanggal_registrasi,    // ✅ already aliased
-                'tanggal_keluar' => $value->tanggal_registrasi,   // ✅ already aliased
+                'tanggal_masuk'  => $value->tanggal_registrasi,
+                'tanggal_keluar' => $value->tanggal_registrasi,
+                'keterangan' => $value->keterangan_batal,
             ])->toArray();
             // dd($billingData);
             log::info('Billing data will insert: ' . count($billingData) . ' records'); // ← tambahkan log

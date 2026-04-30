@@ -43,6 +43,10 @@
             text-align: right;
         }
 
+        .text-center {
+            text-align: center;
+        }
+
         .text-left {
             text-align: left;
         }
@@ -64,6 +68,10 @@
         .sub-header {
             font-size: 6px;
             margin-top: 10px;
+        }
+
+        .underline {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -158,51 +166,163 @@
                 <td>BEBAN PIHAK KE 3</td>
                 <td>: Rp 0</td>
             </tr>
-        </table>
-
-        <div class="line"></div>
-
-        <table class="medium">
-            <tr>
+            <tr style="background: #bfbcbc">
                 <td><b>JUMLAH PEMBAYARAN</b></td>
-                <td class="text-right">
-                    <b>Rp {{ number_format($data['tagihan'], 0, ',', '.') }}</b>
+                <td class="text-left">
+                    : <b>Rp {{ number_format($data['tagihan'], 0, ',', '.') }}</b>
                 </td>
             </tr>
         </table>
 
-        <br><br>
+        <div class="line"></div>
+
+        <div class="medium">
+            DEMIKIAN UNTUK DAPAT DITERIMA DENGAN BAIK DAN MENJADI ACUAN UNTUK PROSES PENAGIHAN PEMBAYARAN OLEH UNIT YANG
+            BAPAK/IBU PIMPIN.
+        </div>
+        <br>
+        <br>
 
         <table class="medium">
             <tr>
-                <td>DISETUJUI OLEH,</td>
-                <td class="text-right">DIBUAT OLEH,</td>
+                <td class="text-center">DISETUJUI OLEH,<br>WADIR YANMED</td>
+                <td class="text-center">DIKETAHUI OLEH,<br>CASE MANAGER</td>
+                <td class="text-center">DIBUAT OLEH,<br>PENATA VERIFKASI</td>
             </tr>
 
             <tr>
-                <td>
+                <td class="text-center">
                     <br><br>
                     @if ($data['ttd_path'])
                         <img src="{{ public_path($data['ttd_path']) }}" height="40">
                     @endif
                     <br>
-                    <b>{{ $data['disetujui_oleh'] }}</b>
+                    <b class="underline">{{ $data['disetujui_oleh'] }}</b>
                 </td>
-
-                <td class="text-right">
+                <td class="text-center">
                     <br><br>
                     {{-- <img src="data:image/png;base64,{{ $qr }}"> --}}
                     <br>
-                    <b>{{ $data['dibuat_oleh'] }}</b>
+                    <b class="underline">{{ $data['diketahui_oleh'] }}</b>
+                </td>
+                <td class="text-center">
+                    <br><br>
+                    {{-- <img src="data:image/png;base64,{{ $qr }}"> --}}
+                    <br>
+                    <b class="underline">{{ $data['dibuat_oleh'] }}</b>
                 </td>
             </tr>
         </table>
-
         <br><br>
-
-        <div class="box">
+        <table class="medium">
+            <tr>
+                <td class="underline">DISPOSISI</td>
+                <td>Selisih Biaya</td>
+                <td>:</td>
+                <td>Ada</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Tagihan Semula (Rp.)</td>
+                <td>:</td>
+                <td>{{ number_format($data['tagihan'], 0, ',', '.') }},-</td>
+                <td></td>
+                <td>Dibayarkan (Rp):</td>
+                <td class="text-right">0,00,-</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Tidak Ditanggung (Rp.)</td>
+                <td>:</td>
+                <td>0,00,-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Item Tidak Ditanggung</td>
+                <td>:</td>
+                <td>0,-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Karena</td>
+                <td>:</td>
+                <td>-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Mohon Ditagihkan ke</td>
+                <td>:</td>
+                <td>-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Sebesar (Rp)</td>
+                <td>:</td>
+                <td>-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Karena</td>
+                <td>:</td>
+                <td>-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Keterangan</td>
+                <td>:</td>
+                <td>-</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+        <br><br>
+        <table>
+            <tr>
+                <td class="text-left">
+                    <div class="box" style="width: 60px; height: 12px;">
+                    </div>
+                </td>
+                <td class="text-right">
+                    <div class="box">
+                        SURAT JAMINAN ADA / TIDAK ADA
+                    </div>
+                </td>
+            </tr>
+        </table>
+        {{-- <div class="box text-right">
             SURAT JAMINAN ADA / TIDAK ADA
-        </div>
+        </div> --}}
 
     </div>
 </body>

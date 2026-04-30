@@ -88,13 +88,49 @@ class Sp3Controller extends Controller
         $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
         $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
         $eslon = Eslon::findOrFail($validated['eslon_id']);
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+            ->with('masterPoli')
             ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
             ->whereIn('kode_poli', $this->kode_poli)
             ->where('eselon', $eslon->nama)
             ->get()
+            ->groupBy('reg_no')
+            ->filter(function ($group) {
+                // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
+                if ($group->count() === 1) {
+                    $nilai = $group->first()->jadi; // ganti 'nama_kolom' dengan nama kolom aslinya
+                    if ($nilai === 'Y') {
+                        return false; // buang data ini
+                    }
+                }
+                return true; // ambil data ini
+            })
+            ->map(function ($group) {
+                $dataBatal = $group->where('jadi', 'Y');
+                $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
+
+                $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+
+                if ($adaBatal) {
+                    $jumlahBatal = $dataBatal->count();
+
+                    // Ambil poli_name dari relasi masterPoli
+                    $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
+
+                    if ($jumlahBatal === 1) {
+                        $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                    } else {
+                        $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
+                        $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                    }
+                } else {
+                    $dataUtama->keterangan_batal = null;
+                }
+
+                return $dataUtama;
+            })
+            ->flatten()
             ->unique('reg_no');
-        // dd($getDataReg);
         $billing = $getDataReg->unique('reg_no');
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
@@ -126,11 +162,48 @@ class Sp3Controller extends Controller
         $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
         $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
         $eslon = Eslon::findOrFail($validated['eslon_id']);
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+            ->with('masterPoli')
             ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
             ->whereIn('kode_poli', $this->kode_poli)
             ->where('eselon', $eslon->nama)
             ->get()
+            ->groupBy('reg_no')
+            ->filter(function ($group) {
+                // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
+                if ($group->count() === 1) {
+                    $nilai = $group->first()->jadi; // ⭐ ganti 'nama_kolom' dengan nama kolom aslinya
+                    if ($nilai === 'Y') {
+                        return false; // buang data ini
+                    }
+                }
+                return true; // ambil data ini
+            })
+            ->map(function ($group) {
+                $dataBatal = $group->where('jadi', 'Y');
+                $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
+
+                $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+
+                if ($adaBatal) {
+                    $jumlahBatal = $dataBatal->count();
+
+                    // Ambil poli_name dari relasi masterPoli
+                    $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
+
+                    if ($jumlahBatal === 1) {
+                        $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                    } else {
+                        $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
+                        $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                    }
+                } else {
+                    $dataUtama->keterangan_batal = null;
+                }
+
+                return $dataUtama;
+            })
+            ->flatten()
             ->unique('reg_no');
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
@@ -149,12 +222,49 @@ class Sp3Controller extends Controller
     public function updateDataBilling($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon'])
+        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+            ->with('masterPoli')
             ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
             ->whereIn('kode_poli', $this->kode_poli)
             ->where('eselon', $sp3->eselon->nama)
             ->get()
+            ->groupBy('reg_no')
+            ->filter(function ($group) {
+                // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
+                if ($group->count() === 1) {
+                    $nilai = $group->first()->jadi; // ⭐ ganti 'nama_kolom' dengan nama kolom aslinya
+                    if ($nilai === 'Y') {
+                        return false; // buang data ini
+                    }
+                }
+                return true; // ambil data ini
+            })
+            ->map(function ($group) {
+                $dataBatal = $group->where('jadi', 'Y');
+                $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
+
+                $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+
+                if ($adaBatal) {
+                    $jumlahBatal = $dataBatal->count();
+
+                    // Ambil poli_name dari relasi masterPoli
+                    $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
+
+                    if ($jumlahBatal === 1) {
+                        $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                    } else {
+                        $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
+                        $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                    }
+                } else {
+                    $dataUtama->keterangan_batal = null;
+                }
+                return $dataUtama;
+            })
+            ->flatten()
             ->unique('reg_no');
+        // dd($getDataReg);
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
@@ -231,6 +341,7 @@ class Sp3Controller extends Controller
             'hal' => $sp3->perihalTagihan->hal,
             'ket_pembayaran' => $sp3->perihalTagihan->ket_pembayaran,
             'disetujui_oleh' => 'dr. RIEN POTU AGUSTINA',
+            'diketahui_oleh' => 'dr. PUTU ISMA SARASWATI DEWI',
             'dibuat_oleh' => auth()->user()->rolename != 'Super Admin' ? auth()->user()->name : '',
             'ttd_path' => ''
         ];

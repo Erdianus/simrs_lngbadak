@@ -24,6 +24,10 @@
         .invalid-feedback {
             font-size: 14px;
         }
+
+        .min-height-100vh {
+            min-height: 100vh;
+        }
     </style>
     <div class="main-wrapper login-body">
         <div class="login-wrapper">
@@ -31,7 +35,7 @@
                 <div class="loginbox">
                     <div class="login-left">
                         <div
-                            class="col-md-6 d-flex align-items-center justify-content-center bg-info bg-gradient position-relative">
+                            class="col-md-6 d-flex align-items-center justify-content-center bg-info bg-gradient position-relative min-height-100vh">
 
                             <!-- Optional decorative circles -->
                             <div class="position-absolute top-0 start-0 translate-middle bg-light rounded-circle opacity-25"

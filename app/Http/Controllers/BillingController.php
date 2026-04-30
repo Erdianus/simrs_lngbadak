@@ -22,56 +22,11 @@ use Illuminate\Http\Request;
 
 class BillingController extends Controller
 {
-    private $kode_poli = [
-        'MCU01',
-        'RJ002',
-        'RJ004',
-        'RJ006',
-        'RJ008',
-        'RJ010',
-        'RJ012',
-        'RJ014',
-        'RJ016',
-        'RJ018',
-        'FIS01',
-        'RIN01',
-        'LAB01',
-        'ADM02',
-        'HC',
-        'RJ021',
-        'RJ023',
-        'TND01',
-        'RJ025',
-        'RJ027',
-        'RJ029',
-        'RJ030',
-        'TER01',
-        'RJ034',
-        'CSSD',
-        'RJ001',
-        'RJ003',
-        'RJ005',
-        'RJ007',
-        'RJ009',
-        'RJ011',
-        'RJ013',
-        'RJ015',
-        'RJ017',
-        'RJ019',
-        'FAR01',
-        'IGD01',
-        'OK001',
-        'RAD01',
-        'RJ020',
-        'RJ022',
-        'RJ024',
-        'RJ026',
-        'RJ028',
-        'RJ031',
-        'RJ032',
-        'RJ033',
-        'RJ035'
-    ];
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         return view('billing.index');
@@ -294,7 +249,8 @@ class BillingController extends Controller
                 "total_biaya_kas"    => 'Rp ' . number_format($record->total_biaya_kas, 0, ',', '.'),
                 "is_verified_by_verifikator"  => $record->is_verified_by_verifikator,
                 "status" => $status,
-                "modify"       => $modify,
+                "keterangan" => $record->keterangan ? '<span class="badge bg-warning">' . $record->keterangan . '</span>' : '-',
+                "modify" => $modify,
             ];
         }
 
