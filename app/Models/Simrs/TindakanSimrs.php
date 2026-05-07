@@ -21,7 +21,7 @@ class TindakanSimrs extends Model
 
     public function getNamaTindakanAttribute()
     {
-        $tindakan = is_null($this->payment)
+        $tindakan = $this->masterTindakanPerusahaan
             ? optional($this->masterTindakanPerusahaan)->tindakan_desc
             : optional($this->masterTindakan)->tindakan_desc;
         return $tindakan;

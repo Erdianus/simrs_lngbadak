@@ -7,14 +7,15 @@ use App\Http\Requests\BillingRequest;
 use App\Models\Billing;
 use App\Models\Eslon;
 use App\Models\Layanan;
+use App\Models\Simrs\DepositKamarSimrs;
 use App\Models\Simrs\KipKirimanSimrs;
 use App\Models\Simrs\ReferensiAdmSimrs;
-use App\Models\Simrs\RegMultiPoliSimrs;
 use App\Models\Simrs\TindakanSimrs;
 use App\Models\Simrs\TransaksiAlkesSimrs;
 use App\Models\Simrs\TransaksiEmbalaceSimrs;
 use App\Models\Simrs\TransaksiKamarSimrs;
 use App\Models\Simrs\TransaksiResepSimrs;
+use App\Models\Sp3;
 use App\Models\SubLayanan;
 use App\Service\BillingService;
 use Brian2694\Toastr\Facades\Toastr;
@@ -100,6 +101,31 @@ class BillingController extends Controller
         return redirect()->route('billing/list');
     }
 
+    public function storeDeposit($slugSp3, $noReg)
+    {
+        $deposit = DepositKamarSimrs::where('no_reg', $noReg)->first();
+        $sp3 = Sp3::with('billings')->where('slug', $slugSp3)->first();
+        $billSp3 = $sp3->billings()->where('no_registrasi', $noReg)->first();
+        if (!is_null($billSp3)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Deposit sudah diinputkan.'
+            ]);
+        }
+
+        $createDeposit = BillingService::createBillDeposito($sp3, $deposit);
+        if ($createDeposit['status'] === 'success') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Deposit berhasil ditambahkan.'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => $createDeposit['message']
+        ]);
+    }
+
     public function edit($slug)
     {
         $billing = Billing::where('slug', $slug)->first();
@@ -122,24 +148,42 @@ class BillingController extends Controller
     public function destroy(Request $request)
     {
         $slug = $request->input('slug');
-        $deleteBilling = BillingService::deleteBilling($slug);
-        if ($deleteBilling) {
+        $deleteBilling = BillingService::deleteSingleBilling($slug);
+        if ($deleteBilling['status'] === 'success') {
             Toastr::success('Billing berhasil dihapus!', 'Success');
             return redirect()->back();
         }
-        Toastr::error('Gagal menghapus Billing. Silakan coba lagi.', 'Error');
+        Toastr::error($deleteBilling['message'], 'Error');
         return redirect()->back();
     }
 
-    public function approveBill($slug)
+    public function approveBill($id)
     {
-        $approveBilling = BillingService::approveBill($slug);
+        $approveBilling = BillingService::approveBill($id);
         if ($approveBilling) {
-            Toastr::success('Billing berhasil disetujui!', 'Success');
-            return redirect()->back();
+            return response()->json([
+                'success' => true,
+                'message' => 'Billing berhasil diapproved'
+            ]);
         }
-        Toastr::error('Gagal menyetujui Billing. Silakan coba lagi.', 'Error');
-        return redirect()->back();
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menyetujui Billing. Silakan coba lagi.'
+        ]);
+    }
+    public function unapproveBill($id)
+    {
+        $approveBilling = BillingService::unapproveBill($id);
+        if ($approveBilling) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Billing berhasil di unapproved'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal Unapprove Billing. Silakan coba lagi.'
+        ]);
     }
 
     public function getBillingsSp3Data(Request $request, $sp3_slug)
@@ -163,20 +207,21 @@ class BillingController extends Controller
 
         $totalRecordsWithFilter = Billing::whereHas('sp3', function ($query) use ($sp3_slug) {
             $query->where('slug', $sp3_slug);
-        })->where(function ($query) use ($searchValue) {
-            $query->orWhereHas('eselon', function ($subQuery) use ($searchValue) {
-                $subQuery->where('nama', 'like', '%' . $searchValue . '%');
-            });
-            $query->orWhereHas('layanan', function ($subQuery) use ($searchValue) {
-                $subQuery->where('nama', 'like', '%' . $searchValue . '%');
-            });
-            $query->orWhereHas('sub_layanan', function ($subQuery) use ($searchValue) {
-                $subQuery->where('nama', 'like', '%' . $searchValue . '%');
-            });
-            $query->orWhere('keterangan', 'like', '%' . $searchValue . '%');
-            $query->orWhere('no_registrasi', 'like', '%' . $searchValue . '%');
-            $query->orWhere('nama_pasien', 'like', '%' . $searchValue . '%');
-        })->count();
+        })
+            ->where(function ($query) use ($searchValue) {
+                $query->orWhereHas('eselon', function ($subQuery) use ($searchValue) {
+                    $subQuery->where('nama', 'like', '%' . $searchValue . '%');
+                });
+                $query->orWhereHas('layanan', function ($subQuery) use ($searchValue) {
+                    $subQuery->where('nama', 'like', '%' . $searchValue . '%');
+                });
+                $query->orWhereHas('sub_layanan', function ($subQuery) use ($searchValue) {
+                    $subQuery->where('nama', 'like', '%' . $searchValue . '%');
+                });
+                $query->orWhere('keterangan', 'like', '%' . $searchValue . '%');
+                $query->orWhere('no_registrasi', 'like', '%' . $searchValue . '%');
+                $query->orWhere('nama_pasien', 'like', '%' . $searchValue . '%');
+            })->count();
 
         $records = Billing::with(['sp3', 'eselon', 'layanan', 'sub_layanan'])
             ->whereHas('sp3', function ($query) use ($sp3_slug) {
@@ -197,7 +242,6 @@ class BillingController extends Controller
                     ->orWhere('billings.no_registrasi', 'like', "%$searchValue%")
                     ->orWhere('billings.nama_pasien', 'like', "%$searchValue%");
             })
-            ->where('no_registrasi', 'like', "%$searchValue%")
             ->orderBy($this->mapColumn($columnName), $columnSortOrder)
             ->skip($start)
             ->take($rowPerPage)
@@ -207,19 +251,6 @@ class BillingController extends Controller
         $role = auth()->user()->role_name;
         foreach ($records as $key => $record) {
             $status = $record->is_verified_by_verifikator ? '<span class="badge bg-success">Terverifikasi</span>' : '<span class="badge bg-secondary">Belum Terverifikasi</span>';
-            $modify = '<td class="text-right">
-                <div class="dropdown dropdown-action">
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="' . url('/detail-billing/' . $record->no_registrasi) . '">
-                            <i class="far fa-eye me-2"></i> Detail
-                        </a>
-                        ' . (!$record->is_verified_by_verifikator ? '
-                        <a class="dropdown-item" href="' . url('/billing/approve/' . $record->no_registrasi) . '">
-                            <i class="fa fa-check me-2"></i> Approve
-                        </a>' : '') . '
-                    </div>
-                </div>
-            </td>';
             $modify = '
                 <td class="text-end"> 
                     <div class="actions">
@@ -227,29 +258,33 @@ class BillingController extends Controller
                             <i class="far fa-eye me-2"></i>
                         </a>
                         ' . ($record->is_verified_by_verifikator != true ? '
-                        <a href="' . url('/billing/approve/' . $record->no_registrasi) . '" class="btn btn-sm bg-success-light">
-                            <i class="fa fa-check me-2"></i>
-                        </a>' : '') . '
+                        <a href="#" 
+                            data-url="' . url('/billing/approve/' . $record->id) . '" 
+                            class="btn btn-sm bg-success-light btn-approve">
+                                <i class="fa fa-check me-2"></i>
+                        </a>' : '<a href="#" 
+                            data-url="' . url('/billing/unapprove/' . $record->id) . '" 
+                            class="btn btn-sm bg-success-light btn-unapprove">
+                                <i class="fa fa-times me-2"></i>
+                        </a>') . '
+                        <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
+                        <i class="fe fe-trash-2"></i>
+                        </a>
                     </div>
                 </td>
             ';
 
             $data_arr[] = [
-                "sp3"         => $record->sp3->no_sp3 ?? 'N/A',
+                // "sp3"         => $record->sp3->no_sp3 ?? 'N/A',
                 "no_registrasi"    => $record->no_registrasi,
                 "nama_pasien"    => $record->nama_pasien ?? 'N/A',
                 "eslon"    => $record->eselon->deskripsi ?? 'N/A',
-                "total_tindakan"    => 'Rp ' . number_format($record->total_tindakan, 0, ',', '.'),
-                "total_BMHP"    => 'Rp ' . number_format($record->total_BMHP, 0, ',', '.'),
-                "total_resep"    => 'Rp ' . number_format($record->total_resep, 0, ',', '.'),
-                "total_KIP"    => 'Rp ' . number_format($record->total_KIP, 0, ',', '.'),
-                "total_sewa_kamar"    => 'Rp ' . number_format($record->total_sewa_kamar, 0, ',', '.'),
-                "total_PPN"    => 'Rp ' . number_format($record->total_ppn, 0, ',', '.'),
-                "total_biaya_eselon"    => 'Rp ' . number_format($record->total_biaya_eselon, 0, ',', '.'),
+                "total_biaya_eselon"    => 'Rp ' . number_format($record->biaya ?? $record->total_biaya_eselon, 0, ',', '.'),
                 "total_biaya_kas"    => 'Rp ' . number_format($record->total_biaya_kas, 0, ',', '.'),
+                "deposit"    => 'Rp ' . number_format($record->deposit, 0, ',', '.'),
                 "is_verified_by_verifikator"  => $record->is_verified_by_verifikator,
                 "status" => $status,
-                "keterangan" => $record->keterangan ? '<span class="badge bg-warning">' . $record->keterangan . '</span>' : '-',
+                "keterangan" => $record->keterangan ? '<span class="badge bg-warning text-dark">' . $record->keterangan . '</span>' : '-',
                 "modify" => $modify,
             ];
         }
@@ -278,15 +313,4 @@ class BillingController extends Controller
         ];
         return $map[$columnName] ?? $columnName;
     }
-    // <a class="dropdown-item" href="' . url('billing/edit/' . $record->slug) . '">
-    //                             <i class="far fa-edit me-2"></i> Edit
-    //                         </a>
-    //                         <a class="dropdown-item" href="' . url('billing/delete/' . $record->slug) . '">
-    //                         <i class="fas fa-trash-alt m-r-5"></i> Delete
-    // <a href="' . url('billing/edit/' . $record->slug) . '" class="btn btn-sm bg-danger-light">
-    //                         <i class="far fa-edit me-2"></i>
-    //                     </a>
-    //                     <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
-    //                     <i class="fe fe-trash-2"></i>
-    //                     </a>
 }

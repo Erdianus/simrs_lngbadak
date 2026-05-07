@@ -16,6 +16,7 @@ class BillingService
             $billingData = $getDataReg->map(fn($value) => [
                 'sp3_id'         => $sp3->id,
                 'no_registrasi'  => $value->reg_no,
+                'no_rm'  => $value->no_mr,
                 'nama_pasien'  => $value->nama,
                 'eslon_id'       => $eselon->id,
                 'tanggal_masuk'  => $value->tanggal_registrasi,
@@ -26,12 +27,14 @@ class BillingService
             log::info('Billing data will insert: ' . count($billingData) . ' records'); // ← tambahkan log
             Billing::insert($billingData);
             $billings = Billing::where('sp3_id', $sp3->id)->get();
+            $totalDeposit = $billings->sum(fn($b) => $b->deposit);
             log::info('Billing data inserted: ' . count($billings) . ' records'); // ← tambahkan log
-            $totalTagihan = $billings->sum(fn($b) => $b->total_biaya_eselon);
+            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->total_biaya_eselon) : $billings->sum(fn($b) => $b->total_biaya_eselon) - $totalDeposit;
             $sp3->update([
-                'total_tagihan' => $totalTagihan
+                'total_tagihan' => $totalTagihan,
+                'total_kunjungan' => $sp3->total_kunjungan,
+                'total_pasien' => $sp3->total_pasien
             ]);
-
             DB::commit();
             return true;
         } catch (\Throwable $th) {
@@ -55,39 +58,89 @@ class BillingService
         }
     }
 
-    public static function approveBill($slug)
+    public static function deleteSingleBilling($slug)
     {
         DB::beginTransaction();
         try {
+            Billing::where('slug', $slug)->first()->delete();
+            DB::commit();
+            return [
+                'status' => 'success',
+                'message' => 'Billing Berhasil Dihapus'
+            ];
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return [
+                'status' => 'failed',
+                'message' => $th->getMessage()
+            ];
+        }
+    }
 
-            // $userId = auth()->id();
-            // $role   = auth()->user()->role_name;
-
-            $bill = Billing::where('no_registrasi', $slug)->first();
+    public static function approveBill($id)
+    {
+        DB::beginTransaction();
+        try {
+            $bill = Billing::find($id);
             $bill->update([
                 'approve_verif_pic_by' => auth()->user()->id,
                 'is_verified_by_verifikator' => true
             ]);
-
-
-            // // Validasi alur approval (biar tidak loncat)
-            // if ($role == 'PIC Verifikator' && !$billing->approved_pic) {
-            //     $billing->approved_verif_pic_by = $userId;
-            // } elseif ($role == 'Pengawas Verifikator' && $billing->approved_pic && !$billing->approved_pengawas) {
-            //     $billing->approved_verif_pws_by = $userId;
-            // } elseif ($role == 'Wakil Direktur' && $billing->approved_pengawas && !$billing->approved_manager) {
-            //     $billing->approved_verif_wadir_by = $userId;
-            // } elseif ($role == 'Keuangan Admin' && $billing->approved_manager && !$billing->approved_wadir) {
-            //     $billing->approved_keu_admin_by = $userId;
-            // } else {
-            //     return true;
-            // }
-            // $billing->save();
             DB::commit();
             return true;
         } catch (\Throwable $th) {
             DB::rollBack();
             return false;
+        }
+    }
+
+    public static function unapproveBill($id)
+    {
+        DB::beginTransaction();
+        try {
+            $bill = Billing::find($id);
+            $bill->update([
+                'approve_verif_pic_by' => null,
+                'is_verified_by_verifikator' => false
+            ]);
+            // dd($bill);
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return false;
+        }
+    }
+
+    public static function createBillDeposito($sp3, $deposit)
+    {
+        DB::beginTransaction();
+        try {
+            $billingData = [
+                'sp3_id'         => $sp3->id,
+                'no_registrasi'  => $deposit->no_reg,
+                'no_rm'  => $deposit->registrasi->no_mr,
+                'nama_pasien'  => $deposit->registrasi->nama,
+                'eslon_id'       => $sp3->eslon_id,
+                'tanggal_masuk'  => $deposit->update_date,
+                'tanggal_keluar' => $deposit->update_date,
+                'keterangan' => $deposit->keterangan,
+                'biaya' => (int) ceil($deposit->jumlah_deposit)
+            ];
+            // dd($billingData);
+            $createBill = Billing::create($billingData);
+            DB::commit();
+            return [
+                'status' => 'success',
+                'message' => 'Deposit berhasil ditambahkan'
+            ];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error($th->getMessage());
+            return [
+                'status' => 'failed',
+                'message' => $th->getMessage()
+            ];
         }
     }
 }

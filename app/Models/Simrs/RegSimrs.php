@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\BillingSimrs;
+namespace App\Models\Simrs;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

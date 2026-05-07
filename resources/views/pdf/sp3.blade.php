@@ -132,23 +132,8 @@
 
         <div class="medium">
             KETERANGAN PEMBAYARAN:<br>
-            PENAGIHAN BIAYA RAWAT JALAN
+            {{ $data['ket_pembayaran'] . ' ' . $data['layanan'] . ' ' . $data['nama_rs'] . ' ' . $data['range_tgl'] . ' atas nama ' . $data['eselon'] }}
         </div>
-
-        <br>
-
-        <table class="border medium">
-            <tr>
-                <td class="border">KODE REKENING</td>
-                <td class="border">KODE BAGIAN</td>
-                <td class="border">JENIS BIAYA</td>
-            </tr>
-            <tr>
-                <td class="border">-</td>
-                <td class="border">-</td>
-                <td class="border">-</td>
-            </tr>
-        </table>
 
         <br>
 

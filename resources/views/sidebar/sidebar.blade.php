@@ -23,10 +23,10 @@
                     </a>
                     <ul>
                         <li><a href="{{ route('home') }}" class="{{ set_active(['home']) }}">Admin Dashboard</a></li>
-                        <li><a href="{{ route('teacher/dashboard') }}"
+                        {{-- <li><a href="{{ route('teacher/dashboard') }}"
                                 class="{{ set_active(['teacher/dashboard']) }}">Teacher Dashboard</a></li>
                         <li><a href="{{ route('student/dashboard') }}"
-                                class="{{ set_active(['student/dashboard']) }}">Student Dashboard</a></li>
+                                class="{{ set_active(['student/dashboard']) }}">Student Dashboard</a></li> --}}
                     </ul>
                 </li>
                 @if (Session::get('role_name') === 'verifikator' ||

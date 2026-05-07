@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('sp3_id')->references('id')->on('sp3s')->onDelete('cascade');
             $table->string('keterangan')->nullable();
-            $table->string('no_registrasi')->unique();
+            $table->string('no_registrasi');
             $table->string('nama_pasien');
             $table->foreignId('eslon_id')->references('id')->on('eslons');
             $table->foreignId('layanan_id')->nullable();

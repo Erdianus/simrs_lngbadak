@@ -22,14 +22,21 @@
                 <div class="col-sm-12">
                     <div class="card comman-shadow">
                         <div class="card-body">
-                            <form action="{{ route('sp3/update', $sp3->slug) }}" method="POST"
-                                enctype="multipart/form-data">
+                            @php
+                                $action = match ($sp3->jenis_sp3) {
+                                    'billing' => route('sp3/update', $sp3->slug),
+                                    'tagihan keluar' => route('sp3/update/tagihan-keluar', $sp3->slug),
+                                    'deposito' => route('sp3/update/deposito', $sp3->slug),
+                                };
+                            @endphp
+                            <form action="{{ $action }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-12">
                                         <h5 class="form-title student-info">Form Edit SP3
                                         </h5>
                                     </div>
+                                    <input type="hidden" name="jenis_sp3" value="{{ $sp3->jenis_sp3 }}">
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms calendar-icon">
                                             <label>Tanggal SP3 <span class="login-danger">*</span></label>
@@ -158,6 +165,33 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    @if ($sp3->jenis_sp3 === 'tagihan keluar')
+                                        <div class="col-12 col-sm-4">
+                                            <div class="form-group local-forms">
+                                                <label>Kunjungan <span class="login-danger">*</span></label>
+                                                <input type="number" name="kunjungan" id="kunjungan"
+                                                    class="form-control"
+                                                    value="{{ $sp3->kunjungan ?? old('kunjungan', 0) }}">
+                                                @error('kunjungan')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-4">
+                                            <div class="form-group local-forms">
+                                                <label>Pasien <span class="login-danger">*</span></label>
+                                                <input type="number" name="pasien" id="pasien" class="form-control"
+                                                    value="{{ $sp3->pasien ?? old('pasien', 0) }}">
+                                                @error('pasien')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Keterangan Pembayaran <span class="login-danger">*</span></label>
@@ -253,6 +287,29 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    @if ($sp3->jenis_sp3 === 'tagihan keluar')
+                                        <div class="col-12 col-sm-4">
+                                            <div class="form-group local-forms">
+                                                <label>Total Tagihan <span class="login-danger">*</span></label>
+                                                <input type="text"
+                                                    class="form-control @error('total_tagihan') is-invalid @enderror"
+                                                    name="total_tagihan_display" id="total_tagihan_display"
+                                                    placeholder="Rp 0"
+                                                    value="{{ $sp3->total_tagihan ? number_format($sp3->total_tagihan, 0, ',', '.') : '' }}"
+                                                    autocomplete="off">
+
+                                                {{-- Hidden input yang dikirim sebagai integer --}}
+                                                <input type="hidden" name="total_tagihan" id="total_tagihan"
+                                                    value="{{ $sp3->total_tagihan }}">
+
+                                                @error('total_tagihan')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="col-12">
                                         <div class="student-submit">
                                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -269,6 +326,21 @@
     <script>
         $(document).ready(function() {
             $('.select2').select2();
+        });
+    </script>
+    <script>
+        const display = document.getElementById('total_tagihan_display');
+        const hidden = document.getElementById('total_tagihan');
+
+        display.addEventListener('input', function() {
+            // Hapus semua karakter selain angka
+            let raw = this.value.replace(/\D/g, '');
+
+            // Simpan nilai integer ke hidden input
+            hidden.value = raw;
+
+            // Format tampilan dengan titik sebagai pemisah ribuan
+            this.value = raw ? 'Rp ' + parseInt(raw).toLocaleString('id-ID') : '';
         });
     </script>
 @endsection

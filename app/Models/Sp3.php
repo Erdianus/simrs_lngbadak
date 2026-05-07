@@ -16,6 +16,7 @@ class Sp3 extends Model
 
     protected $fillable = [
         'no_sp3',
+        'jenis_sp3',
         'no_surat_sp3',
         'keterangan',
         'tgl_sp3',
@@ -34,6 +35,9 @@ class Sp3 extends Model
         'tgl_masuk',
         'tgl_keluar',
         'total_tagihan',
+        'cob',
+        'pasien',
+        'kunjungan',
         'is_approved_by_verifikator',
         'is_approved_by_keuangan',
         'slug',
@@ -42,7 +46,7 @@ class Sp3 extends Model
     protected $appends = [
         'total_pasien',
         'total_kunjungan',
-        // 'total_biaya'
+        'total_biaya'
     ];
 
     protected static function booted()
@@ -94,12 +98,16 @@ class Sp3 extends Model
         return 'slug';
     }
 
-    // public function getTotalBiayaAttribute()
-    // {
-    //     $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon);
-    //     return $total;
-    //     // return 'Rp ' . number_format($total, 0, ',', '.');
-    // }
+    public function getTotalBiayaAttribute()
+    {
+        if ($this->jenis_sp3 === "deposito") {
+            $total = $this->billings->sum(fn($b) => $b->biaya);
+        } else {
+            return null;
+        }
+        return $total;
+        // return 'Rp ' . number_format($total, 0, ',', '.');
+    }
 
     public function getTotalKunjunganAttribute()
     {
@@ -109,7 +117,7 @@ class Sp3 extends Model
 
     public function getTotalPasienAttribute()
     {
-        $totalPasiens = $this->billings->count();
+        $totalPasiens = $this->billings->unique('no_rm')->count();
         return $totalPasiens;
     }
 

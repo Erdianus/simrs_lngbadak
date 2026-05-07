@@ -22,6 +22,7 @@ class Sp3Request extends FormRequest
     public function rules(): array
     {
         return [
+            'jenis_sp3' => ['required', 'string'],
             'tgl_sp3' => ['required', 'date'],
             'jenis_surat' => ['required', 'string'],
             'nomor_tagihan' => ['required', 'string'],
@@ -35,8 +36,21 @@ class Sp3Request extends FormRequest
             'kota' => ['required', 'string'],
             'nama_rs' => ['required', 'string'],
             'dokter_rujukan' => ['nullable', 'string'],
+            'cob' => ['nullable', 'integer'],
+            'jenis_sp3' => ['nullable', 'string'],
+            'kunjungan' => ['nullable', 'integer'],
+            'pasien' => ['nullable', 'integer'],
+            'total_tagihan' => ['nullable', 'numeric', 'min:0'],
             'tgl_masuk' => ['required', 'date'],
-            'tgl_keluar' => ['required', 'date'],
+            'tgl_keluar' => ['required', 'date', 'after_or_equal:tgl_masuk'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'tgl_keluar.after_or_equal' => 'Tanggal keluar harus sama dengan atau setelah tanggal masuk.',
+            'total_tagihan.min' => 'Total tagihan harus berupa angka positif.',
         ];
     }
 }

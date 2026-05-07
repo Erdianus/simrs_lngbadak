@@ -1,5 +1,6 @@
 @extends('layouts.master')
 @section('content')
+    {{-- {!! Toastr::message() !!} --}}
     <div class="page-wrapper">
         <div class="content container-fluid">
             <div class="page-header">
@@ -55,10 +56,8 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td><b>Total Tagihan</b></td>
-                                                <td>:
-                                                    {{ 'Rp ' . number_format($sp3->total_biaya ?? $sp3->total_tagihan, 0, ',', '.') }}
-                                                </td>
+                                                <td><b>Jenis Layanan</b></td>
+                                                <td>: {{ $sp3->layanan->nama }}</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -70,31 +69,11 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <div class="card card-table comman-shadow">
+                    <div class="card comman-shadow">
                         <div class="card-body">
-                            <div class="page-header">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <h3 class="page-title">Billing</h3>
-                                    </div>
-                                    <div class="col-auto text-end float-end ms-auto download-grp">
-                                        <a href="{{ route('sp3/refresh', $sp3->slug) }}"
-                                            class="btn btn-outline-gray me-2 active">
-                                            <i class="fa fa-retweet" aria-hidden="true"></i>
-                                        </a>
-                                        {{-- <a href="{{ route('student/grid') }}" class="btn btn-outline-gray me-2">
-                                            <i class="fa fa-th" aria-hidden="true"></i>
-                                        </a> --}}
-                                        <a href="#" class="btn btn-outline-primary me-2"><i
-                                                class="fas fa-download"></i> Download</a>
-                                        {{-- <a href="{{ route('billing/add/page') }}" class="btn btn-primary"><i
-                                                class="fas fa-plus"></i></a> --}}
-                                    </div>
-                                </div>
-                            </div>
-
+                            <h4 class="card-title">List Deposit Bill Sp3</h4>
                             <div class="table-responsive">
-                                <table class="table table-stripped table table-hover table-center mb-0" id="BillingList">
+                                <table class="table table-stripped table table-hover table-center mb-0" id="BillingSp3List">
                                     <thead class="student-thread">
                                         <tr>
                                             <th>No Registrasi</th>
@@ -102,7 +81,6 @@
                                             <th>Eselon</th>
                                             <th>Total Biaya Eselon</th>
                                             <th>Total Biaya Kas</th>
-                                            <th>Deposit</th>
                                             <th>Status</th>
                                             <th>Keterangan</th>
                                             <th class="text-end">Action</th>
@@ -114,16 +92,45 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card comman-shadow">
+                        <div class="card-body">
+                            <h4 class="card-title">List Deposit</h4>
+                            <div class="table-responsive">
+                                <table class="table table-stripped table table-hover table-center mb-0" id="DepositList">
+                                    <thead class="student-thread">
+                                        <tr>
+                                            <th>No Reg</th>
+                                            <th>Nama Pasien</th>
+                                            <th>Updated Date</th>
+                                            <th>Keterangan</th>
+                                            <th>Jumlah Deposit</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="d-flex justify-content-end">
+                    <a href="{{ route('sp3-verifikasi/list') }}" class="btn btn-primary me-2"><i class="fas fa-check"></i>
+                        Selesai</a>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- model student delete --}}
+
     <div class="modal custom-modal fade" id="delete" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="form-header">
-                        <h3>Delete Billing</h3>
+                        <h3>Delete Deposit Sp3</h3>
                         <p>Are you sure want to delete?</p>
                     </div>
                     <div class="modal-btn delete-action">
@@ -148,8 +155,15 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+    </script>
+@endsection
 @section('script')
-    {{-- delete js --}}
     <script>
         $(document).on('click', '.delete', function() {
             var _this = $(this).parents('tr');
@@ -157,10 +171,56 @@
         });
     </script>
 
+
+    {{-- get all deposit js --}}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#DepositList').DataTable({
+                processing: true,
+                serverSide: true,
+                ordering: true,
+                searching: true,
+                ajax: {
+                    url: "{{ route('get-deposit-data') }}",
+                    data: function(d) {
+                        d.sp3_slug = "{{ $sp3->slug }}"; // kirim slug via request
+                    }
+                },
+                columns: [{
+                        data: 'no_reg',
+                        name: 'no_reg',
+                    },
+                    {
+                        data: 'nama',
+                        name: 'nama',
+                    },
+                    {
+                        data: 'update_date',
+                        name: 'update_date'
+                    },
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan'
+                    },
+                    {
+                        data: 'jumlah_deposit',
+                        name: 'jumlah_deposit'
+                    },
+                    {
+                        data: 'modify',
+                        name: 'modify',
+                        orderable: false,
+                        searchable: false
+                    },
+                ]
+            });
+        });
+    </script>
+
     {{-- get user all js --}}
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#BillingList').DataTable({
+            $('#BillingSp3List').DataTable({
                 processing: true,
                 serverSide: true,
                 ordering: true,
@@ -189,10 +249,6 @@
                         name: 'total_biaya_kas'
                     },
                     {
-                        data: 'deposit',
-                        name: 'deposit'
-                    },
-                    {
                         data: 'status',
                         name: 'status',
                     },
@@ -210,11 +266,13 @@
     </script>
 
     <script>
-        // Approve billing via AJAX
-        $(document).on('click', '.btn-approve', function(e) {
+        // Handle tombol tambah deposit
+        $(document).on('click', '.btn-add-deposit', function(e) {
             e.preventDefault();
             const url = $(this).data('url');
-            console.log(url);
+            const btn = $(this);
+
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
             $.ajax({
                 url: url,
@@ -223,7 +281,38 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    $('#BillingList').DataTable().ajax.reload(null, false);
+                    if (response.success) {
+                        toastr.success(response.message ?? 'Deposit berhasil ditambahkan.');
+                        // Reload kedua DataTable tanpa full page reload
+                        $('#BillingSp3List').DataTable().ajax.reload(null, false);
+                        $('#DepositList').DataTable().ajax.reload(null, false);
+                    } else {
+                        toastr.error(response.message ?? 'Gagal menambahkan deposit.');
+                    }
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
+                    toastr.error(msg);
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html('<i class="fas fa-plus"></i>');
+                }
+            });
+        });
+
+        // Approve billing via AJAX
+        $(document).on('click', '.btn-approve', function(e) {
+            e.preventDefault();
+            const url = $(this).data('url');
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    $('#BillingSp3List').DataTable().ajax.reload(null, false);
                     toastr.success(response.message ?? 'Billing berhasil diapprove');
                 },
                 error: function(xhr) {
@@ -232,8 +321,7 @@
                 }
             });
         });
-    </script>
-    <script>
+
         // Unapprove billing via AJAX
         $(document).on('click', '.btn-unapprove', function(e) {
             e.preventDefault();
@@ -246,7 +334,7 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    $('#BillingList').DataTable().ajax.reload(null, false);
+                    $('#BillingSp3List').DataTable().ajax.reload(null, false);
                     toastr.success(response.message ?? 'Billing berhasil diunapprove');
                 },
                 error: function(xhr) {
@@ -256,6 +344,4 @@
             });
         });
     </script>
-@endsection
-
 @endsection

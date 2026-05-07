@@ -8,10 +8,10 @@
                 <div class="row align-items-center">
                     <div class="col-sm-12">
                         <div class="page-sub-header">
-                            <h3 class="page-title">Buat SP3</h3>
+                            <h3 class="page-title">Buat SP3 Deposito </h3>
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="{{ route('sp3/add/page') }}">SP3</a></li>
-                                <li class="breadcrumb-item active">Buat SP3</li>
+                                <li class="breadcrumb-item active">Buat SP3 Deposito</li>
                             </ul>
                         </div>
                     </div>
@@ -23,14 +23,14 @@
                 <div class="col-sm-12">
                     <div class="card comman-shadow">
                         <div class="card-body">
-                            <form action="{{ route('sp3/add/save') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('sp3/add/save/deposit') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-12">
                                         <h5 class="form-title student-info">Form Tambah SP3
                                         </h5>
                                     </div>
-                                    <input type="hidden" name="jenis_sp3" value="billing">
+                                    <input type="hidden" name="jenis_sp3" value="deposito">
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms calendar-icon">
                                             <label>Tanggal SP3 <span class="login-danger">*</span></label>

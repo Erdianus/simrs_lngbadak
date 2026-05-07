@@ -60,14 +60,33 @@
                                         </a> --}}
                                         <a href="#" class="btn btn-outline-primary me-2"><i
                                                 class="fas fa-download"></i> Download</a>
-                                        <a href="{{ route('sp3/add/page') }}" class="btn btn-primary"><i
-                                                class="fas fa-plus"></i></a>
+                                        <div class="btn btn-group">
+                                            <button type="button" class="btn btn-primary dropdown-toggle"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="{{ route('sp3/add/page') }}" class="dropdown-item"
+                                                        href="#">Sp3 Billing</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('sp3/add/page/deposit') }}" class="dropdown-item"
+                                                        href="#">Sp3 Deposit</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('sp3/add/page/tagihan-keluar') }}"
+                                                        class="dropdown-item" href="#">Sp3 Pembayaran Tagihan Luar</a>
+                                                </li>
+
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="table-responsive">
-                                <table class="table table-stripped table table-hover table-center mb-0" id="EselonsList">
+                                <table class="table table-stripped table table-hover table-center mb-0" id="Sp3List">
                                     <thead class="student-thread">
                                         <tr>
 
@@ -141,7 +160,7 @@
     {{-- get user all js --}}
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#EselonsList').DataTable({
+            $('#Sp3List').DataTable({
                 processing: true,
                 serverSide: true,
                 ordering: true,
@@ -218,6 +237,53 @@
                         searchable: false
                     },
                 ]
+            });
+        });
+    </script>
+    <script>
+        // Approve SP3 via AJAX
+        $(document).on('click', '.btn-approve', function(e) {
+            e.preventDefault();
+            const url = $(this).data('url');
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    $('#Sp3List').DataTable().ajax.reload(null, false);
+                    toastr.success(response.message ?? 'SP3 berhasil disetujui');
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
+                    toastr.error(msg);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // Unapprove sp3 via AJAX
+        $(document).on('click', '.btn-unapprove', function(e) {
+            e.preventDefault();
+            const url = $(this).data('url');
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    $('#Sp3List').DataTable().ajax.reload(null, false);
+                    toastr.success(response.message ?? 'Persetujuan Sp3 berhasil dibatalkan');
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
+                    toastr.error(msg);
+                }
             });
         });
     </script>
