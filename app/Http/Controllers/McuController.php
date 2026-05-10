@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 
 class McuController extends Controller
 {
-    public function getRegMcuData(Request $request)
+    public function getRegMcuData(Request $request, $sp3_slug)
     {
-        $sp3 = Sp3::where('slug', $request->sp3_slug)->first();
+        $sp3 = Sp3::where('slug', $sp3_slug)->first();
         $draw            = $request->get('draw');
         $start           = $request->get("start");
         $rowPerPage      = $request->get("length");
@@ -26,65 +26,43 @@ class McuController extends Controller
         $columnSortOrder = $order_arr[0]['dir'];
         $searchValue     = $search_arr['value'];
 
-        // Base query closure untuk reuse
-        $baseQuery = fn() => RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
-            ->with(['masterPoli', 'eselon'])
-            ->where('kode_poli', 'MCU01')
-            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
-            ->where('eselon', $sp3->eselon->nama)
-            ->orderByDesc('tanggal_registrasi');
+        // ✅ Whitelist kolom yang boleh di-order
+        $validColumns = ['reg_no', 'nama', 'tanggal_registrasi'];
+        if (!in_array($columnName, $validColumns)) {
+            $columnName = 'tanggal_registrasi';
+        }
+        $columnSortOrder = in_array(strtolower($columnSortOrder), ['asc', 'desc'])
+            ? $columnSortOrder
+            : 'desc';
 
-        // Filter closure untuk reuse
-        $filterGroup = fn($group) => !($group->count() === 1 && $group->first()->jadi === 'Y');
+        // ✅ Base query — reusable
+        $baseQuery = RegMultiPoliSimrs::whereIn('kode_poli', ['MCU01', 'LAB01'])
+            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar]);
 
-        // Map closure untuk reuse
-        $mapGroup = function ($group) {
-            $dataBatal = $group->where('jadi', 'Y');
-            $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
-            $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+        // ✅ Total tanpa filter search
+        $totalRecords = (clone $baseQuery)->count();
 
-            if ($adaBatal) {
-                $jumlahBatal = $dataBatal->count();
-                $namaPoli    = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
-
-                $dataUtama->keterangan_batal = $jumlahBatal === 1
-                    ? "Memiliki registrasi batal pada poli: {$namaPoli->first()}"
-                    : "Memiliki {$jumlahBatal} registrasi batal pada poli: " . $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
-            } else {
-                $dataUtama->keterangan_batal = null;
-            }
-
-            return $dataUtama;
-        };
-
-        $totalRecords = $baseQuery()
-            ->get()
-            ->groupBy('reg_no')
-            ->filter($filterGroup)
-            ->map($mapGroup)
-            ->flatten()
-            ->unique('reg_no')
-            ->count();
-
-        $totalRecordsWithFilter = $baseQuery()
+        // ✅ Total dengan filter search (konsisten dengan $records)
+        $totalRecordsWithFilter = (clone $baseQuery)
             ->where(function ($query) use ($searchValue) {
-                $query->orWhere('reg_no', 'like', '%' . $searchValue . '%');
-                $query->orWhere('nama', 'like', '%' . $searchValue . '%');
+                $query->where('reg_no', 'like', '%' . $searchValue . '%')
+                    ->orWhere('nama', 'like', '%' . $searchValue . '%')
+                    ->orWhere('tanggal_registrasi', 'like', '%' . $searchValue . '%');
             })
-            ->get()
-            ->groupBy('reg_no')
-            ->filter($filterGroup)
-            ->flatten()
-            ->unique('reg_no')
             ->count();
 
-        $records = $baseQuery()
-            ->get()
-            ->groupBy('reg_no')
-            ->filter($filterGroup)
-            ->map($mapGroup)
-            ->flatten()
-            ->unique('reg_no');
+        // ✅ Records dengan semua filter
+        $records = (clone $baseQuery)
+            ->where(function ($query) use ($searchValue) {
+                $query->where('reg_no', 'like', '%' . $searchValue . '%')
+                    ->orWhere('nama', 'like', '%' . $searchValue . '%')
+                    ->orWhere('tanggal_registrasi', 'like', '%' . $searchValue . '%');
+            })
+            ->orderBy($columnName, $columnSortOrder)
+            ->skip($start)
+            ->take($rowPerPage)
+            ->get();
+
         $data_arr = [];
         foreach ($records as $record) {
             $modify = '
@@ -100,16 +78,16 @@ class McuController extends Controller
         ';
 
             $data_arr[] = [
-                "no_registrasi"       => $record->reg_no,
-                "nama_pasien"         => $record->nama ?? 'N/A',
-                "eselon"              => $record->eselon ?? 'N/A',
-                "tanggal_registrasi"      => \Carbon\Carbon::parse($record->tanggal_registrasi)->translatedFormat('d M Y'),
-                "total_biaya_eselon"  => 'Rp ' . number_format($record->total_biaya_eselon, 0, ',', '.'),
-                "deposit"             => 'Rp ' . number_format($record->deposit, 0, ',', '.'),
-                "keterangan"          => $record->keterangan_batal
+                "reg_no"             => $record->reg_no,
+                "nama"               => $record->nama ?? 'N/A',
+                "eselon"             => $record->eselon ?? 'N/A',
+                "tanggal_registrasi" => \Carbon\Carbon::parse($record->tanggal_registrasi)->translatedFormat('d M Y'),
+                "total_biaya_eselon" => 'Rp ' . number_format($record->total_biaya_eselon, 0, ',', '.'),
+                "deposit"            => 'Rp ' . number_format($record->deposit, 0, ',', '.'),
+                "keterangan"         => $record->keterangan_batal
                     ? '<span class="badge bg-warning text-dark">' . $record->keterangan_batal . '</span>'
                     : '-',
-                "modify"              => $modify,
+                "modify"             => $modify,
             ];
         }
 

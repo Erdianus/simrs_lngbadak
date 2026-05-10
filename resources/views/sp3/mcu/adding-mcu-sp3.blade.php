@@ -178,7 +178,7 @@
     </script>
 
 
-    {{-- get all deposit js --}}
+    {{-- get all MCU js --}}
     <script type="text/javascript">
         $(document).ready(function() {
             $('#McuList').DataTable({
@@ -187,38 +187,43 @@
                 ordering: true,
                 searching: true,
                 ajax: {
-                    url: "{{ route('get-mcu-data') }}",
-                    data: function(d) {
-                        d.sp3_slug = "{{ $sp3->slug }}"; // kirim slug via request
-                    }
+                    url: "{{ route('get-mcu-data', $sp3->slug) }}"
                 },
                 columns: [{
-                        data: 'no_registrasi',
-                        name: 'no_registrasi',
+                        data: 'reg_no',
+                        name: 'reg_no',
                     },
                     {
-                        data: 'nama_pasien',
-                        name: 'nama_pasien',
+                        data: 'nama',
+                        name: 'nama',
                     },
                     {
                         data: 'eselon',
-                        name: 'eselon'
+                        name: 'eselon',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'tanggal_registrasi',
-                        name: 'tanggal_registrasi'
+                        name: 'tanggal_registrasi',
                     },
                     {
                         data: 'total_biaya_eselon',
-                        name: 'total_biaya_eselon'
+                        name: 'total_biaya_eselon',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'deposit',
-                        name: 'deposit'
+                        name: 'deposit',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'keterangan',
-                        name: 'keterangan'
+                        name: 'keterangan',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'modify',

@@ -172,7 +172,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
     // ------------------------ MCU -------------------------------//
     Route::controller(McuController::class)->group(function () {
-        Route::get('get-mcu-data', 'getRegMcuData')->middleware('auth')->name('get-mcu-data'); // get data sp3
+        Route::get('get-mcu-data/{slug}', 'getRegMcuData')->middleware('auth')->name('get-mcu-data'); // get data sp3
     });
 
 

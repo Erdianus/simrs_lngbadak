@@ -29,7 +29,7 @@
                                 class="{{ set_active(['student/dashboard']) }}">Student Dashboard</a></li> --}}
                     </ul>
                 </li>
-                @if (Session::get('role_name') === 'verifikator' ||
+                @if (Session::get('role_name') === 'PIC Verifikator' ||
                         Session::get('role_name') === 'Super Admin' ||
                         Session::get('role_name') === 'Admin')
                     <li class="submenu {{ set_active(['sp3*']) }} {{ request()->is('sp3/*') ? 'active' : '' }}">

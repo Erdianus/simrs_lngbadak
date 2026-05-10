@@ -97,8 +97,8 @@
                                         {{-- <a href="{{ route('student/grid') }}" class="btn btn-outline-gray me-2">
                                             <i class="fa fa-th" aria-hidden="true"></i>
                                         </a> --}}
-                                        <a href="#" class="btn btn-outline-primary me-2"><i
-                                                class="fas fa-download"></i> Download</a>
+                                        {{-- <a href="#" class="btn btn-outline-primary me-2"><i
+                                                class="fas fa-download"></i> Download</a> --}}
                                         {{-- <a href="{{ route('billing/add/page') }}" class="btn btn-primary"><i
                                                 class="fas fa-plus"></i></a> --}}
                                     </div>

@@ -539,12 +539,14 @@ class Sp3Controller extends Controller
     public function previewSp3($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
-        if ($sp3->jenis_sp3 === 'billing') {
+        if ($sp3->jenis_sp3 === 'billing' || $sp3->jenis_sp3 === 'mcu') {
             $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon);
             $deposit = $sp3->billings->sum(fn($b) => $b->deposit);
+            $cob = $sp3->billings->sum(fn($b) => $b->cob);
             $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
         } else if ($sp3->jenis_sp3 === 'deposito') {
             $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
+            $cob = $sp3->billings->sum(fn($b) => $b->cob);
             $deposit = 0;
             $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
         } else {

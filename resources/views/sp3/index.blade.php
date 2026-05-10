@@ -72,8 +72,8 @@
                                         {{-- <a href="{{ route('student/grid') }}" class="btn btn-outline-gray me-2">
                                             <i class="fa fa-th" aria-hidden="true"></i>
                                         </a> --}}
-                                        <a href="#" class="btn btn-outline-primary me-2"><i
-                                                class="fas fa-download"></i> Download</a>
+                                        {{-- <a href="#" class="btn btn-outline-primary me-2"><i
+                                                class="fas fa-download"></i> Download</a> --}}
                                         <div class="btn btn-group">
                                             <button type="button" class="btn btn-primary dropdown-toggle"
                                                 data-bs-toggle="dropdown" aria-expanded="false">

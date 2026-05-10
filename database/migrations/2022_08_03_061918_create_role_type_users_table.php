@@ -27,10 +27,6 @@ class CreateRoleTypeUsersTable extends Migration
             ['role_type' => 'Pengawas Verifikator'],
             ['role_type' => 'Wakil Direktur'],
             ['role_type' => 'Keuangan Admin'],
-            ['role_type' => 'Teachers'],
-            ['role_type' => 'Student'],
-            ['role_type' => 'Staff'],
-            ['role_type' => 'Client'],
         ]);
     }
 
