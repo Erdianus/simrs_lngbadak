@@ -20,7 +20,6 @@ use Illuminate\Http\Request;
 class Sp3Controller extends Controller
 {
     private $kode_poli = [
-        'MCU01',
         'RJ002',
         'RJ004',
         'RJ006',
@@ -32,7 +31,6 @@ class Sp3Controller extends Controller
         'RJ018',
         'FIS01',
         'RIN01',
-        'LAB01',
         'ADM02',
         'HC',
         'RJ021',
@@ -79,7 +77,7 @@ class Sp3Controller extends Controller
         $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
         $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
         $layanan = Layanan::select(['id', 'nama'])->get();
-        return view('sp3.create', compact('kode_tagihan', 'eselon', 'layanan'));
+        return view('sp3.billing.create', compact('kode_tagihan', 'eselon', 'layanan'));
     }
 
     public function createSp3Deposit()
@@ -96,13 +94,27 @@ class Sp3Controller extends Controller
         $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
         $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
         $layanan = Layanan::select(['id', 'nama'])->get();
-        return view('sp3.create-sp3-tagihan-keluar', compact('kode_tagihan', 'eselon', 'layanan'));
+        return view('sp3.tagihan-keluar.create-sp3-tagihan-keluar', compact('kode_tagihan', 'eselon', 'layanan'));
+    }
+
+    public function createSp3Mcu()
+    {
+        $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
+        $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
+        $layanan = Layanan::select(['id', 'nama'])->get();
+        return view('sp3.mcu.create-sp3-mcu', compact('kode_tagihan', 'eselon', 'layanan'));
     }
 
     public function listAddDepositSp3($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
         return view('sp3.deposito.adding-deposit-sp3', compact('sp3'));
+    }
+
+    public function listAddMcuSp3($slug)
+    {
+        $sp3 = Sp3::where('slug', $slug)->first();
+        return view('sp3.mcu.adding-mcu-sp3', compact('sp3'));
     }
 
     public function store(Sp3Request $request)
@@ -162,8 +174,8 @@ class Sp3Controller extends Controller
             })
             ->flatten()
             ->unique('reg_no');
-        // dd($getDataReg);
         $billing = $getDataReg->unique('reg_no');
+        dd($billing);
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
@@ -205,6 +217,20 @@ class Sp3Controller extends Controller
         }
     }
 
+    public function storeSp3Mcu(Sp3Request $request)
+    {
+        $validated = $request->validated();
+        $createSp3 = Sp3Service::createSp3($validated);
+        if ($createSp3['status'] === 'success') {
+            $sp3 = $createSp3['data'];
+            Toastr::success('Berhasil Menambahkan SP3 :)', 'Success');
+            return redirect()->route('sp3/add/page/list-mcu', $sp3->slug);
+        } else {
+            Toastr::error($createSp3['message'], 'Error');
+            return redirect()->back();
+        }
+    }
+
     public function edit($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
@@ -212,7 +238,7 @@ class Sp3Controller extends Controller
         $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
         $layanan = Layanan::select(['id', 'nama'])->get();
         // dd($sp3);
-        return view('sp3.edit', compact('kode_tagihan', 'eselon', 'layanan', 'sp3'));
+        return view('sp3.billing.edit', compact('kode_tagihan', 'eselon', 'layanan', 'sp3'));
     }
 
     public function update(Sp3Request $request, $slug)
@@ -265,7 +291,7 @@ class Sp3Controller extends Controller
             })
             ->flatten()
             ->unique('reg_no');
-        // dd($getDataReg);
+        $getDataReg = $getDataReg->unique('reg_no');
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
@@ -284,16 +310,40 @@ class Sp3Controller extends Controller
     {
         $validated = $request->validated();
         $updateSp3 = Sp3Service::updateSp3TagihanKeluar($validated, $slug);
-        if ($updateSp3 === true) {
+        if ($updateSp3 === 'success') {
             Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
             return redirect()->route('sp3-verifikasi/list');
         } else {
-            Toastr::error($updateSp3, 'Error');
+            Toastr::error($updateSp3['message'], 'Error');
             return redirect()->back();
         }
     }
 
+    public function updateDeposito(Sp3Request $request, $slug)
+    {
+        $validated = $request->validated();
+        $updateSp3 = Sp3Service::updateSp3Deposito($validated, $slug);
+        if ($updateSp3['status'] === 'success') {
+            Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
+            return redirect()->route('sp3-verifikasi/list');
+        } else {
+            Toastr::error($updateSp3['message'], 'Error');
+            return redirect()->back();
+        }
+    }
 
+    public function updateMcu(Sp3Request $request, $slug)
+    {
+        $validated = $request->validated();
+        $updateSp3 = Sp3Service::updateSp3Deposito($validated, $slug);
+        if ($updateSp3['status'] === 'success') {
+            Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
+            return redirect()->route('sp3-verifikasi/list');
+        } else {
+            Toastr::error($updateSp3['message'], 'Error');
+            return redirect()->back();
+        }
+    }
 
     public function updateDataBilling($slug)
     {
@@ -369,7 +419,7 @@ class Sp3Controller extends Controller
     public function listBillSp3($sp3_slug)
     {
         $sp3 = Sp3::where('slug', $sp3_slug)->first();
-        return view('sp3.detail-list-bill', compact('sp3'));
+        return view('sp3.billing.detail-list-bill', compact('sp3'));
     }
 
     public function approveSp3($slug)
@@ -431,12 +481,27 @@ class Sp3Controller extends Controller
     public function previewSp3($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
-
+        if ($sp3->jenis_sp3 === 'billing') {
+            $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon);
+            $deposit = $sp3->billings->sum(fn($b) => $b->deposit);
+            $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
+        } else if ($sp3->jenis_sp3 === 'deposito') {
+            $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
+            $deposit = 0;
+            $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
+        } else {
+            $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
+            $deposit = 0;
+            $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
+        }
         $data = [
+            'jenis_sp3' => $sp3->jenis_sp3,
             'nomor' => $sp3->no_surat_sp3,
             'tanggal' => \Carbon\Carbon::parse($sp3->tgl_sp3)->translatedFormat('d F Y'),
             'pasien' => $sp3->eselon->deskripsi,
-            'tagihan' => $sp3->total_biaya ?? $sp3->total_tagihan,
+            'tagihan' => $tagihan,
+            'deposit' => $deposit,
+            'jumlah_pembayaran' => $jumlah_pembayaran,
             'kunjungan' => $sp3->total_kunjungan,
             'hal' => $sp3->perihalTagihan->hal,
             'ket_pembayaran' => $sp3->ket_pembayaran,
@@ -556,10 +621,13 @@ class Sp3Controller extends Controller
                         <a href="' . url('sp3/detail/' . $record->slug) . '" class="btn btn-sm bg-success-light">
                             <i class="far fa-eye me-2"></i>
                         </a>
+                        ' . ($record->is_approved_by_verifikator != true ? '
                         <a href="' . url('sp3/edit/' . $record->slug) . '" class="btn btn-sm bg-danger-light">
                             <i class="far fa-edit me-2"></i>
-                        </a>
-                        ' . ($record->is_approved_by_verifikator != true ? '
+                        </a> 
+                        <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
+                        <i class="fe fe-trash-2"></i>
+                        </a>' : '') . ($record->is_approved_by_verifikator != true ? '
                         <a href="#" class="btn btn-sm bg-success-light btn-approve" data-url="' . url('/sp3/approve/' . $record->slug) . '">
                             <i class="fa fa-check me-2"></i>
                         </a>' : '<a href="#" 
@@ -567,9 +635,6 @@ class Sp3Controller extends Controller
                                 class="btn btn-sm bg-success-light btn-unapprove">
                                     <i class="fa fa-times me-2"></i>
                             </a>') . '
-                        <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
-                        <i class="fe fe-trash-2"></i>
-                        </a>
                         ' . ($record->is_approved_by_verifikator == true ? '
                         <a href="' . url('/sp3/' . $record->slug . '/preview') . '" class="btn btn-sm bg-success-light">
                             <i class="fa fa-print me-2"></i>
@@ -580,9 +645,9 @@ class Sp3Controller extends Controller
             // dd($record);
             $data_arr[] = [
                 "no_sp3"         => $record->no_surat_sp3 ?? '-',
-                "tgl_sp3"     => $record->tgl_sp3,
+                "tgl_sp3"     => \Carbon\Carbon::parse($record->tgl_sp3)->translatedFormat('d M Y'),
                 "nomor_tagihan"    => $record->nomor_tagihan,
-                "tgl_terima_keu"    => $record->tgl_terima_keu,
+                "tgl_terima_keu"    => \Carbon\Carbon::parse($record->tgl_terima_keu)->translatedFormat('d M Y'),
                 "perihal_tagihan"    => $record->perihalTagihan->kode,
                 "ket_inv_pasien"    => $record->ket_inv_pasien,
                 "ket_inv_rs"    => $record->ket_inv_rs,
@@ -591,9 +656,9 @@ class Sp3Controller extends Controller
                 "jumlah_kunjungan"    => $record->kunjungan ?? $record->total_kunjungan,
                 "ket_pembayaran"    => $record->ket_pembayaran,
                 "layanan"    => $record->layanan->nama,
-                "tgl_berobat"     => $record->tgl_masuk && $record->tgl_keluar ? \Carbon\Carbon::parse($record->tgl_masuk)->translatedFormat('d F Y')
-                    . ' - ' . \Carbon\Carbon::parse($record->tgl_keluar)->translatedFormat('d F Y') : null,
-                "total_biaya"    => 'Rp ' . number_format($record->total_biaya ?? $record->total_tagihan, 0, ',', '.'),
+                "tgl_berobat"     => $record->tgl_masuk && $record->tgl_keluar ? \Carbon\Carbon::parse($record->tgl_masuk)->translatedFormat('d M Y')
+                    . ' - ' . \Carbon\Carbon::parse($record->tgl_keluar)->translatedFormat('d M Y') : null,
+                "total_biaya"    => 'Rp ' . number_format($record->jenis_sp3 === 'tagihan keluar' ? $record->total_tagihan : $record->total_biaya, 0, ',', '.'),
                 "status"         => $status,
                 "modify"         => $modify,
             ];
@@ -673,7 +738,7 @@ class Sp3Controller extends Controller
                 "no_reg"         => $record->no_reg,
                 "nama"         => $record->registrasi->nama ?? '-',
                 "jumlah_deposit"     => 'Rp ' . number_format($record->jumlah_deposit, 0, ',', '.'),
-                "update_date"    => \Carbon\Carbon::parse($record->update_date)->translatedFormat('d F Y'),
+                "update_date"    => \Carbon\Carbon::parse($record->update_date)->translatedFormat('d M Y'),
                 // "no_deposit"    => $record->no_deposit,
                 // "cara_bayar"    => $record->cara_bayar,
                 "keterangan"    => $record->keterangan,

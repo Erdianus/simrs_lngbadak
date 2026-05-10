@@ -9,6 +9,7 @@ use App\Http\Controllers\EslonController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\McuController;
 use App\Http\Controllers\Setting;
 use App\Http\Controllers\Sp3Controller;
 use App\Http\Controllers\StudentController;
@@ -119,32 +120,40 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
     // ------------------------ sp3 -------------------------------//
     Route::controller(Sp3Controller::class)->group(function () {
+        //sp3 verifikasi
         Route::get('sp3-verifikasi/list', 'index')->middleware('auth')->name('sp3-verifikasi/list'); // list sp3
-        Route::get('sp3-keuangan/list', 'index')->middleware('auth')->name('sp3-keuangan/list'); // list sp3
         Route::get('sp3/add/page', 'create')->middleware('auth')->name('sp3/add/page'); // page sp3
         Route::get('sp3/add/page-tagihan-keluar', 'createSp3TagihanKeluar')->middleware('auth')->name('sp3/add/page/tagihan-keluar'); // page sp3
         Route::get('sp3/add/page-deposit', 'createSp3Deposit')->middleware('auth')->name('sp3/add/page/deposit'); // page sp3
         Route::get('sp3/add/page-deposit/{slug}', 'listAddDepositSp3')->middleware('auth')->name('sp3/add/page/list-deposit'); // page sp3
+        Route::get('sp3/add/page-mcu', 'createSp3Mcu')->middleware('auth')->name('sp3/add/page/mcu'); // page sp3
+        Route::get('sp3/add/page-mcu/{slug}', 'listAddMcuSp3')->middleware('auth')->name('sp3/add/page/list-mcu'); // page sp3
         Route::post('sp3/add/save', 'store')->middleware('auth')->name('sp3/add/save'); // save record sp3
         Route::post('sp3/add/save/tagihan-keluar', 'storeSp3TagihanKeluar')->middleware('auth')->name('sp3/add/save/tagihan-keluar'); // save record sp3
         Route::post('sp3/add/save/deposit', 'storeSp3Deposito')->middleware('auth')->name('sp3/add/save/deposit'); // save record sp3
+        Route::post('sp3/add/save/mcu', 'storeSp3Mcu')->middleware('auth')->name('sp3/add/save/mcu'); // save record sp3
         Route::get('sp3/edit/{slug}', 'edit')->middleware('auth'); // view for edit
         Route::get('sp3/refresh/{slug}', 'updateDataBilling')->middleware('auth')->name('sp3/refresh'); // update record sp3
         Route::post('sp3/update/{slug}', 'update')->middleware('auth')->name('sp3/update'); // update record sp3
         Route::post('sp3/update/tagihan-keluar/{slug}', 'updateTagihanKeluar')->middleware('auth')->name('sp3/update/tagihan-keluar'); // update record sp3
         Route::post('sp3/update/deposito/{slug}', 'updateDeposito')->middleware('auth')->name('sp3/update/deposito'); // update record sp3
+        Route::post('sp3/update/mcu/{slug}', 'updateMcu')->middleware('auth')->name('sp3/update/mcu'); // update record sp3
         Route::get('sp3/detail/{slug}', 'listBillSp3')->middleware('auth')->name('sp3/detail'); // view for edit
         Route::post('sp3/delete', 'destroy')->middleware('auth')->name('sp3/delete'); // delete record sp3
         Route::get('sp3/approve/{slug}', 'approveSp3')->middleware('auth'); // view for edit
         Route::get('sp3/unapprove/{slug}', 'unapproveSp3')->middleware('auth'); // view for edit
         Route::get('get-sp3-verifikasi-data', 'getSp3VerifikasiData')->middleware('auth')->name('get-sp3-verifikasi-data'); // get data sp3
-        Route::get('get-sp3-keuangan-data', 'getSp3KeuanganData')->middleware('auth')->name('get-sp3-keuangan-data'); // get data sp3
         Route::get('get-deposit-data', 'getDepositData')->middleware('auth')->name('get-deposit-data'); // get data sp3
         Route::get('/sp3/{slug}/preview', 'previewSp3')->middleware('auth')->name('preview/pdf');
+
+        //sp3 Keuangan
+        Route::get('sp3-keuangan/list', 'index')->middleware('auth')->name('sp3-keuangan/list'); // list sp3
+        Route::get('get-sp3-keuangan-data', 'getSp3KeuanganData')->middleware('auth')->name('get-sp3-keuangan-data'); // get data sp3
     });
 
     // ------------------------ billing -------------------------------//
     Route::controller(BillingController::class)->group(function () {
+        Route::post('billing/save/cob', 'addCob')->middleware('auth')->name('billing/add/save/cob'); //add cob billing
         Route::get('billing/approve/{slug}', 'approveBill')->middleware('auth'); // view for edit
         Route::get('billing/unapprove/{slug}', 'unapproveBill')->middleware('auth')->name('billing/unapprove'); // view for edit
         Route::get('billing-verifikasi/list', 'index')->middleware('auth')->name('billing-verifikasi/list'); // list billing
@@ -155,10 +164,18 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::post('billing/update/{slug}', 'update')->middleware('auth')->name('billing/update'); // update record billing
         Route::post('billing/delete', 'destroy')->middleware('auth')->name('billing/delete'); // delete record billing
         Route::get('billing/{slugSp3}/{noReg}', 'storeDeposit')->middleware('auth')->name('billing/store-deposit'); // store deposit billing sp3
+        Route::get('billing/mcu/{slugSp3}/{noReg}', 'storeMcu')->middleware('auth')->name('billing/store-mcu'); // store deposit billing sp3
         Route::get('get-billings-verifikasi-data', 'getBillingsVerifikasiData')->middleware('auth')->name('get-billings-verifikasi-data'); // get data billings
         Route::get('get-billings-billings-sp3/{slug}', 'getBillingsSp3Data')->middleware('auth')->name('get-billings-sp3-data'); // get data billings
         Route::get('detail-billing/{slug}', 'listTindakanBill')->middleware('auth')->name('detail-billing'); // get data billings
     });
+
+    // ------------------------ MCU -------------------------------//
+    Route::controller(McuController::class)->group(function () {
+        Route::get('get-mcu-data', 'getRegMcuData')->middleware('auth')->name('get-mcu-data'); // get data sp3
+    });
+
+
 
 
     // ------------------------ eselon -------------------------------//

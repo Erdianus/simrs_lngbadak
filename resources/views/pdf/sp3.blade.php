@@ -144,17 +144,21 @@
             </tr>
             <tr>
                 <td>TAGIHAN PASIEN</td>
-                <td>: Rp {{ number_format($data['tagihan'], 0, ',', '.') }}</td>
+                <td>: Rp
+                    {{ number_format($data['tagihan'], 0, ',', '.') }}
+                </td>
                 <td class="text-right">{{ $data['kunjungan'] }} PASIEN, {{ $data['kunjungan'] }} Kunjungan</td>
             </tr>
             <tr>
                 <td>BEBAN PIHAK KE 3</td>
-                <td>: Rp 0</td>
+                <td>: Rp
+                    {{ number_format($data['deposit'], 0, ',', '.') }}
+                </td>
             </tr>
             <tr style="background: #bfbcbc">
                 <td><b>JUMLAH PEMBAYARAN</b></td>
                 <td class="text-left">
-                    : <b>Rp {{ number_format($data['tagihan'], 0, ',', '.') }}</b>
+                    : <b>Rp {{ number_format($data['jumlah_pembayaran'], 0, ',', '.') }}</b>
                 </td>
             </tr>
         </table>
@@ -201,94 +205,8 @@
         <br><br>
         <table class="medium">
             <tr>
-                <td class="underline">DISPOSISI</td>
-                <td>Selisih Biaya</td>
-                <td>:</td>
-                <td>Ada</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Tagihan Semula (Rp.)</td>
-                <td>:</td>
-                <td>{{ number_format($data['tagihan'], 0, ',', '.') }},-</td>
-                <td></td>
-                <td>Dibayarkan (Rp):</td>
-                <td class="text-right">0,00,-</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Tidak Ditanggung (Rp.)</td>
-                <td>:</td>
-                <td>0,00,-</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Item Tidak Ditanggung</td>
-                <td>:</td>
-                <td>0,-</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Karena</td>
-                <td>:</td>
-                <td>-</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Mohon Ditagihkan ke</td>
-                <td>:</td>
-                <td>-</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Sebesar (Rp)</td>
-                <td>:</td>
-                <td>-</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Karena</td>
-                <td>:</td>
-                <td>-</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Keterangan</td>
-                <td>:</td>
-                <td>-</td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <b class = "underline">Note:</b>
+                <p></p>
             </tr>
         </table>
         <br><br>

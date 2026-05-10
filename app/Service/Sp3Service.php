@@ -123,8 +123,7 @@ class Sp3Service
             if ($sp3->billings()->count() > 0) {
                 BillingService::deleteBilling($sp3->id);
             }
-            BillingService::createBilling($getDataReg, $sp3, $eselon);
-
+            $createBill = BillingService::createBilling($getDataReg, $sp3, $eselon);
             DB::commit();
             return true;
         } catch (\Throwable $th) {
@@ -134,6 +133,86 @@ class Sp3Service
     }
 
     public static function updateSp3TagihanKeluar($data, $slug)
+    {
+        DB::beginTransaction();
+        try {
+            $sp3 = Sp3::where('slug', $slug)->first();
+            $sp3->update([
+                'jenis_sp3' => $data['jenis_sp3'],
+                'tgl_sp3' => $data['tgl_sp3'],
+                'jenis_surat' => $data['jenis_surat'],
+                'nomor_tagihan' => $data['nomor_tagihan'],
+                'tgl_terima_keu' => $data['tgl_terima_keu'],
+                'perihal_tagihan_id' => $data['perihal_tagihan_id'],
+                'ket_inv_pasien' => $data['ket_inv_pasien'],
+                'ket_inv_rs' => $data['ket_inv_rs'],
+                'eslon_id' => $data['eslon_id'],
+                'ket_pembayaran' => $data['ket_pembayaran'],
+                'layanan_id' => $data['layanan_id'],
+                'kota' => $data['kota'],
+                'nama_rs' => $data['nama_rs'],
+                'dokter_rujukan' => $data['dokter_rujukan'] ?? null,
+                'kunjungan' => $data['kunjungan'] ?? null,
+                'pasien' => $data['pasien'] ?? null,
+                'tgl_masuk' => $data['tgl_masuk'],
+                'tgl_keluar' => $data['tgl_keluar'],
+                'total_tagihan' => $data['total_tagihan'] ?? 0,
+            ]);
+            Log::info('SP3 updated: ' . $sp3->id);
+            DB::commit();
+            return [
+                'status' => 'success'
+            ];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => 'failed',
+                'message' => $th->getMessage()
+            ];
+        }
+    }
+
+    public static function updateSp3Deposito($data, $slug)
+    {
+        DB::beginTransaction();
+        try {
+            $sp3 = Sp3::where('slug', $slug)->first();
+            $sp3->update([
+                'jenis_sp3' => $data['jenis_sp3'],
+                'tgl_sp3' => $data['tgl_sp3'],
+                'jenis_surat' => $data['jenis_surat'],
+                'nomor_tagihan' => $data['nomor_tagihan'],
+                'tgl_terima_keu' => $data['tgl_terima_keu'],
+                'perihal_tagihan_id' => $data['perihal_tagihan_id'],
+                'ket_inv_pasien' => $data['ket_inv_pasien'],
+                'ket_inv_rs' => $data['ket_inv_rs'],
+                'eslon_id' => $data['eslon_id'],
+                'ket_pembayaran' => $data['ket_pembayaran'],
+                'layanan_id' => $data['layanan_id'],
+                'kota' => $data['kota'],
+                'nama_rs' => $data['nama_rs'],
+                'dokter_rujukan' => $data['dokter_rujukan'] ?? null,
+                'kunjungan' => $data['kunjungan'] ?? null,
+                'pasien' => $data['pasien'] ?? null,
+                'tgl_masuk' => $data['tgl_masuk'],
+                'tgl_keluar' => $data['tgl_keluar'],
+                'total_tagihan' => $data['total_tagihan'] ?? 0,
+            ]);
+            Log::info('SP3 updated: ' . $sp3->id);
+            DB::commit();
+            return [
+                'status' => 'success'
+            ];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => 'failed',
+                'message' => $th->getMessage()
+            ];
+        }
+    }
+
+    public static function updateSp3Mcu($data, $slug)
     {
         DB::beginTransaction();
         try {

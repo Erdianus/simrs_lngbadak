@@ -15,7 +15,10 @@ class LayananSeeder extends Seeder
         $layanans = [
             ['nama' => 'Rawat Inap'],
             ['nama' => 'Rawat Jalan'],
-            ['nama' => 'IGD'],
+            ['nama' => 'MCU'],
+            ['nama' => 'DCU'],
+            ['nama' => 'SKD'],
+            ['nama' => 'Pemeriksaan Narkoba'],
         ];
 
         foreach ($layanans as $layanan) {

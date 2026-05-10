@@ -10,6 +10,7 @@ use App\Models\Layanan;
 use App\Models\Simrs\DepositKamarSimrs;
 use App\Models\Simrs\KipKirimanSimrs;
 use App\Models\Simrs\ReferensiAdmSimrs;
+use App\Models\Simrs\RegMultiPoliSimrs;
 use App\Models\Simrs\TindakanSimrs;
 use App\Models\Simrs\TransaksiAlkesSimrs;
 use App\Models\Simrs\TransaksiEmbalaceSimrs;
@@ -44,6 +45,7 @@ class BillingController extends Controller
     public function listTindakanBill($bill)
     {
         $billing = Billing::where('no_registrasi', $bill)->first();
+        // dd($billing);
         $tindakan = TindakanSimrs::select(['reg_no', 'jumlah', 'discount', 'payment', 'tindakan_id', 'tindakan_biaya'])
             ->where('reg_no', $billing->no_registrasi)
             ->where('payment', NULL)
@@ -126,6 +128,30 @@ class BillingController extends Controller
         ]);
     }
 
+    public function storeMcu($slugSp3, $noReg)
+    {
+        $deposit = RegMultiPoliSimrs::where('reg_no', $noReg)->first();
+        $sp3 = Sp3::with('billings')->where('slug', $slugSp3)->first();
+        $billSp3 = $sp3->billings()->where('no_registrasi', $noReg)->first();
+        if (!is_null($billSp3)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Billing sudah diinputkan.'
+            ]);
+        }
+        $createBillMcu = BillingService::createBillMcu($sp3, $deposit);
+        if ($createBillMcu['status'] === 'success') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Billing berhasil ditambahkan.'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => $createBillMcu['message']
+        ]);
+    }
+
     public function edit($slug)
     {
         $billing = Billing::where('slug', $slug)->first();
@@ -184,6 +210,21 @@ class BillingController extends Controller
             'success' => false,
             'message' => 'Gagal Unapprove Billing. Silakan coba lagi.'
         ]);
+    }
+
+    public function addCob(Request $request)
+    {
+        $validated = $request->validate([
+            'total_cob' => 'required|numeric|min:0',
+            'slug' => 'required|string',
+        ]);
+        $result = BillingService::addCob($validated);
+        if ($result['status'] === 'success') {
+            Toastr::success('COB berhasil ditambahkan', 'Success');
+            return redirect()->back();
+        }
+        Toastr::error($result['message'], 'Error');
+        return redirect()->back();
     }
 
     public function getBillingsSp3Data(Request $request, $sp3_slug)
@@ -267,10 +308,13 @@ class BillingController extends Controller
                             class="btn btn-sm bg-success-light btn-unapprove">
                                 <i class="fa fa-times me-2"></i>
                         </a>') . '
-                        <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
+                        <a class="btn btn-sm bg-danger-light delete" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
                         <i class="fe fe-trash-2"></i>
                         </a>
-                    </div>
+                        <a class="btn btn-sm bg-primary-light cob" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#cob">
+                        <i class="fe fe-plus"></i>
+                        </a>
+                        </div>
                 </td>
             ';
 
@@ -280,7 +324,7 @@ class BillingController extends Controller
                 "nama_pasien"    => $record->nama_pasien ?? 'N/A',
                 "eslon"    => $record->eselon->deskripsi ?? 'N/A',
                 "total_biaya_eselon"    => 'Rp ' . number_format($record->biaya ?? $record->total_biaya_eselon, 0, ',', '.'),
-                "total_biaya_kas"    => 'Rp ' . number_format($record->total_biaya_kas, 0, ',', '.'),
+                "cob"    => 'Rp ' . number_format($record->cob, 0, ',', '.'),
                 "deposit"    => 'Rp ' . number_format($record->deposit, 0, ',', '.'),
                 "is_verified_by_verifikator"  => $record->is_verified_by_verifikator,
                 "status" => $status,

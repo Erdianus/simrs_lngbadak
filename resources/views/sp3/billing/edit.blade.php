@@ -27,13 +27,14 @@
                                     'billing' => route('sp3/update', $sp3->slug),
                                     'tagihan keluar' => route('sp3/update/tagihan-keluar', $sp3->slug),
                                     'deposito' => route('sp3/update/deposito', $sp3->slug),
+                                    'mcu' => route('sp3/update/mcu', $sp3->slug),
                                 };
                             @endphp
                             <form action="{{ $action }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-12">
-                                        <h5 class="form-title student-info">Form Edit SP3
+                                        <h5 class="form-title student-info">Form Edit SP3 {{ ucwords($sp3->jenis_sp3) }}
                                         </h5>
                                     </div>
                                     <input type="hidden" name="jenis_sp3" value="{{ $sp3->jenis_sp3 }}">

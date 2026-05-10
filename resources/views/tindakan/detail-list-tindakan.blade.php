@@ -1,5 +1,6 @@
 @extends('layouts.master')
 @section('content')
+    {{-- {{ dd($billing) }} --}}
     <div class="page-wrapper">
         <div class="content container-fluid">
             <div class="page-header">
@@ -67,7 +68,7 @@
                                             <tr>
                                                 <td><b>Tanggal Registrasi</b></td>
                                                 <td>:
-                                                    {{ \Carbon\Carbon::parse($billing->tgl_masuk)->translatedFormat('d F Y') }}
+                                                    {{ \Carbon\Carbon::parse($billing->tanggal_masuk)->translatedFormat('d F Y') }}
                                                 </td>
                                             </tr>
                                             <tr>

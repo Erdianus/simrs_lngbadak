@@ -71,7 +71,7 @@
                 <div class="col-sm-12">
                     <div class="card comman-shadow">
                         <div class="card-body">
-                            <h4 class="card-title">List Deposit Bill Sp3</h4>
+                            <h4 class="card-title">List MCU Bill Sp3</h4>
                             <div class="table-responsive">
                                 <table class="table table-stripped table table-hover table-center mb-0" id="BillingSp3List">
                                     <thead class="student-thread">
@@ -96,16 +96,18 @@
                 <div class="col-sm-12">
                     <div class="card comman-shadow">
                         <div class="card-body">
-                            <h4 class="card-title">List Deposit</h4>
+                            <h4 class="card-title">List MCU</h4>
                             <div class="table-responsive">
-                                <table class="table table-stripped table table-hover table-center mb-0" id="DepositList">
+                                <table class="table table-stripped table table-hover table-center mb-0" id="McuList">
                                     <thead class="student-thread">
                                         <tr>
                                             <th>No Reg</th>
                                             <th>Nama Pasien</th>
-                                            <th>Updated Date</th>
-                                            <th>Keterangan</th>
+                                            <th>Eselon</th>
+                                            <th>Tanggal Registrasi</th>
+                                            <th>Total Biaya Eselon</th>
                                             <th>Jumlah Deposit</th>
+                                            <th>Keterangan</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
@@ -130,14 +132,14 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="form-header">
-                        <h3>Delete Deposit Sp3</h3>
+                        <h3>Delete MCU Sp3</h3>
                         <p>Are you sure want to delete?</p>
                     </div>
                     <div class="modal-btn delete-action">
                         <div class="row">
                             <form action="{{ route('billing/delete') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="slug" class="e_slug" value="">
+                                <input type="hidden" name="slug" class="e_slug" value="" id='slug-delete'>
                                 <div class="row">
                                     <div class="col-6">
                                         <button type="submit" class="btn btn-primary paid-continue-btn"
@@ -165,9 +167,13 @@
 @endsection
 @section('script')
     <script>
-        $(document).on('click', '.delete', function() {
-            var _this = $(this).parents('tr');
-            $('.e_slug').val(_this.find('.slug').data('slug'));
+        $('#delete').on('show.bs.modal', function(e) {
+            console.log('relatedTarget:', e.relatedTarget);
+            console.log('button data:', $(e.relatedTarget).data());
+            var button = $(e.relatedTarget); // tombol yang diklik
+            var slug = button.data('slug');
+            console.log('slug:', slug); // pastikan muncul
+            $(this).find('#slug-delete').val(slug);
         });
     </script>
 
@@ -175,36 +181,44 @@
     {{-- get all deposit js --}}
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#DepositList').DataTable({
+            $('#McuList').DataTable({
                 processing: true,
                 serverSide: true,
                 ordering: true,
                 searching: true,
                 ajax: {
-                    url: "{{ route('get-deposit-data') }}",
+                    url: "{{ route('get-mcu-data') }}",
                     data: function(d) {
                         d.sp3_slug = "{{ $sp3->slug }}"; // kirim slug via request
                     }
                 },
                 columns: [{
-                        data: 'no_reg',
-                        name: 'no_reg',
+                        data: 'no_registrasi',
+                        name: 'no_registrasi',
                     },
                     {
-                        data: 'nama',
-                        name: 'nama',
+                        data: 'nama_pasien',
+                        name: 'nama_pasien',
                     },
                     {
-                        data: 'update_date',
-                        name: 'update_date'
+                        data: 'eselon',
+                        name: 'eselon'
+                    },
+                    {
+                        data: 'tanggal_registrasi',
+                        name: 'tanggal_registrasi'
+                    },
+                    {
+                        data: 'total_biaya_eselon',
+                        name: 'total_biaya_eselon'
+                    },
+                    {
+                        data: 'deposit',
+                        name: 'deposit'
                     },
                     {
                         data: 'keterangan',
                         name: 'keterangan'
-                    },
-                    {
-                        data: 'jumlah_deposit',
-                        name: 'jumlah_deposit'
                     },
                     {
                         data: 'modify',
@@ -266,8 +280,8 @@
     </script>
 
     <script>
-        // Handle tombol tambah deposit
-        $(document).on('click', '.btn-add-deposit', function(e) {
+        // Handle tombol tambah mcu
+        $(document).on('click', '.btn-add-mcu', function(e) {
             e.preventDefault();
             const url = $(this).data('url');
             const btn = $(this);
@@ -285,7 +299,7 @@
                         toastr.success(response.message ?? 'Deposit berhasil ditambahkan.');
                         // Reload kedua DataTable tanpa full page reload
                         $('#BillingSp3List').DataTable().ajax.reload(null, false);
-                        $('#DepositList').DataTable().ajax.reload(null, false);
+                        $('#McuList').DataTable().ajax.reload(null, false);
                     } else {
                         toastr.error(response.message ?? 'Gagal menambahkan deposit.');
                     }

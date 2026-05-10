@@ -32,8 +32,7 @@
                 @if (Session::get('role_name') === 'verifikator' ||
                         Session::get('role_name') === 'Super Admin' ||
                         Session::get('role_name') === 'Admin')
-                    <li
-                        class="submenu {{ set_active(['list/users']) }} {{ request()->is('view/user/edit/*') ? 'active' : '' }}">
+                    <li class="submenu {{ set_active(['sp3*']) }} {{ request()->is('sp3/*') ? 'active' : '' }}">
                         <a href="#">
                             <i class="fas fa-shield-alt"></i>
                             <span>Unit Verifikasi</span>
@@ -42,7 +41,7 @@
                         <ul>
                             {{-- <li><a href="{{ route('billing-verifikasi/list') }}" class="{{set_active(['billing-verifikasi/list'])}} {{ (request()->is('billing/edit/*')) ? 'active' : '' }}">List Billing</a></li> --}}
                             <li><a href="{{ route('sp3-verifikasi/list') }}"
-                                    class="{{ set_active(['sp3-verifikasi/list']) }} {{ request()->is('sp3/edit/*') ? 'active' : '' }}">List
+                                    class="{{ set_active(['sp3*']) }} {{ request()->is('sp3*') ? 'active' : '' }}">List
                                     SP3</a></li>
                         </ul>
                     </li>
@@ -50,8 +49,7 @@
                 @if (Session::get('role_name') === 'keuangan' ||
                         Session::get('role_name') === 'Super Admin' ||
                         Session::get('role_name') === 'Admin')
-                    <li
-                        class="submenu {{ set_active(['list/users']) }} {{ request()->is('view/user/edit/*') ? 'active' : '' }}">
+                    <li class="submenu">
                         <a href="#">
                             <i class="fas fa-money-bill"></i>
                             <span>Unit Keuangan</span>

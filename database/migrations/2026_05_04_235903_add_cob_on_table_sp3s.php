@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sp3s', function (Blueprint $table) {
-            $table->integer('cob')->nullable();
             $table->string('jenis_sp3')->nullable();
             $table->integer('kunjungan')->nullable();
             $table->integer('pasien')->nullable();
         });
 
         Schema::table('billings', function (Blueprint $table) {
+            $table->integer('cob')->nullable();
             $table->string('no_rm')->nullable();
             $table->integer('biaya')->nullable();
         });
@@ -30,11 +30,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sp3s', function (Blueprint $table) {
-            $table->dropColumn(['cob', 'jenis_sp3', 'kunjungan', 'pasien']);
+            $table->dropColumn(['jenis_sp3', 'kunjungan', 'pasien']);
         });
 
         Schema::table('billings', function (Blueprint $table) {
-            $table->dropColumn(['no_rm', 'biaya']);
+            $table->dropColumn(['cob', 'no_rm', 'biaya']);
         });
     }
 };

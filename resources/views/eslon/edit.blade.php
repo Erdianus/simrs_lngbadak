@@ -1,4 +1,3 @@
-
 @extends('layouts.master')
 @section('content')
     <div class="page-wrapper">
@@ -17,20 +16,22 @@
                     </div>
                 </div>
             </div>
-            {{-- message --}}
             {!! Toastr::message() !!}
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card comman-shadow">
                         <div class="card-body">
-                            <form action="{{ route('eselon/update',$eselon->slug) }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('eselon/update', $eselon->slug) }}" method="POST"
+                                enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" class="form-control" name="slug" value="{{ $eselon->slug }}" readonly>
+                                <input type="hidden" class="form-control" name="slug" value="{{ $eselon->slug }}"
+                                    readonly>
                                 <div class="row">
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Nama <span class="login-danger">*</span></label>
-                                            <input type="text" class="form-control @error('nama') is-invalid @enderror" name="nama" value="{{ $eselon->nama }}">
+                                            <input type="text" class="form-control @error('nama') is-invalid @enderror"
+                                                name="nama" value="{{ $eselon->nama }}">
                                             @error('nama')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -41,7 +42,9 @@
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Deskripsi <span class="login-danger">*</span></label>
-                                            <input type="text" class="form-control @error('deskripsi') is-invalid @enderror" name="deskripsi" value="{{ $eselon->deskripsi }}">
+                                            <input type="text"
+                                                class="form-control @error('deskripsi') is-invalid @enderror"
+                                                name="deskripsi" value="{{ $eselon->deskripsi }}">
                                             @error('deskripsi')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>

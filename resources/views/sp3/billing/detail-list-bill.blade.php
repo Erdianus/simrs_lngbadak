@@ -57,7 +57,7 @@
                                             <tr>
                                                 <td><b>Total Tagihan</b></td>
                                                 <td>:
-                                                    {{ 'Rp ' . number_format($sp3->total_biaya ?? $sp3->total_tagihan, 0, ',', '.') }}
+                                                    {{ 'Rp ' . number_format($sp3->jenis_sp3 === 'tagihan keluar' ? $sp3->total_tagihan : $sp3->total_biaya, 0, ',', '.') }}
                                                 </td>
                                             </tr>
                                         </table>
@@ -78,10 +78,22 @@
                                         <h3 class="page-title">Billing</h3>
                                     </div>
                                     <div class="col-auto text-end float-end ms-auto download-grp">
-                                        <a href="{{ route('sp3/refresh', $sp3->slug) }}"
-                                            class="btn btn-outline-gray me-2 active">
-                                            <i class="fa fa-retweet" aria-hidden="true"></i>
-                                        </a>
+                                        @if ($sp3->jenis_sp3 === 'deposito')
+                                            <a href="{{ route('sp3/add/page/list-deposit', $sp3->slug) }}"
+                                                class="btn btn-outline-gray me-2 active">
+                                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                            </a>
+                                        @elseif ($sp3->jenis_sp3 === 'mcu')
+                                            <a href="{{ route('sp3/add/page/list-mcu', $sp3->slug) }}"
+                                                class="btn btn-outline-gray me-2 active">
+                                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('sp3/refresh', $sp3->slug) }}"
+                                                class="btn btn-outline-gray me-2 active">
+                                                <i class="fa fa-retweet" aria-hidden="true"></i>
+                                            </a>
+                                        @endif
                                         {{-- <a href="{{ route('student/grid') }}" class="btn btn-outline-gray me-2">
                                             <i class="fa fa-th" aria-hidden="true"></i>
                                         </a> --}}
@@ -101,7 +113,7 @@
                                             <th>Nama Pasien</th>
                                             <th>Eselon</th>
                                             <th>Total Biaya Eselon</th>
-                                            <th>Total Biaya Kas</th>
+                                            <th>COB</th>
                                             <th>Deposit</th>
                                             <th>Status</th>
                                             <th>Keterangan</th>
@@ -117,7 +129,7 @@
         </div>
     </div>
 
-    {{-- model student delete --}}
+    {{-- modal delete --}}
     <div class="modal custom-modal fade" id="delete" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -130,7 +142,7 @@
                         <div class="row">
                             <form action="{{ route('billing/delete') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="slug" class="e_slug" value="">
+                                <input type="hidden" name="slug" class="e_slug" id = 'slug-delete' value="">
                                 <div class="row">
                                     <div class="col-6">
                                         <button type="submit" class="btn btn-primary paid-continue-btn"
@@ -148,12 +160,77 @@
             </div>
         </div>
     </div>
+
+    {{-- modal add COB --}}
+    <div class="modal custom-modal fade" id="cob" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="form-header">
+                        <h3>Input COB Billing</h3>
+                    </div>
+                    <div class="modal-btn delete-action">
+                        <div class="row">
+                            <form id="form-cob" action="{{ route('billing/add/save/cob') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="slug" id="slug-cob" value="">
+                                <div class="col-12">
+                                    <div class="form-group local-forms">
+                                        <label>Total COB <span class="login-danger">*</span></label>
+                                        <input type="text" class="form-control @error('total_cob') is-invalid @enderror"
+                                            name="total_cob_display" id="total_cob_display" placeholder="Rp 0"
+                                            value="{{ old('total_cob') ? number_format(old('total_cob'), 0, ',', '.') : '' }}"
+                                            autocomplete="off">
+
+                                        {{-- Hidden input yang dikirim sebagai integer --}}
+                                        <input type="hidden" name="total_cob" id="total_cob"
+                                            value="{{ old('total_cob') }}">
+
+                                        @error('total_cob')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-primary paid-continue-btn"
+                                            style="width: 100%;">Add</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <a data-bs-dismiss="modal" class="btn btn-primary paid-cancel-btn">Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @section('script')
     {{-- delete js --}}
     <script>
-        $(document).on('click', '.delete', function() {
-            var _this = $(this).parents('tr');
-            $('.e_slug').val(_this.find('.slug').data('slug'));
+        $('#delete').on('show.bs.modal', function(e) {
+            console.log('relatedTarget:', e.relatedTarget);
+            console.log('button data:', $(e.relatedTarget).data());
+            var button = $(e.relatedTarget); // tombol yang diklik
+            var slug = button.data('slug');
+            console.log('slug:', slug); // pastikan muncul
+            $(this).find('#slug-delete').val(slug);
+        });
+    </script>
+
+    <script>
+        $('#cob').on('show.bs.modal', function(e) {
+            console.log('relatedTarget:', e.relatedTarget);
+            console.log('button data:', $(e.relatedTarget).data());
+            var button = $(e.relatedTarget); // tombol yang diklik
+            var slug = button.data('slug');
+            console.log('slug:', slug); // pastikan muncul
+            $(this).find('#slug-cob').val(slug);
         });
     </script>
 
@@ -185,8 +262,8 @@
                         name: 'total_biaya_eselon'
                     },
                     {
-                        data: 'total_biaya_kas',
-                        name: 'total_biaya_kas'
+                        data: 'cob',
+                        name: 'cob'
                     },
                     {
                         data: 'deposit',
@@ -254,6 +331,48 @@
                     toastr.error(msg);
                 }
             });
+        });
+
+        //add COB pada billing
+        // $(document).on('submit', '#form-cob', function(e) {
+        //     e.preventDefault();
+
+        //     const form = $(this);
+        //     const url = form.attr('action');
+
+        //     $.ajax({
+        //         url: url,
+        //         method: 'POST',
+        //         data: form.serialize(),
+        //         success: function(response) {
+        //             $('#cob').modal('hide');
+        //             form[0].reset();
+        //             $('#BillingList').DataTable().ajax.reload(null, false);
+        //             toastr.success(response.message ?? 'COB berhasil ditambahkan');
+        //         },
+        //         error: function(xhr) {
+        //             const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
+        //             toastr.error(msg);
+        //         }
+        //     });
+        // });
+    </script>
+
+
+
+    <script>
+        const display = document.getElementById('total_cob_display');
+        const hidden = document.getElementById('total_cob');
+
+        display.addEventListener('input', function() {
+            // Hapus semua karakter selain angka
+            let raw = this.value.replace(/\D/g, '');
+
+            // Simpan nilai integer ke hidden input
+            hidden.value = raw;
+
+            // Format tampilan dengan titik sebagai pemisah ribuan
+            this.value = raw ? 'Rp ' + parseInt(raw).toLocaleString('id-ID') : '';
         });
     </script>
 @endsection

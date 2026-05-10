@@ -17,7 +17,7 @@
             </div>
             {{-- message --}}
             {!! Toastr::message() !!}
-            <div class="student-group-form">
+            {{-- <div class="student-group-form">
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card card-table comman-shadow">
@@ -73,6 +73,10 @@
                                                 <li>
                                                     <a href="{{ route('sp3/add/page/deposit') }}" class="dropdown-item"
                                                         href="#">Sp3 Deposit</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('sp3/add/page/mcu') }}" class="dropdown-item"
+                                                        href="#">Sp3 MCU</a>
                                                 </li>
                                                 <li>
                                                     <a href="{{ route('sp3/add/page/tagihan-keluar') }}"

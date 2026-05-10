@@ -39,7 +39,9 @@ class Billing extends Model
         'approved_verif_pws_by',
         'approved_verif_wadir_by',
         'approved_keu_admin_by',
-        'slug'
+        'slug',
+        'cob'
+
     ];
 
     protected $appends = [
@@ -57,28 +59,21 @@ class Billing extends Model
     protected static function booted()
     {
         static::creating(function (Billing $billing) {
-            $billing->slug = $billing->slug ?: static::generateUniqueSlug($billing->no_registrasi);
+            $billing->slug = $billing->slug ?: static::generateUniqueSlug();
         });
 
         static::updating(function (Billing $billing) {
-            if ($billing->isDirty('no_registrasi') || empty($billing->slug)) {
-                $billing->slug = static::generateUniqueSlug($billing->no_registrasi, $billing->id);
+            if (empty($billing->slug)) {
+                $billing->slug = static::generateUniqueSlug();
             }
         });
     }
 
-    protected static function generateUniqueSlug(string $value, int $ignoreId = null): string
+    protected static function generateUniqueSlug(): string
     {
-        $slug = Str::slug($value);
-        $original = $slug;
-        $count = 1;
-
-        while (static::where('slug', $slug)
-            ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
-            ->exists()
-        ) {
-            $slug = $original . '-' . $count++;
-        }
+        do {
+            $slug = Str::random(16);
+        } while (static::where('slug', $slug)->exists());
 
         return $slug;
     }

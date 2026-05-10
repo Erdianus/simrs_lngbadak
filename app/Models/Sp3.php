@@ -46,6 +46,7 @@ class Sp3 extends Model
     protected $appends = [
         'total_pasien',
         'total_kunjungan',
+        'total_biaya_tindakan',
         'total_biaya'
     ];
 
@@ -53,44 +54,28 @@ class Sp3 extends Model
     {
         static::creating(function (Sp3 $sp3) {
             if ($sp3->nomor_tagihan) {
-                $sp3->slug = $sp3->slug ?: static::generateUniqueSlug($sp3->slugSource());
+                $sp3->slug = $sp3->slug ?: static::generateUniqueToken();
             }
         });
 
         static::updating(function (Sp3 $sp3) {
             if ((($sp3->isDirty('nomor_tagihan') || $sp3->isDirty('eslon_id')) && $sp3->nomor_tagihan) || empty($sp3->slug)) {
-                $sp3->slug = static::generateUniqueSlug($sp3->slugSource(), $sp3->id);
+                $sp3->slug = static::generateUniqueToken($sp3->id);
             }
         });
     }
 
-    protected function slugSource(): string
+    protected static function generateUniqueToken(int $ignoreId = null): string
     {
-        $eslonName = null;
-
-        if ($this->eslon_id) {
-            $eslonName = Eslon::find($this->eslon_id)->nama ?? null;
-        }
-
-        $eslonPart = $eslonName ?: $this->eslon_id;
-
-        return trim($this->nomor_tagihan . ' ' . $eslonPart);
-    }
-
-    protected static function generateUniqueSlug(string $value, int $ignoreId = null): string
-    {
-        $slug = Str::slug($value);
-        $original = $slug;
-        $count = 1;
-
-        while (static::where('slug', $slug)
+        do {
+            $token = Str::random(16);
+        } while (
+            static::where('slug', $token)
             ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
             ->exists()
-        ) {
-            $slug = $original . '-' . $count++;
-        }
+        );
 
-        return $slug;
+        return $token;
     }
 
     public function getRouteKeyName()
@@ -98,14 +83,22 @@ class Sp3 extends Model
         return 'slug';
     }
 
+    public function getTotalBiayaTindakanAttribute()
+    {
+        return $this->billings->sum(fn($b) => $b->total_biaya_eselon);
+    }
+
     public function getTotalBiayaAttribute()
     {
+        $totalCob = $this->billings->sum(fn($b) => $b->cob);
         if ($this->jenis_sp3 === "deposito") {
             $total = $this->billings->sum(fn($b) => $b->biaya);
+        } else if ($this->jenis_sp3 === "billing") {
+            $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon);
         } else {
-            return null;
+            $total = $this->total_tagihan;
         }
-        return $total;
+        return $total - $totalCob;
         // return 'Rp ' . number_format($total, 0, ',', '.');
     }
 
