@@ -10,6 +10,7 @@ use App\Models\PerihalTagihan;
 use App\Models\Simrs\DepositKamarSimrs;
 use App\Models\Simrs\EselonSimrs;
 use App\Models\Simrs\RegMultiPoliSimrs;
+use App\Models\Simrs\TransaksiKamarSimrs;
 use App\Models\Sp3;
 use App\Service\Sp3Service;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -19,7 +20,7 @@ use Illuminate\Http\Request;
 
 class Sp3Controller extends Controller
 {
-    private $kode_poli = [
+    private $kode_poli = [ //EXCLUDE RIN01 MCU01 dan LAB01
         'RJ002',
         'RJ004',
         'RJ006',
@@ -30,7 +31,6 @@ class Sp3Controller extends Controller
         'RJ016',
         'RJ018',
         'FIS01',
-        'RIN01',
         'ADM02',
         'HC',
         'RJ021',
@@ -69,7 +69,8 @@ class Sp3Controller extends Controller
     ];
     public function index()
     {
-        return view('sp3.index');
+        $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
+        return view('sp3.index', compact('eselon'));
     }
 
     public function create()
@@ -121,8 +122,10 @@ class Sp3Controller extends Controller
     {
         $validated = $request->validated();
         $sp3 = Sp3::where('eslon_id', $validated['eslon_id'])
+            ->where('tgl_sp3', $validated['tgl_sp3'])
             ->where('tgl_masuk', $validated['tgl_masuk'])
             ->where('tgl_keluar', $validated['tgl_keluar'])
+            ->where('layanan_id', $validated['layanan_id'])
             ->get();
         if ($sp3->count() > 0) {
             Toastr::error('Data SP3 dengan eselon dan tanggal yang sama sudah ada.', 'Error');
@@ -131,56 +134,73 @@ class Sp3Controller extends Controller
         $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
         $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
         $eslon = Eslon::findOrFail($validated['eslon_id']);
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
-            ->with('masterPoli')
-            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
-            ->whereIn('kode_poli', $this->kode_poli)
-            ->where('eselon', $eslon->nama)
-            ->get()
-            ->groupBy('reg_no')
-            ->filter(function ($group) {
-                // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
-                if ($group->count() === 1) {
-                    $nilai = $group->first()->jadi; // ganti 'nama_kolom' dengan nama kolom aslinya
-                    if ($nilai === 'Y') {
-                        return false; // buang data ini
+        if ($validated['layanan_id'] == 1) { //jika layanan rawat inap
+            // Ambil no_reg yang masih aktif (belum keluar dari RS)
+            $noRegMasihAktif = TransaksiKamarSimrs::whereNull('tanggal_keluar')
+                ->pluck('no_reg')
+                ->values();
+
+            $noRegSudahPulang = TransaksiKamarSimrs::whereRaw("DATE(tanggal_keluar) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
+                ->where('eselon', $eslon->nama)
+                ->whereNotIn('no_reg', $noRegMasihAktif) // exclude pasien yg masih aktif
+                ->pluck('no_reg')
+                ->values();
+
+            $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+                ->with('masterPoli')
+                ->whereIn('reg_no', $noRegSudahPulang)
+                ->get()
+                ->unique('reg_no');
+        } else {
+            $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+                ->with('masterPoli')
+                ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
+                ->whereIn('kode_poli', $this->kode_poli)
+                ->where('eselon', $eslon->nama)
+                ->get()
+                ->groupBy('reg_no')
+                ->filter(function ($group) {
+                    // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
+                    if ($group->count() === 1) {
+                        $nilai = $group->first()->jadi; // ganti 'nama_kolom' dengan nama kolom aslinya
+                        if ($nilai === 'Y') {
+                            return false; // buang data ini
+                        }
                     }
-                }
-                return true; // ambil data ini
-            })
-            ->map(function ($group) {
-                $dataBatal = $group->where('jadi', 'Y');
-                $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
+                    return true; // ambil data ini
+                })
+                ->map(function ($group) {
+                    $dataBatal = $group->where('jadi', 'Y');
+                    $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
 
-                $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+                    $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
 
-                if ($adaBatal) {
-                    $jumlahBatal = $dataBatal->count();
+                    if ($adaBatal) {
+                        $jumlahBatal = $dataBatal->count();
 
-                    // Ambil poli_name dari relasi masterPoli
-                    $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
+                        // Ambil poli_name dari relasi masterPoli
+                        $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
 
-                    if ($jumlahBatal === 1) {
-                        $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                        if ($jumlahBatal === 1) {
+                            $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                        } else {
+                            $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
+                            $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                        }
                     } else {
-                        $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
-                        $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                        $dataUtama->keterangan_batal = null;
                     }
-                } else {
-                    $dataUtama->keterangan_batal = null;
-                }
 
-                return $dataUtama;
-            })
-            ->flatten()
-            ->unique('reg_no');
-        $billing = $getDataReg->unique('reg_no');
-        dd($billing);
+                    return $dataUtama;
+                })
+                ->flatten()
+                ->unique('reg_no');
+        }
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
         }
-        $create = Sp3Service::createSp3Billing($validated, $billing, $eslon);
+        $create = Sp3Service::createSp3Billing($validated, $getDataReg, $eslon);
         if ($create === true) {
             Toastr::success('Berhasil Menambahkan SP3 :)', 'Success');
             return redirect()->route('sp3-verifikasi/list');
@@ -248,50 +268,70 @@ class Sp3Controller extends Controller
         $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
         $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
         $eslon = Eslon::findOrFail($validated['eslon_id']);
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
-            ->with('masterPoli')
-            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
-            ->whereIn('kode_poli', $this->kode_poli)
-            ->where('eselon', $eslon->nama)
-            ->get()
-            ->groupBy('reg_no')
-            ->filter(function ($group) {
-                // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
-                if ($group->count() === 1) {
-                    $nilai = $group->first()->jadi; // ⭐ ganti 'nama_kolom' dengan nama kolom aslinya
-                    if ($nilai === 'Y') {
-                        return false; // buang data ini
+
+        if ($validated['layanan_id'] == 1) { //jika layanan rawat inap
+            // Ambil no_reg yang masih aktif (belum keluar dari RS)
+            $noRegMasihAktif = TransaksiKamarSimrs::whereNull('tanggal_keluar')
+                ->pluck('no_reg')
+                ->values();
+
+            $noRegSudahPulang = TransaksiKamarSimrs::whereRaw("DATE(tanggal_keluar) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
+                ->where('eselon', $eslon->nama)
+                ->whereNotIn('no_reg', $noRegMasihAktif) // exclude pasien yg masih aktif
+                ->pluck('no_reg')
+                ->values();
+
+            $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+                ->with('masterPoli')
+                ->whereIn('reg_no', $noRegSudahPulang)
+                ->get()
+                ->unique('reg_no');
+        } else {
+            $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+                ->with('masterPoli')
+                ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
+                ->whereIn('kode_poli', $this->kode_poli)
+                ->where('eselon', $eslon->nama)
+                ->get()
+                ->groupBy('reg_no')
+                ->filter(function ($group) {
+                    // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
+                    if ($group->count() === 1) {
+                        $nilai = $group->first()->jadi; // ⭐ ganti 'nama_kolom' dengan nama kolom aslinya
+                        if ($nilai === 'Y') {
+                            return false; // buang data ini
+                        }
                     }
-                }
-                return true; // ambil data ini
-            })
-            ->map(function ($group) {
-                $dataBatal = $group->where('jadi', 'Y');
-                $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
+                    return true; // ambil data ini
+                })
+                ->map(function ($group) {
+                    $dataBatal = $group->where('jadi', 'Y');
+                    $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
 
-                $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+                    $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
 
-                if ($adaBatal) {
-                    $jumlahBatal = $dataBatal->count();
+                    if ($adaBatal) {
+                        $jumlahBatal = $dataBatal->count();
 
-                    // Ambil poli_name dari relasi masterPoli
-                    $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
+                        // Ambil poli_name dari relasi masterPoli
+                        $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
 
-                    if ($jumlahBatal === 1) {
-                        $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                        if ($jumlahBatal === 1) {
+                            $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                        } else {
+                            $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
+                            $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                        }
                     } else {
-                        $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
-                        $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                        $dataUtama->keterangan_batal = null;
                     }
-                } else {
-                    $dataUtama->keterangan_batal = null;
-                }
 
-                return $dataUtama;
-            })
-            ->flatten()
-            ->unique('reg_no');
-        $getDataReg = $getDataReg->unique('reg_no');
+                    return $dataUtama;
+                })
+                ->flatten()
+                ->unique('reg_no');
+            $getDataReg = $getDataReg->unique('reg_no');
+        }
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
@@ -348,49 +388,67 @@ class Sp3Controller extends Controller
     public function updateDataBilling($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
-        $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
-            ->with('masterPoli')
-            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
-            ->whereIn('kode_poli', $this->kode_poli)
-            ->where('eselon', $sp3->eselon->nama)
-            ->get()
-            ->groupBy('reg_no')
-            ->filter(function ($group) {
-                // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
-                if ($group->count() === 1) {
-                    $nilai = $group->first()->jadi; // ⭐ ganti 'nama_kolom' dengan nama kolom aslinya
-                    if ($nilai === 'Y') {
-                        return false; // buang data ini
+        if ($sp3->layanan_id == 1) { //jika layanan rawat inap
+            // Ambil no_reg yang masih aktif (belum keluar dari RS)
+            $noRegMasihAktif = TransaksiKamarSimrs::whereNull('tanggal_keluar')
+                ->pluck('no_reg')
+                ->values();
+
+            $noRegSudahPulang = TransaksiKamarSimrs::whereRaw("DATE(tanggal_keluar) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
+                ->where('eselon', $sp3->eselon->nama)
+                ->whereNotIn('no_reg', $noRegMasihAktif) // exclude pasien yg masih aktif
+                ->pluck('no_reg')
+                ->values();
+
+            $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+                ->with('masterPoli')
+                ->whereIn('reg_no', $noRegSudahPulang)
+                ->get()
+                ->unique('reg_no');
+        } else {
+            $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
+                ->with('masterPoli')
+                ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
+                ->whereIn('kode_poli', $this->kode_poli)
+                ->where('eselon', $sp3->eselon->nama)
+                ->get()
+                ->groupBy('reg_no')
+                ->filter(function ($group) {
+                    // Jika reg_no hanya muncul 1 kali DAN jadi nilainya 'Y' → buang
+                    if ($group->count() === 1) {
+                        $nilai = $group->first()->jadi; // ⭐ ganti 'nama_kolom' dengan nama kolom aslinya
+                        if ($nilai === 'Y') {
+                            return false; // buang data ini
+                        }
                     }
-                }
-                return true; // ambil data ini
-            })
-            ->map(function ($group) {
-                $dataBatal = $group->where('jadi', 'Y');
-                $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
+                    return true; // ambil data ini
+                })
+                ->map(function ($group) {
+                    $dataBatal = $group->where('jadi', 'Y');
+                    $adaBatal  = $group->count() > 1 && $dataBatal->count() > 0;
 
-                $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
+                    $dataUtama = $group->where('jadi', '!=', 'Y')->first() ?? $group->first();
 
-                if ($adaBatal) {
-                    $jumlahBatal = $dataBatal->count();
+                    if ($adaBatal) {
+                        $jumlahBatal = $dataBatal->count();
 
-                    // Ambil poli_name dari relasi masterPoli
-                    $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
+                        // Ambil poli_name dari relasi masterPoli
+                        $namaPoli = $dataBatal->map(fn($item) => $item->masterPoli?->poli_name ?? $item->kode_poli);
 
-                    if ($jumlahBatal === 1) {
-                        $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                        if ($jumlahBatal === 1) {
+                            $dataUtama->keterangan_batal = "Memiliki registrasi batal pada poli: {$namaPoli->first()}";
+                        } else {
+                            $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
+                            $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                        }
                     } else {
-                        $daftarPoli = $namaPoli->map(fn($poli, $i) => ($i + 1) . ". {$poli}")->implode(', ');
-                        $dataUtama->keterangan_batal = "Memiliki {$jumlahBatal} registrasi batal pada poli: {$daftarPoli}";
+                        $dataUtama->keterangan_batal = null;
                     }
-                } else {
-                    $dataUtama->keterangan_batal = null;
-                }
-                return $dataUtama;
-            })
-            ->flatten()
-            ->unique('reg_no');
-        // dd($getDataReg);
+                    return $dataUtama;
+                })
+                ->flatten()
+                ->unique('reg_no');
+        }
         if ($getDataReg->isEmpty()) {
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
@@ -554,7 +612,7 @@ class Sp3Controller extends Controller
         $totalRecords = Sp3::count();
 
         $totalRecordsWithFilter = Sp3::where(function ($query) use ($searchValue) {
-            $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
+            $query->orWhere('no_surat_sp3', 'like', '%' . $searchValue . '%');
             $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
             $query->orWhere('ket_inv_pasien', 'like', '%' . $searchValue . '%');
             $query->orWhere('ket_inv_rs', 'like', '%' . $searchValue . '%');
@@ -564,9 +622,11 @@ class Sp3Controller extends Controller
             $query->orWhere('dokter_rujukan', 'like', '%' . $searchValue . '%');
         })->count();
 
-        $records = Sp3::with('eselon')->orderBy($columnName, $columnSortOrder)
+        $records = Sp3::with('eselon')
+            ->orderBy('is_approved_by_verifikator', 'ASC')
+            ->orderBy($columnName, $columnSortOrder)
             ->where(function ($query) use ($searchValue) {
-                $query->orWhere('no_sp3', 'like', '%' . $searchValue . '%');
+                $query->orWhere('no_surat_sp3', 'like', '%' . $searchValue . '%');
                 $query->orWhere('nomor_tagihan', 'like', '%' . $searchValue . '%');
                 $query->orWhere('ket_inv_pasien', 'like', '%' . $searchValue . '%');
                 $query->orWhere('ket_inv_rs', 'like', '%' . $searchValue . '%');
@@ -577,44 +637,12 @@ class Sp3Controller extends Controller
             })
             ->skip($start)
             ->take($rowPerPage)
-            ->orderBy('is_approved_by_verifikator', 'DESC')
+            ->orderByDesc('tgl_sp3')
             ->get();
         $data_arr = [];
 
         foreach ($records as $key => $record) {
             $status = $record->is_approved_by_verifikator ? '<span class="badge bg-success">Terverifikasi</span>' : '<span class="badge bg-secondary">Belum Terverifikasi</span>';
-            // $modify = '
-            //     <td class="text-right">
-            //         <div class="dropdown dropdown-action">
-            //             <a href="" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            //                 <i class="fas fa-ellipsis-v ellipse_color"></i>
-            //             </a>
-            //             <div class="dropdown-menu dropdown-menu-right">
-            //                 <a class="dropdown-item" href="' . url('sp3/edit/' . $record->slug) . '">
-            //                     <i class="far fa-edit me-2"></i> Edit
-            //                 </a>
-            //                 <a class="dropdown-item" href="' . url('sp3/detail/' . $record->slug) . '">
-            //                     <i class="far fa-eye me-2"></i> Detail
-            //                 </a>
-            //                 <a class="dropdown-item" href="' . url('sp3/delete/' . $record->slug) . '">
-            //                     <i class="fas fa-trash-alt m-r-5"></i> Delete
-            //                 </a>
-            //                 ' . (!$record->is_approved_by_verifikator ? '
-            //                 <a href="#" class="dropdown-item btn-approve" data-url="' . url('/sp3/approve/' . $record->slug) . '">
-            //                     <i class="fa fa-check me-2"></i> Approve
-            //                 </a>' : '<a href="#" 
-            //                     data-url="' . url('/sp3/unapprove/' . $record->slug) . '" 
-            //                     class="btn btn-sm bg-success-light btn-unapprove">
-            //                         <i class="fa fa-times me-2"></i>
-            //                 </a>') . '
-            //                 ' . ($record->is_approved_by_verifikator ? '
-            //                 <a class="dropdown-item" href="' . url('/sp3/' . $record->slug . '/preview') . '">
-            //                     <i class="fa fa-print me-2"></i> Print
-            //                 </a>' : '') . '
-            //             </div>
-            //         </div>
-            //     </td>
-            // ';
             $modify = '
                 <td class="text-end"> 
                     <div class="actions">

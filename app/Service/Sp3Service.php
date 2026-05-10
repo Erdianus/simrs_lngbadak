@@ -34,7 +34,6 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
             ]);
-            // dd($getDataReg);
             $newBill = $getDataReg->pluck('no_registrasi')->toArray();
             $existingBill = Billing::where('eslon_id', $sp3->eslon_id)
                 ->where('tanggal_keluar', '>=', $sp3->tgl_masuk)

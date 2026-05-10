@@ -21,22 +21,36 @@
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by ID ...">
+                            <select class="form-control select select2" id="filter_eselon" name="eselon_id">
+                                <option value="">Select Eselon</option>
+                                @foreach ($eselon as $item)
+                                    <option value="{{ $item->id }}">{{ $item->nama . ' / ' . $item->deskripsi }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by Name ...">
+                            <input type="text" class="form-control datetimepicker" id="filter_dari_tgl" name="dari_tgl"
+                                placeholder="Dari Tanggal" value="{{ \Carbon\Carbon::now()->format('d-M-Y') }}">
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by Phone ...">
+                            <input type="text" class="form-control datetimepicker" id="filter_sampai_tgl"
+                                name="sampai_tgl" placeholder="Sampai Tgl"
+                                value="{{ \Carbon\Carbon::now()->format('d-M-Y') }}">
                         </div>
                     </div>
                     <div class="col-lg-2">
                         <div class="search-student-btn">
-                            <button type="btn" class="btn btn-primary">Search</button>
+                            <button type="button" id="btn_filter" class="btn btn-primary">
+                                <i class="fa fa-search"></i> Search
+                            </button>
+                            <button type="button" id="btn_reset" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> Reset
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -171,6 +185,12 @@
                 searching: true,
                 ajax: {
                     url: "{{ route('get-sp3-verifikasi-data') }}",
+                    data: function(d) {
+                        // Kirim parameter filter ke server setiap reload
+                        // d.eselon_id = $('#filter_eselon').val();
+                        // d.dari_tgl = $('#filter_dari_tgl').val();
+                        // d.sampai_tgl = $('#filter_sampai_tgl').val();
+                    }
                 },
                 columns: [{
                         data: 'no_sp3',
@@ -232,7 +252,9 @@
                     },
                     {
                         data: 'status',
-                        name: 'status'
+                        name: 'status',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'modify',
@@ -242,6 +264,19 @@
                     },
                 ]
             });
+
+            // // Tombol Search → reload datatable saja
+            // $('#btn_filter').on('click', function() {
+            //     table.ajax.reload();
+            // });
+
+            // // Tombol Reset → kembalikan nilai default lalu reload
+            // $('#btn_reset').on('click', function() {
+            //     $('#filter_eselon').val('').trigger('change'); // trigger change untuk select2
+            //     $('#filter_dari_tgl').val("{{ \Carbon\Carbon::now()->subDays(30)->format('Y-m-d') }}");
+            //     $('#filter_sampai_tgl').val("{{ \Carbon\Carbon::now()->format('Y-m-d') }}");
+            //     table.ajax.reload();
+            // });
         });
     </script>
     <script>

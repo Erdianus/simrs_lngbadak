@@ -265,6 +265,7 @@ class BillingController extends Controller
             })->count();
 
         $records = Billing::with(['sp3', 'eselon', 'layanan', 'sub_layanan'])
+            ->orderBy('is_verified_by_verifikator', 'ASC')
             ->whereHas('sp3', function ($query) use ($sp3_slug) {
                 $query->where('slug', $sp3_slug);
             })
