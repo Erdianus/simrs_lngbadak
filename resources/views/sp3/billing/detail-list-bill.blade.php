@@ -76,6 +76,12 @@
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <h3 class="page-title">Billing</h3>
+                                        <span id="verified" class="badge bg-success mx-3">Terverifikasi:
+                                            {{ $verified }}</span>
+                                        <span id="unverified" class="badge bg-danger mx-3">Belum Terverifikasi:
+                                            {{ $unverified }}</span>
+                                    </div>
+                                    <div class="col">
                                     </div>
                                     <div class="col-auto text-end float-end ms-auto download-grp">
                                         @if ($sp3->jenis_sp3 === 'deposito')
@@ -177,7 +183,8 @@
                                 <div class="col-12">
                                     <div class="form-group local-forms">
                                         <label>Total COB <span class="login-danger">*</span></label>
-                                        <input type="text" class="form-control @error('total_cob') is-invalid @enderror"
+                                        <input type="text"
+                                            class="form-control @error('total_cob') is-invalid @enderror"
                                             name="total_cob_display" id="total_cob_display" placeholder="Rp 0"
                                             value="{{ old('total_cob') ? number_format(old('total_cob'), 0, ',', '.') : '' }}"
                                             autocomplete="off">
@@ -212,6 +219,23 @@
     </div>
 @section('script')
     {{-- delete js --}}
+    <script>
+        function loadBillingCount() {
+            $.ajax({
+                url: '{{ route('billing/count', $sp3->slug) }}',
+                method: 'GET',
+                success: function(response) {
+                    $('#verified').text('Terverifikasi: ' + response.verified);
+                    $('#unverified').text('Belum Terverifikasi: ' + response.unverified);
+                    console.log(response.verified + ' ' + response.unverified);
+
+                },
+                error: function(xhr) {
+                    console.log('Error:', xhr.responseJSON);
+                }
+            });
+        }
+    </script>
     <script>
         $('#delete').on('show.bs.modal', function(e) {
             console.log('relatedTarget:', e.relatedTarget);
@@ -259,11 +283,15 @@
                     },
                     {
                         data: 'total_biaya_eselon',
-                        name: 'total_biaya_eselon'
+                        name: 'total_biaya_eselon',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'cob',
-                        name: 'cob'
+                        name: 'cob',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'deposit',
@@ -304,7 +332,10 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    $('#BillingList').DataTable().ajax.reload(null, false);
+                    $('#BillingList').DataTable().ajax.reload(function() {
+                        loadBillingCount();
+                        console.log(loadBillingCount());
+                    }, false);
                     toastr.success(response.message ?? 'Billing berhasil diapprove');
                 },
                 error: function(xhr) {
@@ -327,7 +358,9 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    $('#BillingList').DataTable().ajax.reload(null, false);
+                    $('#BillingList').DataTable().ajax.reload(function() {
+                        console.log(loadBillingCount());
+                    }, false);
                     toastr.success(response.message ?? 'Billing berhasil diunapprove');
                 },
                 error: function(xhr) {

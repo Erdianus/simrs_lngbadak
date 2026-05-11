@@ -227,6 +227,17 @@ class BillingController extends Controller
         return redirect()->back();
     }
 
+    public function billingCount($slug)
+    {
+        $sp3 = Sp3::where('slug', $slug)->first();
+        $verified   = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 1)->count();
+        $unverified = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 0)->count();
+        return response()->json([
+            'verified'   => $verified,
+            'unverified' => $unverified,
+        ]);
+    }
+
     public function getBillingsSp3Data(Request $request, $sp3_slug)
     {
         $draw            = $request->get('draw');

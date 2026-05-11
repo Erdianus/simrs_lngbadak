@@ -121,7 +121,7 @@
                                             <th>Keterangan Pembayaran</th>
                                             <th>Layanan</th>
                                             <th>Tanggal Berobat</th>
-                                            <th>Total Biaya</th>
+                                            {{-- <th>Total Biaya</th> --}}
                                             <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -243,12 +243,6 @@
                     {
                         data: 'tgl_berobat',
                         name: 'tgl_berobat'
-                    },
-                    {
-                        data: 'total_biaya',
-                        name: 'total_biaya',
-                        orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'status',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sp3Request;
+use App\Models\Billing;
 use App\Models\Eslon;
 use App\Models\Layanan;
 use App\Models\PerihalTagihan;
@@ -477,7 +478,9 @@ class Sp3Controller extends Controller
     public function listBillSp3($sp3_slug)
     {
         $sp3 = Sp3::where('slug', $sp3_slug)->first();
-        return view('sp3.billing.detail-list-bill', compact('sp3'));
+        $verified   = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 1)->count();
+        $unverified = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 0)->count();
+        return view('sp3.billing.detail-list-bill', compact('sp3', 'verified', 'unverified'));
     }
 
     public function approveSp3($slug)
@@ -540,10 +543,10 @@ class Sp3Controller extends Controller
     {
         $sp3 = Sp3::where('slug', $slug)->first();
         if ($sp3->jenis_sp3 === 'billing' || $sp3->jenis_sp3 === 'mcu') {
-            $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon);
             $deposit = $sp3->billings->sum(fn($b) => $b->deposit);
+            $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon) - $deposit;
             $cob = $sp3->billings->sum(fn($b) => $b->cob);
-            $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
+            $jumlah_pembayaran = $tagihan - $cob;
         } else if ($sp3->jenis_sp3 === 'deposito') {
             $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
             $cob = $sp3->billings->sum(fn($b) => $b->cob);
@@ -560,7 +563,7 @@ class Sp3Controller extends Controller
             'tanggal' => \Carbon\Carbon::parse($sp3->tgl_sp3)->translatedFormat('d F Y'),
             'pasien' => $sp3->eselon->deskripsi,
             'tagihan' => $tagihan,
-            'deposit' => $deposit,
+            'cob' => $cob,
             'jumlah_pembayaran' => $jumlah_pembayaran,
             'kunjungan' => $sp3->total_kunjungan,
             'hal' => $sp3->perihalTagihan->hal,
@@ -688,7 +691,7 @@ class Sp3Controller extends Controller
                 "layanan"    => $record->layanan->nama,
                 "tgl_berobat"     => $record->tgl_masuk && $record->tgl_keluar ? \Carbon\Carbon::parse($record->tgl_masuk)->translatedFormat('d M Y')
                     . ' - ' . \Carbon\Carbon::parse($record->tgl_keluar)->translatedFormat('d M Y') : null,
-                "total_biaya"    => 'Rp ' . number_format($record->jenis_sp3 === 'tagihan keluar' ? $record->total_tagihan : $record->total_biaya, 0, ',', '.'),
+                // "total_biaya"    => 'Rp ' . number_format($record->jenis_sp3 === 'tagihan keluar' ? $record->total_tagihan : $record->total_biaya, 0, ',', '.'),
                 "status"         => $status,
                 "modify"         => $modify,
             ];

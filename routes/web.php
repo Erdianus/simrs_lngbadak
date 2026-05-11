@@ -153,6 +153,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
     // ------------------------ billing -------------------------------//
     Route::controller(BillingController::class)->group(function () {
+        Route::get('billing/count/{slug}', 'billingCount')->middleware('auth')->name('billing/count'); // get data billings
         Route::post('billing/save/cob', 'addCob')->middleware('auth')->name('billing/add/save/cob'); //add cob billing
         Route::get('billing/approve/{slug}', 'approveBill')->middleware('auth'); // view for edit
         Route::get('billing/unapprove/{slug}', 'unapproveBill')->middleware('auth')->name('billing/unapprove'); // view for edit
@@ -174,9 +175,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
     Route::controller(McuController::class)->group(function () {
         Route::get('get-mcu-data/{slug}', 'getRegMcuData')->middleware('auth')->name('get-mcu-data'); // get data sp3
     });
-
-
-
 
     // ------------------------ eselon -------------------------------//
     Route::controller(EslonController::class)->group(function () {

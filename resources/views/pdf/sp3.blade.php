@@ -152,7 +152,7 @@
             <tr>
                 <td>BEBAN PIHAK KE 3</td>
                 <td>: Rp
-                    {{ number_format($data['deposit'], 0, ',', '.') }}
+                    {{ number_format($data['cob'], 0, ',', '.') }}
                 </td>
             </tr>
             <tr style="background: #bfbcbc">

@@ -37,7 +37,8 @@ class McuController extends Controller
 
         // ✅ Base query — reusable
         $baseQuery = RegMultiPoliSimrs::whereIn('kode_poli', ['MCU01', 'LAB01'])
-            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar]);
+            ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
+            ->where('eselon', $sp3->eselon->nama);
 
         // ✅ Total tanpa filter search
         $totalRecords = (clone $baseQuery)->count();
