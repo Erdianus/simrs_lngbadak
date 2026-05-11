@@ -33,6 +33,7 @@ class Sp3Service
                 'dokter_rujukan' => $data['dokter_rujukan'] ?? null,
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
+                'keterangan' => $data['keterangan'],
             ]);
             $newBill = $getDataReg->pluck('no_registrasi')->toArray();
             $existingBill = Billing::where('eslon_id', $sp3->eslon_id)
@@ -78,6 +79,7 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
                 'total_tagihan' => $data['total_tagihan'] ?? 0,
+                'keterangan' => $data['keterangan'],
             ]);
             Log::info('New SP3 created: ' . $sp3->id);
             DB::commit();
@@ -117,6 +119,7 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
                 'is_approved_by_verifikator' => false,
+                'keterangan' => $data['keterangan'],
             ]);
             Log::info('Existing billings deleted for SP3 ID: ' . $sp3->billings); // ← tambahkan
             if ($sp3->billings()->count() > 0) {
@@ -156,6 +159,7 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
                 'total_tagihan' => $data['total_tagihan'] ?? 0,
+                'keterangan' => $data['keterangan'],
             ]);
             Log::info('SP3 updated: ' . $sp3->id);
             DB::commit();
@@ -196,6 +200,7 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
                 'total_tagihan' => $data['total_tagihan'] ?? 0,
+                'keterangan' => $data['keterangan'],
             ]);
             Log::info('SP3 updated: ' . $sp3->id);
             DB::commit();
@@ -236,6 +241,7 @@ class Sp3Service
                 'tgl_masuk' => $data['tgl_masuk'],
                 'tgl_keluar' => $data['tgl_keluar'],
                 'total_tagihan' => $data['total_tagihan'] ?? 0,
+                'keterangan' => $data['keterangan'],
             ]);
             Log::info('SP3 updated: ' . $sp3->id);
             DB::commit();

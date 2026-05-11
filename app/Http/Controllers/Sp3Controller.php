@@ -551,7 +551,7 @@ class Sp3Controller extends Controller
             $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
             $cob = $sp3->billings->sum(fn($b) => $b->cob);
             $deposit = 0;
-            $jumlah_pembayaran = $sp3->total_biaya ?? $sp3->total_tagihan;
+            $jumlah_pembayaran = $tagihan - $cob;
         } else {
             $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
             $deposit = 0;
@@ -565,7 +565,8 @@ class Sp3Controller extends Controller
             'tagihan' => $tagihan,
             'cob' => $cob,
             'jumlah_pembayaran' => $jumlah_pembayaran,
-            'kunjungan' => $sp3->total_kunjungan,
+            'total_kunjungan' => $sp3->total_kunjungan,
+            'total_pasien' => $sp3->total_pasien,
             'hal' => $sp3->perihalTagihan->hal,
             'ket_pembayaran' => $sp3->ket_pembayaran,
             'layanan' => $sp3->layanan->nama,
@@ -576,7 +577,9 @@ class Sp3Controller extends Controller
             'disetujui_oleh' => 'dr. RIEN POTU AGUSTINA',
             'diketahui_oleh' => 'dr. PUTU ISMA SARASWATI DEWI',
             'dibuat_oleh' => auth()->user()->rolename != 'Super Admin' ? auth()->user()->name : '',
-            'ttd_path' => ''
+            'ttd_path' => '',
+            'keterangan' => $sp3->keterangan,
+
         ];
         // dd($data);
         $pdf = Pdf::loadView('pdf.sp3', [

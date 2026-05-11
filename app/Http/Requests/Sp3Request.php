@@ -43,6 +43,7 @@ class Sp3Request extends FormRequest
             'total_tagihan' => ['nullable', 'numeric', 'min:0'],
             'tgl_masuk' => ['required', 'date'],
             'tgl_keluar' => ['required', 'date', 'after_or_equal:tgl_masuk'],
+            'keterangan' => ['nullable', 'string'],
         ];
     }
 

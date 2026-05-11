@@ -147,7 +147,7 @@
                 <td>: Rp
                     {{ number_format($data['tagihan'], 0, ',', '.') }}
                 </td>
-                <td class="text-right">{{ $data['kunjungan'] }} PASIEN, {{ $data['kunjungan'] }} Kunjungan</td>
+                <td class="text-right">{{ $data['total_pasien'] }} PASIEN, {{ $data['total_kunjungan'] }} KUNJUNGAN</td>
             </tr>
             <tr>
                 <td>BEBAN PIHAK KE 3</td>
@@ -206,7 +206,7 @@
         <table class="medium">
             <tr>
                 <b class = "underline">Note:</b>
-                <p></p>
+                <p>{{ $data['keterangan'] }}</p>
             </tr>
         </table>
         <br><br>

@@ -311,6 +311,13 @@
                                             </div>
                                         </div>
                                     @endif
+                                    {{ $sp3->kete }}
+                                    <div class="col-12 mb-3">
+                                        <div class="form-group local-forms">
+                                            <label for="keterangan" class="form-label">Keterangan (Optional)</label>
+                                            <textarea class="form-control" id="keterangan" name="keterangan" rows="5">{{ $sp3->keterangan }}</textarea>
+                                        </div>
+                                    </div>
                                     <div class="col-12">
                                         <div class="student-submit">
                                             <button type="submit" class="btn btn-primary">Submit</button>
