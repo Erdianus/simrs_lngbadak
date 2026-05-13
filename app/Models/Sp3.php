@@ -92,14 +92,13 @@ class Sp3 extends Model
     {
         $totalCob = $this->billings->sum(fn($b) => $b->cob);
         if ($this->jenis_sp3 === "deposito") {
-            $total = $this->billings->sum(fn($b) => $b->biaya);
+            $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon);
         } else if ($this->jenis_sp3 === "billing" || $this->jenis_sp3 === "mcu") {
             $total = $this->billings->sum(fn($b) => $b->total_biaya_eselon) - $this->billings->sum(fn($b) => $b->deposit);
         } else {
             $total = $this->total_tagihan;
         }
         return $total - $totalCob;
-        // return 'Rp ' . number_format($total, 0, ',', '.');
     }
 
     public function getTotalKunjunganAttribute()

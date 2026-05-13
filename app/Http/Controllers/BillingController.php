@@ -158,14 +158,12 @@ class BillingController extends Controller
         return view('eslon.edit', compact('billing'));
     }
 
-    public function update(BillingRequest $request, $slug)
+    public function update($slug)
     {
-        // Validasi data yang diterima dari form
-        $validatedData = $request->validated();
-        $updateBilling = BillingService::updateBilling($slug, $validatedData);
-        if ($updateBilling) {
-            Toastr::success('Billing berhasil diperbaharui!', 'Success');
-            return redirect()->route('billing/list');
+        $updateBilling = BillingService::updateBilling($slug);
+        if ($updateBilling['status'] == 'success') {
+            Toastr::success($updateBilling['message'], 'Success');
+            return redirect()->back();
         }
         Toastr::error('Gagal memperbarui Billing. Silakan coba lagi.', 'Error');
         return redirect()->back();
@@ -227,9 +225,9 @@ class BillingController extends Controller
         return redirect()->back();
     }
 
-    public function billingCount($slug)
+    public function billingCount($id)
     {
-        $sp3 = Sp3::where('slug', $slug)->first();
+        $sp3 = Sp3::findOrFail($id);
         $verified   = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 1)->count();
         $unverified = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 0)->count();
         return response()->json([
@@ -306,38 +304,76 @@ class BillingController extends Controller
             $status = $record->is_verified_by_verifikator ? '<span class="badge bg-success">Terverifikasi</span>' : '<span class="badge bg-secondary">Belum Terverifikasi</span>';
             $modify = '
                 <td class="text-end"> 
-                    <div class="actions">
-                        <a href="' . url('detail-billing/' . $record->no_registrasi) . '" class="btn btn-sm bg-success-light">
-                            <i class="far fa-eye me-2"></i>
-                        </a>
-                        ' . ($record->is_verified_by_verifikator != true ? '
-                        <a href="#" 
-                            data-url="' . url('/billing/approve/' . $record->id) . '" 
-                            class="btn btn-sm bg-success-light btn-approve">
-                                <i class="fa fa-check me-2"></i>
-                        </a>' : '<a href="#" 
-                            data-url="' . url('/billing/unapprove/' . $record->id) . '" 
-                            class="btn btn-sm bg-success-light btn-unapprove">
-                                <i class="fa fa-times me-2"></i>
-                        </a>') . '
-                        <a class="btn btn-sm bg-danger-light delete" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
-                        <i class="fe fe-trash-2"></i>
-                        </a>
-                        <a class="btn btn-sm bg-primary-light cob" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#cob">
-                        <i class="fe fe-plus"></i>
-                        </a>
-                        </div>
-                </td>
-            ';
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-light btn-sm rounded-circle p-1 lh-1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-ellipsis-v px-1"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">';
 
+            $modify .= '
+                            <li>
+                                <a href="' . url('detail-billing/' . $record->no_registrasi) . '" class="dropdown-item d-flex align-items-center gap-2">
+                                    <span class="text-success"><i class="far fa-eye"></i></span>
+                                    <span>Detail</span>
+                                </a>
+                            </li>';
+
+            if (!$record->sp3->is_approved_by_verifikator) {
+                if (!$record->is_verified_by_verifikator) {
+                    $modify .= '
+                            <li>
+                                <a href="#" data-url="' . url('/billing/approve/' . $record->id) . '" class="dropdown-item d-flex align-items-center gap-2 btn-approve">
+                                    <span class="text-success"><i class="fa fa-check"></i></span>
+                                    <span>Approve</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-url="' . url('/billing/update/' . $record->id) . '" class="dropdown-item d-flex align-items-center gap-2 btn-update">
+                                    <span class="text-primary"><i class="fa fa-retweet"></i></span>
+                                    <span>Update</span>
+                                </a>
+                            </li>';
+                } else {
+                    $modify .= '
+                            <li>
+                                <a href="#" data-url="' . url('/billing/unapprove/' . $record->id) . '" class="dropdown-item d-flex align-items-center gap-2 btn-unapprove">
+                                    <span class="text-warning"><i class="fa fa-times"></i></span>
+                                    <span>Unapprove</span>
+                                </a>
+                            </li>';
+                }
+
+                $modify .= '
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a href="#" class="dropdown-item d-flex align-items-center gap-2 delete" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
+                                    <span class="text-danger"><i class="fa fa-trash"></i></span>
+                                    <span>Delete</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="dropdown-item d-flex align-items-center gap-2 cob" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#cob">
+                                    <span class="text-primary"><i class="fa fa-plus"></i></span>
+                                    <span>COB</span>
+                                </a>
+                            </li>';
+            }
+
+            $modify .= '
+                        </ul>
+                    </div>
+                </td>';
+            $deposit = $record->biaya_deposit ?? $record->deposit;
+            $total_eselon = $record->biaya_eselon ?? $record->total_biaya_eselon;
+            $total_biaya_sp3 = $total_eselon - $deposit - $record->cob;
             $data_arr[] = [
-                // "sp3"         => $record->sp3->no_sp3 ?? 'N/A',
                 "no_registrasi"    => $record->no_registrasi,
                 "nama_pasien"    => $record->nama_pasien ?? 'N/A',
                 "eslon"    => $record->eselon->deskripsi ?? 'N/A',
-                "total_biaya_eselon"    => 'Rp ' . number_format($record->biaya ?? $record->total_biaya_eselon, 0, ',', '.'),
+                "total_biaya_eselon"    => 'Rp ' . number_format($total_eselon, 0, ',', '.'),
                 "cob"    => 'Rp ' . number_format($record->cob, 0, ',', '.'),
-                "deposit"    => 'Rp ' . number_format($record->deposit, 0, ',', '.'),
+                "deposit"    => 'Rp ' . number_format($deposit, 0, ',', '.'),
+                "total_biaya_sp3"    => 'Rp ' . number_format($total_biaya_sp3, 0, ',', '.'),
                 "is_verified_by_verifikator"  => $record->is_verified_by_verifikator,
                 "status" => $status,
                 "keterangan" => $record->keterangan ? '<span class="badge bg-warning text-dark">' . $record->keterangan . '</span>' : '-',

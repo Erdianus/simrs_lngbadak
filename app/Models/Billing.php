@@ -40,7 +40,9 @@ class Billing extends Model
         'approved_verif_wadir_by',
         'approved_keu_admin_by',
         'slug',
-        'cob'
+        'cob',
+        'biaya_eselon',
+        'biaya_deposit'
 
     ];
 
@@ -83,58 +85,60 @@ class Billing extends Model
         return 'slug';
     }
 
-    // public function getBiayaFormatedAttribute()
-    // {
-    //     return 'Rp ' . number_format($this->biaya, 0, ',', '.');
-    // }
+    public function getTotalBiayaSp3Attribute()
+    {
+        return $this->total_biaya_eselon - $this->deposit - $this->cob;
+    }
 
-    // public function getTotalTindakanAttribute()
-    // {
-    //     $tindakan = TindakanSimrs::select(['reg_no', 'jumlah', 'discount', 'tindakan_biaya'])
-    //         ->where('reg_no', $this->no_registrasi)
-    //         ->get();
-    //     return $tindakan->sum('total_biaya');
-    // }
+    public function countTotalBiayaEselon(): int
+    {
+        $tindakan = TindakanSimrs::select(['reg_no', 'jumlah', 'discount', 'payment', 'tindakan_id', 'tindakan_biaya'])
+            ->where('reg_no', $this->no_registrasi)
+            ->where('payment', NULL)
+            ->get();
+        $alkes = TransaksiAlkesSimrs::select(['reg_no', 'discount', 'payment', 'harga_jual', 'jumlah_jual', 'alkes_id'])
+            ->where('reg_no', $this->no_registrasi)
+            ->where('payment', NULL)
+            ->get();
+        $resepRawatJalan = TransaksiResepSimrs::select(['regnum', 'jumlah_dijual', 'harga_jual', 'discount', 'payment', 'farmalkes_id'])
+            ->where('regnum', $this->no_registrasi)
+            ->where('payment', NULL)
+            ->get();
+        $resepRawatInap = KipKirimanSimrs::select(['no_reg', 'farmalkes_id', 'jumlah_kiriman', 'kiriman_id', 'payment', 'harga', 'discount'])
+            ->where('no_reg', $this->no_registrasi)
+            ->where('payment', NULL)
+            ->get();
+        $kamar = TransaksiKamarSimrs::select(['no_reg', 'id_kamar', 'lama_hari', 'keterangan', 'tarif_sewa', 'discount'])
+            ->where('no_reg', $this->no_registrasi)
+            ->where('payment', NULL)
+            ->get();
+        $embalace = TransaksiEmbalaceSimrs::select(['no_reg', 'ppn', 'discount'])
+            ->where('no_reg', $this->no_registrasi)
+            ->where('payment', NULL)
+            ->get();
 
-    // public function getTotalBMHPAttribute()
-    // {
-    //     $alkes = TransaksiAlkesSimrs::select(['reg_no', 'discount', 'payment', 'jumlah_jual', 'harga_jual'])
-    //         ->where('reg_no', $this->no_registrasi)
-    //         ->get();
-    //     return $alkes->sum('total_biaya');
-    // }
+        $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + ($embalace->sum('ppn'));
+        if ($resepRawatInap->count() > 0 || $kamar->count() > 0) {
+            $ref_adm = ReferensiAdmSimrs::select(['besar_fee', 'max_besar'])->where('kode_eselon', $this->eselon->nama)->first();
+            $biayaAdm = ceil($totalEselon * ($ref_adm->besar_fee / 100));
+            $total = $totalEselon + $biayaAdm;
+            if ($biayaAdm > $ref_adm->max_besar) {
+                $totalEselon = $totalEselon + ($ref_adm->max_besar);
+            } else {
+                $totalEselon = $total;
+            }
+        }
+        return $totalEselon;
+    }
 
-    // public function getTotalResepAttribute()
-    // {
-    //     $resepRawatJalan = TransaksiResepSimrs::select(['regnum', 'jumlah_dijual', 'harga_jual', 'discount'])
-    //         ->where('regnum', $this->no_registrasi)
-    //         ->get();
-    //     return $resepRawatJalan->sum('total_biaya');
-    // }
-
-    // public function getTotalKIPAttribute()
-    // {
-    //     $resepRawatInap = KipKirimanSimrs::select(['no_reg', 'jumlah_kiriman', 'harga', 'discount'])
-    //         ->where('no_reg', $this->no_registrasi)
-    //         ->get();
-    //     return $resepRawatInap->sum('total_biaya');
-    // }
-
-    // public function getTotalSewaKamarAttribute()
-    // {
-    //     $sewaKamar = TransaksiKamarSimrs::select(['no_reg', 'lama_hari', 'tarif_sewa', 'discount'])
-    //         ->where('no_reg', $this->no_registrasi)
-    //         ->get();
-    //     return $sewaKamar->sum('total_biaya');
-    // }
-
-    // public function getTotalPPNAttribute()
-    // {
-    //     $embalace = TransaksiEmbalaceSimrs::select(['no_reg', 'ppn', 'discount'])
-    //         ->where('no_reg', $this->no_registrasi)
-    //         ->get();
-    //     return $embalace->sum('ppn');
-    // }
+    public function countDeposit()
+    {
+        $deposit = DepositKamarSimrs::select('jumlah_deposit')->where('no_reg', $this->no_registrasi)->first();
+        if ($deposit) {
+            return $deposit->jumlah_deposit;
+        }
+        return 0;
+    }
 
     public function getTotalBiayaEselonAttribute()
     {
@@ -176,37 +180,6 @@ class Billing extends Model
         }
         return $totalEselon;
     }
-
-    // public function getTotalBiayaKasAttribute()
-    // {
-    //     $tindakan = TindakanSimrs::select(['reg_no', 'jumlah', 'discount', 'payment', 'tindakan_id', 'tindakan_biaya'])
-    //         ->where('reg_no', $this->no_registrasi)
-    //         ->where('payment', 'C')
-    //         ->get();
-    //     $alkes = TransaksiAlkesSimrs::select(['reg_no', 'discount', 'payment', 'jumlah_jual', 'alkes_id'])
-    //         ->where('reg_no', $this->no_registrasi)
-    //         ->where('payment', 'C')
-    //         ->get();
-    //     $resepRawatJalan = TransaksiResepSimrs::select(['regnum', 'jumlah_dijual', 'harga_jual', 'discount', 'payment', 'farmalkes_id'])
-    //         ->where('regnum', $this->no_registrasi)
-    //         ->where('payment', 'C')
-    //         ->get();
-    //     $resepRawatInap = KipKirimanSimrs::select(['no_reg', 'farmalkes_id', 'jumlah_kiriman', 'kiriman_id', 'harga', 'discount'])
-    //         ->where('no_reg', $this->reg_no)
-    //         ->where('payment', 'C')
-    //         ->get();
-    //     $kamar = TransaksiKamarSimrs::select(['no_reg', 'id_kamar', 'lama_hari', 'keterangan', 'tarif_sewa', 'discount'])
-    //         ->where('no_reg', $this->reg_no)
-    //         ->where('payment', 'C')
-    //         ->get();
-    //     $embalace = TransaksiEmbalaceSimrs::select(['no_reg', 'ppn', 'discount'])
-    //         ->where('no_reg', $this->reg_no)
-    //         ->where('payment', 'C')
-    //         ->get();
-
-    //     $totalKas = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + ($embalace->sum('ppn'));
-    //     return $totalKas;
-    // }
 
     public function getDepositAttribute()
     {

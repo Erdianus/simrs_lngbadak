@@ -78,7 +78,7 @@
                                         <h3 class="page-title">Billing</h3>
                                         <span id="verified" class="badge bg-success mx-3">Terverifikasi:
                                             {{ $verified }}</span>
-                                        <span id="unverified" class="badge bg-danger mx-3">Belum Terverifikasi:
+                                        <span id="unverified" class="badge bg-secondary mx-3">Belum Terverifikasi:
                                             {{ $unverified }}</span>
                                     </div>
                                     <div class="col">
@@ -121,6 +121,7 @@
                                             <th>Total Biaya Eselon</th>
                                             <th>COB</th>
                                             <th>Deposit</th>
+                                            <th>Total Biaya</th>
                                             <th>Status</th>
                                             <th>Keterangan</th>
                                             <th class="text-end">Action</th>
@@ -222,7 +223,7 @@
     <script>
         function loadBillingCount() {
             $.ajax({
-                url: '{{ route('billing/count', $sp3->slug) }}',
+                url: '{{ route('billing/count', $sp3->id) }}',
                 method: 'GET',
                 success: function(response) {
                     $('#verified').text('Terverifikasi: ' + response.verified);
@@ -300,6 +301,12 @@
                         searchable: false
                     },
                     {
+                        data: 'total_biaya_sp3',
+                        name: 'total_biaya_sp3',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
                         data: 'status',
                         name: 'status',
                         orderable: false,
@@ -370,29 +377,29 @@
             });
         });
 
-        //add COB pada billing
-        // $(document).on('submit', '#form-cob', function(e) {
-        //     e.preventDefault();
+        // Unapprove billing via AJAX
+        $(document).on('click', '.btn-update', function(e) {
+            e.preventDefault();
+            const url = $(this).data('url');
 
-        //     const form = $(this);
-        //     const url = form.attr('action');
-
-        //     $.ajax({
-        //         url: url,
-        //         method: 'POST',
-        //         data: form.serialize(),
-        //         success: function(response) {
-        //             $('#cob').modal('hide');
-        //             form[0].reset();
-        //             $('#BillingList').DataTable().ajax.reload(null, false);
-        //             toastr.success(response.message ?? 'COB berhasil ditambahkan');
-        //         },
-        //         error: function(xhr) {
-        //             const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
-        //             toastr.error(msg);
-        //         }
-        //     });
-        // });
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    $('#BillingList').DataTable().ajax.reload(function() {
+                        console.log(loadBillingCount());
+                    }, false);
+                    toastr.success(response.message ?? 'Billing berhasil diupdate');
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
+                    toastr.error(msg);
+                }
+            });
+        });
     </script>
 
 

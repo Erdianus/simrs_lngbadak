@@ -35,6 +35,7 @@ class Sp3Service
                 'tgl_keluar' => $data['tgl_keluar'],
                 'keterangan' => $data['keterangan'],
             ]);
+            // dd($sp3->computeTotalTagihan());
             $newBill = $getDataReg->pluck('no_registrasi')->toArray();
             $existingBill = Billing::where('eslon_id', $sp3->eslon_id)
                 ->where('tanggal_keluar', '>=', $sp3->tgl_masuk)
@@ -46,7 +47,6 @@ class Sp3Service
                 return redirect()->back();
             }
             BillingService::createBilling($getDataReg, $sp3, $eselon);
-            // dd('test');
             DB::commit();
             return true;
         } catch (\Throwable $th) {
@@ -125,7 +125,7 @@ class Sp3Service
             if ($sp3->billings()->count() > 0) {
                 BillingService::deleteBilling($sp3->id);
             }
-            $createBill = BillingService::createBilling($getDataReg, $sp3, $eselon);
+            BillingService::createBilling($getDataReg, $sp3, $eselon);
             DB::commit();
             return true;
         } catch (\Throwable $th) {
@@ -205,7 +205,8 @@ class Sp3Service
             Log::info('SP3 updated: ' . $sp3->id);
             DB::commit();
             return [
-                'status' => 'success'
+                'status' => 'success',
+                'message' => 'Berhasil Mengupdate Sp3'
             ];
         } catch (\Throwable $th) {
             DB::rollBack();

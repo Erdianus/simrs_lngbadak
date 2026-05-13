@@ -121,7 +121,7 @@
                                             <th>Keterangan Pembayaran</th>
                                             <th>Layanan</th>
                                             <th>Tanggal Berobat</th>
-                                            {{-- <th>Total Biaya</th> --}}
+                                            <th>Total Biaya</th>
                                             <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -245,6 +245,10 @@
                         name: 'tgl_berobat'
                     },
                     {
+                        data: 'total_tagihan',
+                        name: 'total_tagihan'
+                    },
+                    {
                         data: 'status',
                         name: 'status',
                         orderable: false,
@@ -258,19 +262,6 @@
                     },
                 ]
             });
-
-            // // Tombol Search → reload datatable saja
-            // $('#btn_filter').on('click', function() {
-            //     table.ajax.reload();
-            // });
-
-            // // Tombol Reset → kembalikan nilai default lalu reload
-            // $('#btn_reset').on('click', function() {
-            //     $('#filter_eselon').val('').trigger('change'); // trigger change untuk select2
-            //     $('#filter_dari_tgl').val("{{ \Carbon\Carbon::now()->subDays(30)->format('Y-m-d') }}");
-            //     $('#filter_sampai_tgl').val("{{ \Carbon\Carbon::now()->format('Y-m-d') }}");
-            //     table.ajax.reload();
-            // });
         });
     </script>
     <script>

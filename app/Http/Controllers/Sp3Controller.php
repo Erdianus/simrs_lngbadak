@@ -103,7 +103,7 @@ class Sp3Controller extends Controller
     {
         $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
         $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
-        $layanan = Layanan::select(['id', 'nama'])->get();
+        $layanan = Layanan::select(['id', 'nama'])->whereIn('nama', ['MCU', 'DCU', 'SKD', 'Pemeriksaan Narkoba'])->get();
         return view('sp3.mcu.create-sp3-mcu', compact('kode_tagihan', 'eselon', 'layanan'));
     }
 
@@ -142,13 +142,13 @@ class Sp3Controller extends Controller
                 ->values();
 
             $noRegSudahPulang = TransaksiKamarSimrs::whereRaw("DATE(tanggal_keluar) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
-                ->where('eselon', $eslon->nama)
                 ->whereNotIn('no_reg', $noRegMasihAktif) // exclude pasien yg masih aktif
                 ->pluck('no_reg')
                 ->values();
 
             $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
                 ->with('masterPoli')
+                ->where('eselon', $eslon->nama)
                 ->whereIn('reg_no', $noRegSudahPulang)
                 ->get()
                 ->unique('reg_no');
@@ -265,7 +265,6 @@ class Sp3Controller extends Controller
     public function update(Sp3Request $request, $slug)
     {
         $validated = $request->validated();
-        // dd($validated);
         $tglMasuk  = Carbon::createFromFormat('d-m-Y', $validated['tgl_masuk'])->format('Y-m-d');
         $tglKeluar  = Carbon::createFromFormat('d-m-Y', $validated['tgl_keluar'])->format('Y-m-d');
         $eslon = Eslon::findOrFail($validated['eslon_id']);
@@ -277,13 +276,13 @@ class Sp3Controller extends Controller
                 ->values();
 
             $noRegSudahPulang = TransaksiKamarSimrs::whereRaw("DATE(tanggal_keluar) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
-                ->where('eselon', $eslon->nama)
                 ->whereNotIn('no_reg', $noRegMasihAktif) // exclude pasien yg masih aktif
                 ->pluck('no_reg')
                 ->values();
 
             $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
                 ->with('masterPoli')
+                ->where('eselon', $eslon->nama)
                 ->whereIn('reg_no', $noRegSudahPulang)
                 ->get()
                 ->unique('reg_no');
@@ -337,6 +336,7 @@ class Sp3Controller extends Controller
             Toastr::error('Data Billing Tidak Ada', 'Error');
             return redirect()->back();
         }
+
         $create = Sp3Service::updateSp3($validated, $getDataReg, $eslon, $slug);
         if ($create === true) {
             Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
@@ -396,13 +396,13 @@ class Sp3Controller extends Controller
                 ->values();
 
             $noRegSudahPulang = TransaksiKamarSimrs::whereRaw("DATE(tanggal_keluar) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
-                ->where('eselon', $sp3->eselon->nama)
                 ->whereNotIn('no_reg', $noRegMasihAktif) // exclude pasien yg masih aktif
                 ->pluck('no_reg')
                 ->values();
 
             $getDataReg = RegMultiPoliSimrs::select(['reg_no', 'nama', 'tanggal_registrasi', 'no_mr', 'kode_poli', 'eselon', 'jadi'])
                 ->with('masterPoli')
+                ->where('eselon', $sp3->eselon->nama)
                 ->whereIn('reg_no', $noRegSudahPulang)
                 ->get()
                 ->unique('reg_no');
@@ -542,14 +542,13 @@ class Sp3Controller extends Controller
     public function previewSp3($slug)
     {
         $sp3 = Sp3::where('slug', $slug)->first();
+        $cob = $sp3->billings->sum(fn($b) => $b->cob);
         if ($sp3->jenis_sp3 === 'billing' || $sp3->jenis_sp3 === 'mcu') {
             $deposit = $sp3->billings->sum(fn($b) => $b->deposit);
             $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon) - $deposit;
-            $cob = $sp3->billings->sum(fn($b) => $b->cob);
             $jumlah_pembayaran = $tagihan - $cob;
         } else if ($sp3->jenis_sp3 === 'deposito') {
-            $tagihan = $sp3->total_biaya ?? $sp3->total_tagihan;
-            $cob = $sp3->billings->sum(fn($b) => $b->cob);
+            $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon);
             $deposit = 0;
             $jumlah_pembayaran = $tagihan - $cob;
         } else {
@@ -631,7 +630,8 @@ class Sp3Controller extends Controller
         })->count();
 
         $records = Sp3::with('eselon')
-            ->orderBy('is_approved_by_verifikator', 'ASC')
+            // ->orderBy('is_approved_by_verifikator', 'ASC')
+            ->orderBy('no_surat_sp3', 'DESC')
             ->orderBy($columnName, $columnSortOrder)
             ->where(function ($query) use ($searchValue) {
                 $query->orWhere('no_surat_sp3', 'like', '%' . $searchValue . '%');
@@ -645,7 +645,6 @@ class Sp3Controller extends Controller
             })
             ->skip($start)
             ->take($rowPerPage)
-            ->orderByDesc('tgl_sp3')
             ->get();
         $data_arr = [];
 
@@ -694,7 +693,7 @@ class Sp3Controller extends Controller
                 "layanan"    => $record->layanan->nama,
                 "tgl_berobat"     => $record->tgl_masuk && $record->tgl_keluar ? \Carbon\Carbon::parse($record->tgl_masuk)->translatedFormat('d M Y')
                     . ' - ' . \Carbon\Carbon::parse($record->tgl_keluar)->translatedFormat('d M Y') : null,
-                // "total_biaya"    => 'Rp ' . number_format($record->jenis_sp3 === 'tagihan keluar' ? $record->total_tagihan : $record->total_biaya, 0, ',', '.'),
+                "total_tagihan"    => 'Rp ' . number_format($record->total_tagihan, 0, ',', '.'),
                 "status"         => $status,
                 "modify"         => $modify,
             ];

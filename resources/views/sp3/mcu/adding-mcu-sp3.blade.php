@@ -119,7 +119,8 @@
             </div>
             <div class="row mb-4">
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('sp3-verifikasi/list') }}" class="btn btn-primary me-2"><i class="fas fa-check"></i>
+                    <a href="{{ route('sp3/detail', $sp3->slug) }}" class="btn btn-primary me-2"><i
+                            class="fas fa-check"></i>
                         Selesai</a>
                 </div>
             </div>

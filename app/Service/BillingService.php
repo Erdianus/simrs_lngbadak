@@ -15,6 +15,7 @@ class BillingService
         // dd($getDataReg);
         DB::beginTransaction();
         try {
+
             $billingData = $getDataReg->map(function ($value) use ($sp3, $eselon) {
                 do {
                     $slug = Str::random(16);
@@ -34,23 +35,46 @@ class BillingService
                     'slug'           => $slug,
                 ];
             })->toArray();
-            log::info('Billing data will insert: ' . count($billingData) . ' records'); // ← tambahkan log
             Billing::insert($billingData);
             $billings = Billing::where('sp3_id', $sp3->id)->get();
+            
             $totalDeposit = $billings->sum(fn($b) => $b->deposit);
-            log::info('Billing data inserted: ' . count($billings) . ' records'); // ← tambahkan log
             $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->total_biaya_eselon) : $billings->sum(fn($b) => $b->total_biaya_eselon) - $totalDeposit;
             $sp3->update([
-                'total_tagihan' => $totalTagihan,
+                'total_tagihan' => (int)$totalTagihan,
                 'total_kunjungan' => $sp3->total_kunjungan,
                 'total_pasien' => $sp3->total_pasien
             ]);
+            log::info('Billing data inserted: ' . count($billings) . ' records'); // ← tambahkan log
             DB::commit();
             return true;
         } catch (\Throwable $th) {
             DB::rollback();
             Log::error('Error createBilling: ' . $th->getMessage()); // ← tambahkan log
             return $th->getMessage();
+        }
+    }
+
+    public static function updateBilling($slug)
+    {
+        DB::beginTransaction();
+        try {
+            $billing = Billing::where('slug', $slug)->first();
+            $billing->update([
+                'total_biaya_eselon' => $billing->countTotalBiayaEselon(),
+                'deposit' => $billing->countDeposit()
+            ]);
+            DB::commit();
+            return [
+                'status' => 'success',
+                'message' => 'berhasil mengupdate Billing'
+            ];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => 'failed',
+                'message' => $th->getMessage()
+            ];
         }
     }
 
@@ -153,7 +177,7 @@ class BillingService
             Billing::create($billingData);
             $billings = $sp3->billings;
             $totalCob = $billings->sum(fn($b) => $b->cob);
-            $totalBiayaEselon = $billings->sum(fn($b) => $b->biaya);
+            $totalBiayaEselon = $billings->sum(fn($b) => $b->total_biaya_eselon);
             $totalTagihan = $totalBiayaEselon - $totalCob;
             $sp3->update([
                 'total_tagihan' => $totalTagihan,

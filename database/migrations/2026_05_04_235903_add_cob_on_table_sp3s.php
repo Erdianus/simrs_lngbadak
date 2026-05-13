@@ -21,6 +21,8 @@ return new class extends Migration
             $table->integer('cob')->nullable();
             $table->string('no_rm')->nullable();
             $table->integer('biaya')->nullable();
+            $table->integer('biaya_deposit')->nullable();
+            $table->integer('biaya_eselon')->nullable();
         });
     }
 
