@@ -53,9 +53,9 @@ class Billing extends Model
         // 'total_KIP',
         // 'total_sewa_kamar',
         // 'total_PPN',
-        'total_biaya_eselon',
+        // 'total_biaya_eselon',
         // 'total_biaya_kas',
-        'deposit'
+        // 'deposit'
     ];
 
     protected static function booted()
@@ -131,7 +131,7 @@ class Billing extends Model
         return $totalEselon;
     }
 
-    public function countDeposit()
+    public function countDeposit(): int
     {
         $deposit = DepositKamarSimrs::select('jumlah_deposit')->where('no_reg', $this->no_registrasi)->first();
         if ($deposit) {

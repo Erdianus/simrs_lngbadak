@@ -15,13 +15,19 @@ class BillingService
         // dd($getDataReg);
         DB::beginTransaction();
         try {
-
             $billingData = $getDataReg->map(function ($value) use ($sp3, $eselon) {
                 do {
                     $slug = Str::random(16);
                 } while (Billing::where('slug', $slug)->exists());
 
                 $existingSlugs[] = $slug;
+
+                $tempBilling = new Billing(['no_registrasi' => $value->reg_no]);
+                $tempBilling->eslon_id = $eselon->id;
+
+                // Hitung sekali, simpan hasilnya
+                $totalBiayaEselon = (int)ceil($tempBilling->countTotalBiayaEselon());
+                $deposit          = (int)ceil($tempBilling->countDeposit());
 
                 return [
                     'sp3_id'         => $sp3->id,
@@ -33,19 +39,24 @@ class BillingService
                     'tanggal_keluar' => $value->tanggal_registrasi,
                     'keterangan'     => $value->keterangan_batal,
                     'slug'           => $slug,
+                    'biaya_eselon'      => $totalBiayaEselon, // ← disimpan ke DB
+                    'biaya_deposit'   => $deposit,
                 ];
             })->toArray();
             Billing::insert($billingData);
-            $billings = Billing::where('sp3_id', $sp3->id)->get();
-
-            $totalDeposit = $billings->sum(fn($b) => $b->deposit);
-            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->total_biaya_eselon) : $billings->sum(fn($b) => $b->total_biaya_eselon) - $totalDeposit;
+            $billings = Billing::where('sp3_id', $sp3->id)
+                ->selectRaw('
+                    SUM(biaya_deposit) as total_deposit,
+                    SUM(biaya_eselon) as total_eselon    
+                ')
+                ->first();
+            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->total_eselon : $billings->total_eselon - $billings->total_deposit;
             $sp3->update([
                 'total_tagihan' => (int)$totalTagihan,
                 'total_kunjungan' => $sp3->total_kunjungan,
                 'total_pasien' => $sp3->total_pasien
             ]);
-            log::info('Billing data inserted: ' . count($billings) . ' records'); // ← tambahkan log
+            log::info('Billing data inserted: ' . count($billingData) . ' records'); // ← tambahkan log
             DB::commit();
             return true;
         } catch (\Throwable $th) {
