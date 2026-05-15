@@ -37,7 +37,7 @@ class BillingService
             })->toArray();
             Billing::insert($billingData);
             $billings = Billing::where('sp3_id', $sp3->id)->get();
-            
+
             $totalDeposit = $billings->sum(fn($b) => $b->deposit);
             $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->total_biaya_eselon) : $billings->sum(fn($b) => $b->total_biaya_eselon) - $totalDeposit;
             $sp3->update([
@@ -123,13 +123,36 @@ class BillingService
         }
     }
 
+    public static function approveAllBills($billings)
+    {
+        DB::beginTransaction();
+        try {
+            $ids = $billings->pluck('id');
+            Billing::whereIn('id', $ids)->update([
+                'approved_verif_pic_by' => auth()->user()->id,
+                'is_verified_by_verifikator' => true
+            ]);
+            DB::commit();
+            return [
+                'status' => 'success',
+                'message' => 'Billing Berhasil Diverifikasi'
+            ];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return [
+                'status' => 'failed',
+                'message' => $th->getMessage()
+            ];
+        }
+    }
+
     public static function approveBill($id)
     {
         DB::beginTransaction();
         try {
             $bill = Billing::find($id);
             $bill->update([
-                'approve_verif_pic_by' => auth()->user()->id,
+                'approved_verif_pic_by' => auth()->user()->id,
                 'is_verified_by_verifikator' => true
             ]);
             DB::commit();
@@ -146,7 +169,7 @@ class BillingService
         try {
             $bill = Billing::find($id);
             $bill->update([
-                'approve_verif_pic_by' => null,
+                'approved_verif_pic_by' => null,
                 'is_verified_by_verifikator' => false
             ]);
             // dd($bill);

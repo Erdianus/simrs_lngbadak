@@ -57,7 +57,7 @@
                         </a>
                         <ul>
                             <li><a href="{{ route('sp3-keuangan/list') }}"
-                                    class="{{ set_active(['sp3-keuangan/list']) }} {{ request()->is('sp3/edit/*') ? 'active' : '' }}">List
+                                    class="{{ set_active(['sp3-keuangan/list']) }} {{ request()->is('sp3-keuangan/edit/*') ? 'active' : '' }}">List
                                     SP3</a></li>
                         </ul>
                     </li>

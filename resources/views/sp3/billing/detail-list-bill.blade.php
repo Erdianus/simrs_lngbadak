@@ -100,6 +100,18 @@
                                                 <i class="fa fa-retweet" aria-hidden="true"></i>
                                             </a>
                                         @endif
+                                        <button class="btn btn-primary me-2 btn-approve-all"
+                                            data-url="{{ route('billing/check/all-bill', $sp3->slug) }}"
+                                            id="btn-check-all">
+                                            <span class="btn-text">
+                                                Check All <span class="fa fa-check" aria-hidden="true"></span>
+                                            </span>
+                                            <span class="btn-loading d-none">
+                                                <span class="spinner-border spinner-border-sm me-1" role="status"
+                                                    aria-hidden="true"></span>
+                                                Processing...
+                                            </span>
+                                        </button>
                                         {{-- <a href="{{ route('student/grid') }}" class="btn btn-outline-gray me-2">
                                             <i class="fa fa-th" aria-hidden="true"></i>
                                         </a> --}}
@@ -326,6 +338,65 @@
     </script>
 
     <script>
+        // Approve billing via AJAX
+        $(document).on('click', '.btn-approve-all', function(e) {
+            e.preventDefault();
+            const url = $(this).data('url');
+            const btn = $(this);
+            console.log(url);
+
+            btn.prop('disabled', true);
+            btn.find('.btn-text').addClass('d-none');
+            btn.find('.btn-loading').removeClass('d-none');
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Show success state
+                        btn.find('.btn-loading').addClass('d-none');
+                        btn.find('.btn-text').html(
+                            'Done! <span class="fa fa-check-circle" aria-hidden="true"></span>'
+                        ).removeClass('d-none');
+                        btn.removeClass('btn-primary').addClass('btn-success');
+
+                        $('#BillingList').DataTable().ajax.reload(function() {
+                            loadBillingCount();
+                        }, false);
+                        toastr.success(response.message);
+
+                        // Reset button after 2 seconds
+                        setTimeout(function() {
+                            btn.prop('disabled', false);
+                            btn.removeClass('btn-success').addClass('btn-primary');
+                            btn.find('.btn-text').html(
+                                'Check All <span class="fa fa-check" aria-hidden="true"></span>'
+                            );
+                        }, 2000);
+                    } else {
+                        resetBtn(btn);
+                        toastr.error(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan';
+                    toastr.error(msg);
+                }
+            });
+        });
+
+        function resetBtn(btn) {
+            btn.prop('disabled', false);
+            btn.find('.btn-loading').addClass('d-none');
+            btn.find('.btn-text').html(
+                'Check All <span class="fa fa-check" aria-hidden="true"></span>'
+            ).removeClass('d-none');
+        }
+
         // Approve billing via AJAX
         $(document).on('click', '.btn-approve', function(e) {
             e.preventDefault();

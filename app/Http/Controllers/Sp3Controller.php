@@ -616,6 +616,14 @@ class Sp3Controller extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue     = $search_arr['value']; // Search value
 
+        $dari_tgl    = $request->get('dari_tgl')
+            ? \Carbon\Carbon::createFromFormat('Y-m-d', $request->get('dari_tgl'))->startOfDay()
+            : \Carbon\Carbon::now()->subDays(30)->startOfDay();
+
+        $sampai_tgl  = $request->get('sampai_tgl')
+            ? \Carbon\Carbon::createFromFormat('Y-m-d', $request->get('sampai_tgl'))->endOfDay()
+            : \Carbon\Carbon::now()->endOfDay();
+
         $totalRecords = Sp3::count();
 
         $totalRecordsWithFilter = Sp3::where(function ($query) use ($searchValue) {
@@ -631,6 +639,7 @@ class Sp3Controller extends Controller
 
         $records = Sp3::with('eselon')
             // ->orderBy('is_approved_by_verifikator', 'ASC')
+            // ->whereBetween('tgl_masuk', [$dari_tgl, $sampai_tgl])
             ->orderBy('no_surat_sp3', 'DESC')
             ->orderBy($columnName, $columnSortOrder)
             ->where(function ($query) use ($searchValue) {

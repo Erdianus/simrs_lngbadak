@@ -17,36 +17,27 @@
             </div>
             {{-- message --}}
             {!! Toastr::message() !!}
-            {{-- <div class="student-group-form">
+            {{-- <div class="student-group-form mb-3">
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
-                            <select class="form-control select select2" id="filter_eselon" name="eselon_id">
-                                <option value="">Select Eselon</option>
-                                @foreach ($eselon as $item)
-                                    <option value="{{ $item->id }}">{{ $item->nama . ' / ' . $item->deskripsi }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <label>Dari Tanggal (tgl_masuk)</label>
+                            <input type="text" class="form-control datetimepicker" id="filter_dari_tgl"
+                                placeholder="Dari Tanggal"
+                                value="{{ \Carbon\Carbon::now()->subDays(30)->format('d-M-Y') }}">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
-                            <input type="text" class="form-control datetimepicker" id="filter_dari_tgl" name="dari_tgl"
-                                placeholder="Dari Tanggal" value="{{ \Carbon\Carbon::now()->format('d-M-Y') }}">
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="form-group">
+                            <label>Sampai Tanggal (tgl_keluar)</label>
                             <input type="text" class="form-control datetimepicker" id="filter_sampai_tgl"
-                                name="sampai_tgl" placeholder="Sampai Tgl"
-                                value="{{ \Carbon\Carbon::now()->format('d-M-Y') }}">
+                                placeholder="Sampai Tanggal" value="{{ \Carbon\Carbon::now()->format('d-M-Y') }}">
                         </div>
                     </div>
-                    <div class="col-lg-2">
-                        <div class="search-student-btn">
-                            <button type="button" id="btn_filter" class="btn btn-primary">
-                                <i class="fa fa-search"></i> Search
+                    <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                        <div class="form-group">
+                            <button type="button" id="btn_filter" class="btn btn-primary me-2">
+                                <i class="fa fa-search"></i> Filter
                             </button>
                             <button type="button" id="btn_reset" class="btn btn-secondary">
                                 <i class="fa fa-refresh"></i> Reset
@@ -186,10 +177,8 @@
                 ajax: {
                     url: "{{ route('get-sp3-verifikasi-data') }}",
                     data: function(d) {
-                        // Kirim parameter filter ke server setiap reload
-                        // d.eselon_id = $('#filter_eselon').val();
-                        // d.dari_tgl = $('#filter_dari_tgl').val();
-                        // d.sampai_tgl = $('#filter_sampai_tgl').val();
+                        d.dari_tgl = $('#filter_dari_tgl').val();
+                        d.sampai_tgl = $('#filter_sampai_tgl').val();
                     }
                 },
                 columns: [{
@@ -265,6 +254,19 @@
         });
     </script>
     <script>
+        // Tombol Filter: reload datatable dengan nilai filter yang dipilih
+        $('#btn_filter').on('click', function() {
+            $('#Sp3List').DataTable().ajax.reload(null, false);
+            // null = tidak ada callback, false = jangan kembali ke halaman 1
+        });
+
+        // Tombol Reset: kembalikan nilai filter ke default, lalu reload
+        $('#btn_reset').on('click', function() {
+            $('#filter_dari_tgl').val('{{ \Carbon\Carbon::now()->subDays(30)->format('d-M-Y') }}');
+            $('#filter_sampai_tgl').val('{{ \Carbon\Carbon::now()->format('d-M-Y') }}');
+            $('#Sp3List').DataTable().ajax.reload(null, false);
+        });
+
         // Approve SP3 via AJAX
         $(document).on('click', '.btn-approve', function(e) {
             e.preventDefault();

@@ -181,6 +181,24 @@ class BillingController extends Controller
         return redirect()->back();
     }
 
+    public function approveAllBillSp3($slug_sp3)
+    {
+        $sp3 = Sp3::with('billings')->where('slug', $slug_sp3)->first();
+        $billings = $sp3->billings;
+        $approvedBillings = BillingService::approveAllBills($billings);
+        // dd($approvedBillings);
+        if ($approvedBillings['status'] === 'success') {
+            return response()->json([
+                'success' => true,
+                'message' => $approvedBillings['message']
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => $approvedBillings['message']
+        ]);
+    }
+
     public function approveBill($id)
     {
         $approveBilling = BillingService::approveBill($id);
@@ -195,6 +213,7 @@ class BillingController extends Controller
             'message' => 'Gagal menyetujui Billing. Silakan coba lagi.'
         ]);
     }
+
     public function unapproveBill($id)
     {
         $approveBilling = BillingService::unapproveBill($id);
