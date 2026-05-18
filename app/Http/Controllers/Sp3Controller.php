@@ -640,6 +640,7 @@ class Sp3Controller extends Controller
         $records = Sp3::with('eselon')
             // ->orderBy('is_approved_by_verifikator', 'ASC')
             // ->whereBetween('tgl_masuk', [$dari_tgl, $sampai_tgl])
+            ->orderBy('created_at', 'DESC')
             ->orderBy('no_surat_sp3', 'DESC')
             ->orderBy($columnName, $columnSortOrder)
             ->where(function ($query) use ($searchValue) {

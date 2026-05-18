@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('date_of_birth')->nullable();
             $table->string('join_date')->nullable();
             $table->string('phone_number')->nullable();
-            $table->string('status')->nullable();
+            $table->string('status')->default('Active');
             $table->string('role_name')->nullable();
             $table->string('avatar')->nullable();
             $table->string('position')->nullable();
@@ -32,7 +32,7 @@ class CreateUsersTable extends Migration
             $table->timestamps();
         });
     }
-    
+
 
     /**
      * Reverse the migrations.

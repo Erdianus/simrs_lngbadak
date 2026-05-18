@@ -16,7 +16,8 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
-            'role_name' => 'Super Admin'
+            'role_name' => 'Super Admin',
+            'status' => 'Active'
         ];
 
         \App\Models\User::create($user);

@@ -73,12 +73,6 @@ Route::group(['namespace' => 'App\Http\Controllers\Auth'], function () {
         Route::get('/logout', 'logout')->name('logout');
         Route::post('change/password', 'changePassword')->name('change/password');
     });
-
-    // ----------------------------- register -------------------------//
-    Route::controller(RegisterController::class)->group(function () {
-        Route::get('/register', 'register')->name('register');
-        Route::post('/register', 'storeUser')->name('register');
-    });
 });
 
 Route::group(['namespace' => 'App\Http\Controllers'], function () {
@@ -95,6 +89,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('list/users', 'index')->middleware('auth')->name('list/users');
         Route::post('change/password', 'changePassword')->name('change/password');
         Route::get('view/user/edit/{id}', 'userView')->middleware('auth');
+        Route::get('user/create', 'create')->name('user/create');
+        Route::post('user/store', 'store')->name('user/store');
         Route::post('user/update', 'userUpdate')->name('user/update');
         Route::post('user/delete', 'userDelete')->name('user/delete');
         Route::get('get-users-data', 'getUsersData')->name('get-users-data');
