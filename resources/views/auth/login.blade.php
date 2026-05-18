@@ -2,10 +2,10 @@
 @section('content')
     {{-- message --}}
     {!! Toastr::message() !!}
-    <div class="login-right">
-        <div class="login-right-wrap">
-            <h1>Welcome To RS LNG Badak</h1>
-            {{-- <p class="account-subtitle">Need an account? <a href="{{ route('register') }}">Sign Up</a></p> --}}
+    {{-- KANAN --}}
+    <div class="login-page-right col-md-7 d-flex align-items-center justify-content-center p-4 p-md-5">
+        <div class="w-100">
+            <h2>Welcome To RS LNG Badak</h2>
             <h2>Sign in</h2>
             <form action="{{ route('login') }}" method="POST">
                 @csrf
@@ -21,28 +21,12 @@
                     <span class="profile-views feather-eye toggle-password"></span>
                 </div>
                 <div class="forgotpass">
-                    {{-- <div class="remember-me">
-                    <label class="custom_check mr-2 mb-0 d-inline-flex remember-me"> Remember me
-                        <input type="checkbox" name="radio">
-                        <span class="checkmark"></span>
-                    </label>
-                </div> --}}
                     <a href="forgot-password.html">Forgot Password?</a>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary btn-block" type="submit">Login</button>
                 </div>
             </form>
-            {{-- <div class="login-or">
-            <span class="or-line"></span>
-            <span class="span-or">or</span>
-        </div>
-        <div class="social-login">
-            <a href="#"><i class="fab fa-google-plus-g"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-        </div> --}}
         </div>
     </div>
 @endsection

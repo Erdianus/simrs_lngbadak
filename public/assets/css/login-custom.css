@@ -1,0 +1,39 @@
+/* =============================================
+   LOGIN CUSTOM - Minimal, pakai Bootstrap
+   ============================================= */
+
+.login-page-wrapper {
+    min-height: 100vh;
+    background-color: #f7f7fa;
+}
+
+.login-page-box {
+    min-height: 500px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.login-page-left {
+    background: #18aefa;
+    border-radius: 8px 0 0 8px;
+    min-height: 500px;
+}
+
+.login-page-right {
+    min-height: 500px;
+    background: #fff;
+}
+
+@media (max-width: 767px) {
+    .login-page-left {
+        display: none !important;
+    }
+    .login-page-box {
+        max-width: 450px;
+        min-height: unset;
+    }
+    .login-page-right {
+        min-height: unset;
+    }
+}
