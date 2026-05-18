@@ -78,7 +78,7 @@ class Sp3Controller extends Controller
     {
         $kode_tagihan = PerihalTagihan::select(['id', 'kode', 'hal'])->get();
         $eselon = Eslon::select(['id', 'nama', 'deskripsi'])->get();
-        $layanan = Layanan::select(['id', 'nama'])->get();
+        $layanan = Layanan::select(['id', 'nama'])->whereIn('nama', ['Rawat Jalan', 'Rawat Inap'])->get();
         return view('sp3.billing.create', compact('kode_tagihan', 'eselon', 'layanan'));
     }
 

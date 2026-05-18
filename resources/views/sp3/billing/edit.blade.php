@@ -260,6 +260,29 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    @if ($sp3->jenis_sp3 === 'tagihan keluar')
+                                        <div class="col-12 col-sm-4">
+                                            <div class="form-group local-forms">
+                                                <label>Total Tagihan <span class="login-danger">*</span></label>
+                                                <input type="text"
+                                                    class="form-control @error('total_tagihan') is-invalid @enderror"
+                                                    name="total_tagihan_display" id="total_tagihan_display"
+                                                    placeholder="Rp 0"
+                                                    value="{{ $sp3->total_tagihan ? number_format($sp3->total_tagihan, 0, ',', '.') : '' }}"
+                                                    autocomplete="off">
+
+                                                {{-- Hidden input yang dikirim sebagai integer --}}
+                                                <input type="hidden" name="total_tagihan" id="total_tagihan"
+                                                    value="{{ $sp3->total_tagihan }}">
+
+                                                @error('total_tagihan')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms calendar-icon">
                                             <label>Tanggal Masuk <span class="login-danger">*</span></label>
@@ -288,29 +311,6 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    @if ($sp3->jenis_sp3 === 'tagihan keluar')
-                                        <div class="col-12 col-sm-4">
-                                            <div class="form-group local-forms">
-                                                <label>Total Tagihan <span class="login-danger">*</span></label>
-                                                <input type="text"
-                                                    class="form-control @error('total_tagihan') is-invalid @enderror"
-                                                    name="total_tagihan_display" id="total_tagihan_display"
-                                                    placeholder="Rp 0"
-                                                    value="{{ $sp3->total_tagihan ? number_format($sp3->total_tagihan, 0, ',', '.') : '' }}"
-                                                    autocomplete="off">
-
-                                                {{-- Hidden input yang dikirim sebagai integer --}}
-                                                <input type="hidden" name="total_tagihan" id="total_tagihan"
-                                                    value="{{ $sp3->total_tagihan }}">
-
-                                                @error('total_tagihan')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    @endif
                                     {{ $sp3->kete }}
                                     <div class="col-12 mb-3">
                                         <div class="form-group local-forms">
