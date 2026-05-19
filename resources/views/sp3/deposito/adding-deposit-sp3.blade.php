@@ -126,6 +126,7 @@
     </div>
 
 
+    {{-- modal delete --}}
     <div class="modal custom-modal fade" id="delete" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -138,7 +139,7 @@
                         <div class="row">
                             <form action="{{ route('billing/delete') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="slug" class="e_slug" value="">
+                                <input type="hidden" name="slug" class="e_slug" id="slug-delete" value="">
                                 <div class="row">
                                     <div class="col-6">
                                         <button type="submit" class="btn btn-primary paid-continue-btn"
@@ -167,8 +168,19 @@
 @section('script')
     <script>
         $(document).on('click', '.delete', function() {
-            var _this = $(this).parents('tr');
-            $('.e_slug').val(_this.find('.slug').data('slug'));
+            var slug = $(this).attr('data-slug');
+            // console.log('slug dari click:', slug);
+            $('#slug-delete').val(slug);
+        });
+
+        // Modal show sebagai backup
+        $('#delete').on('show.bs.modal', function(e) {
+            var button = $(e.relatedTarget);
+            var slug = button.attr('data-slug');
+            // console.log('slug dari modal:', slug);
+            if (slug) {
+                $('#slug-delete').val(slug);
+            }
         });
     </script>
 

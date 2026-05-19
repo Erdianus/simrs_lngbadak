@@ -316,10 +316,12 @@ class BillingController extends Controller
             ->skip($start)
             ->take($rowPerPage)
             ->get();
+
         $data_arr = [];
         $userId = auth()->id();
         $role = auth()->user()->role_name;
         foreach ($records as $key => $record) {
+            // dd($record->slug);
             $status = $record->is_verified_by_verifikator ? '<span class="badge bg-success">Terverifikasi</span>' : '<span class="badge bg-secondary">Belum Terverifikasi</span>';
             $modify = '
                 <td class="text-end"> 

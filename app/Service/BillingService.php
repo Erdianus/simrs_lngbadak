@@ -109,7 +109,6 @@ class BillingService
         try {
             $bill = Billing::where('slug', $slug)->first();
             $bill->delete();
-            // dd($slug);
             $sp3 = Sp3::findOrFail($bill->sp3_id);
             $billings = $sp3->billings;
             log::info('Billing data inserted: ' . count($billings) . ' records'); // ← tambahkan log

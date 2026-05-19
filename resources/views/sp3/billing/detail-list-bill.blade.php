@@ -154,14 +154,14 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="form-header">
-                        <h3>Delete Billing</h3>
+                        <h3>Delete Deposit Sp3</h3>
                         <p>Are you sure want to delete?</p>
                     </div>
                     <div class="modal-btn delete-action">
                         <div class="row">
                             <form action="{{ route('billing/delete') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="slug" class="e_slug" id = 'slug-delete' value="">
+                                <input type="hidden" name="slug" class="e_slug" id="slug-delete" value="">
                                 <div class="row">
                                     <div class="col-6">
                                         <button type="submit" class="btn btn-primary paid-continue-btn"
@@ -250,18 +250,26 @@
         }
     </script>
     <script>
+        $(document).on('click', '.delete', function() {
+            var slug = $(this).attr('data-slug');
+            // console.log('slug dari click:', slug);
+            $('#slug-delete').val(slug);
+        });
+
+        // Modal show sebagai backup
         $('#delete').on('show.bs.modal', function(e) {
-            console.log('relatedTarget:', e.relatedTarget);
-            console.log('button data:', $(e.relatedTarget).data());
-            var button = $(e.relatedTarget); // tombol yang diklik
-            var slug = button.data('slug');
-            console.log('slug:', slug); // pastikan muncul
-            $(this).find('#slug-delete').val(slug);
+            var button = $(e.relatedTarget);
+            var slug = button.attr('data-slug');
+            // console.log('slug dari modal:', slug);
+            if (slug) {
+                $('#slug-delete').val(slug);
+            }
         });
     </script>
 
     <script>
         $('#cob').on('show.bs.modal', function(e) {
+            e.preventDefault();
             console.log('relatedTarget:', e.relatedTarget);
             console.log('button data:', $(e.relatedTarget).data());
             var button = $(e.relatedTarget); // tombol yang diklik
