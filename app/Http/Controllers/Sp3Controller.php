@@ -157,6 +157,11 @@ class Sp3Controller extends Controller
                 ->with('masterPoli')
                 ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
                 ->whereIn('kode_poli', $this->kode_poli)
+                ->whereNotExists(function ($query) {
+                    $query->selectRaw('1')
+                        ->from('trans_kamar')
+                        ->whereRaw('trans_kamar.no_reg = reg_multi_poli.reg_no');
+                })
                 ->where('eselon', $eslon->nama)
                 ->get()
                 ->groupBy('reg_no')
@@ -291,6 +296,11 @@ class Sp3Controller extends Controller
                 ->with('masterPoli')
                 ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$tglMasuk, $tglKeluar])
                 ->whereIn('kode_poli', $this->kode_poli)
+                ->whereNotExists(function ($query) {
+                    $query->selectRaw('1')
+                        ->from('trans_kamar')
+                        ->whereRaw('trans_kamar.no_reg = reg_multi_poli.reg_no');
+                })
                 ->where('eselon', $eslon->nama)
                 ->get()
                 ->groupBy('reg_no')
@@ -411,6 +421,11 @@ class Sp3Controller extends Controller
                 ->with('masterPoli')
                 ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
                 ->whereIn('kode_poli', $this->kode_poli)
+                ->whereNotExists(function ($query) {
+                    $query->selectRaw('1')
+                        ->from('trans_kamar')
+                        ->whereRaw('trans_kamar.no_reg = reg_multi_poli.reg_no');
+                })
                 ->where('eselon', $sp3->eselon->nama)
                 ->get()
                 ->groupBy('reg_no')

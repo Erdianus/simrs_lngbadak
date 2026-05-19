@@ -84,4 +84,9 @@ class RegMultiPoliSimrs extends Model
     {
         return $this->belongsTo(EselonSimrs::class, 'eselon', 'kode_eselon');
     }
+
+    public function transaksiKamar()
+    {
+        return $this->hasMany(TransaksiKamarSimrs::class, 'no_reg', 'reg_no');
+    }
 }
