@@ -558,6 +558,7 @@ class Sp3Controller extends Controller
     {
         $sp3 = Sp3::where('slug', $slug)->first();
         $cob = $sp3->billings->sum(fn($b) => $b->cob);
+        $jenis_pembayaran = $sp3->ket_pembayaran == 'Pembayaran Biaya' ? 'Pembayaran' : 'Penagihan';
         if ($sp3->jenis_sp3 === 'billing' || $sp3->jenis_sp3 === 'mcu') {
             $deposit = $sp3->billings->sum(fn($b) => $b->deposit);
             $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon) - $deposit;
@@ -593,6 +594,7 @@ class Sp3Controller extends Controller
             'dibuat_oleh' => auth()->user()->rolename != 'Super Admin' ? auth()->user()->name : '',
             'ttd_path' => '',
             'keterangan' => $sp3->keterangan,
+            'jenis_pembayaran' => $jenis_pembayaran
 
         ];
         // dd($data);

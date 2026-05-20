@@ -196,15 +196,19 @@
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Keterangan Pembayaran <span class="login-danger">*</span></label>
-                                            <input type="text"
-                                                class="form-control @error('ket_pembayaran') is-invalid @enderror"
-                                                name="ket_pembayaran" placeholder="Enter INV RS"
-                                                value="{{ $sp3->ket_pembayaran }}">
-                                            @error('ket_pembayaran')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
+                                            <select
+                                                class="form-control select select2 @error('ket_pembayaran') is-invalid @enderror"
+                                                name="ket_pembayaran">
+                                                <option selected disabled>Select Keterangan Pembayaran</option>
+                                                <option value="Penagihan Biaya"
+                                                    {{ $sp3->ket_pembayaran == 'Penagihan Biaya' ? 'selected' : '' }}>
+                                                    Penagihan Biaya
+                                                </option>
+                                                <option value="Pembayaran Biaya"
+                                                    {{ $sp3->ket_pembayaran == 'Pembayaran Biaya' ? 'selected' : '' }}>
+                                                    Pembayaran Biaya
+                                                </option>
+                                            </select>
                                             @error('ket_pembayaran')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>

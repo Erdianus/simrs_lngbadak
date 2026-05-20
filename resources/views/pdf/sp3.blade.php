@@ -80,7 +80,7 @@
     <div class="container">
 
         <div class="title">
-            SURAT PERMINTAAN PROSES PENAGIHAN
+            SURAT PERMINTAAN PROSES {{ strtoupper($data['jenis_pembayaran']) }}
         </div>
 
         <table class = 'medium'>
@@ -131,7 +131,7 @@
         <br><br>
 
         <div class="medium">
-            KETERANGAN PEMBAYARAN:<br>
+            KETERANGAN {{ strtoupper($data['jenis_pembayaran']) }}:<br>
             {{ $data['ket_pembayaran'] . ' ' . $data['layanan'] . ' ' . $data['nama_rs'] . ' ' . $data['range_tgl'] . ' atas nama ' . $data['eselon'] }}
         </div>
 
@@ -156,7 +156,7 @@
                 </td>
             </tr>
             <tr style="background: #bfbcbc">
-                <td><b>JUMLAH PEMBAYARAN</b></td>
+                <td><b>JUMLAH {{ strtoupper($data['jenis_pembayaran']) }}</b></td>
                 <td class="text-left">
                     : <b>Rp {{ number_format($data['jumlah_pembayaran'], 0, ',', '.') }}</b>
                 </td>
@@ -166,7 +166,8 @@
         <div class="line"></div>
 
         <div class="medium">
-            DEMIKIAN UNTUK DAPAT DITERIMA DENGAN BAIK DAN MENJADI ACUAN UNTUK PROSES PENAGIHAN PEMBAYARAN OLEH UNIT YANG
+            DEMIKIAN UNTUK DAPAT DITERIMA DENGAN BAIK DAN MENJADI ACUAN UNTUK PROSES
+            {{ strtoupper($data['jenis_pembayaran']) }} OLEH UNIT YANG
             BAPAK/IBU PIMPIN.
         </div>
         <br>

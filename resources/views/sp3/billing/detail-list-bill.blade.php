@@ -57,7 +57,7 @@
                                             <tr>
                                                 <td><b>Total Tagihan</b></td>
                                                 <td>:
-                                                    {{ 'Rp ' . number_format($sp3->jenis_sp3 === 'tagihan keluar' ? $sp3->total_tagihan : $sp3->total_biaya, 0, ',', '.') }}
+                                                    {{ 'Rp ' . number_format($sp3->total_tagihan, 0, ',', '.') }}
                                                 </td>
                                             </tr>
                                         </table>
