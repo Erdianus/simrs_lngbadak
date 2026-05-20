@@ -164,7 +164,8 @@ class Sp3Service
             Log::info('SP3 updated: ' . $sp3->id);
             DB::commit();
             return [
-                'status' => 'success'
+                'status' => 'success',
+                'message' => 'Berhasil update SP3 Tagihan Keluar'
             ];
         } catch (\Throwable $th) {
             DB::rollBack();

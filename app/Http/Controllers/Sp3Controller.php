@@ -361,7 +361,7 @@ class Sp3Controller extends Controller
     {
         $validated = $request->validated();
         $updateSp3 = Sp3Service::updateSp3TagihanKeluar($validated, $slug);
-        if ($updateSp3 === 'success') {
+        if ($updateSp3['status'] === 'success') {
             Toastr::success('Berhasil Mengupdate SP3 :)', 'Success');
             return redirect()->route('sp3-verifikasi/list');
         } else {
