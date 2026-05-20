@@ -208,11 +208,12 @@ class BillingService
             ];
             // dd($billingData);
             Billing::create($billingData);
+            $sp3->refresh();
             $billings = $sp3->billings;
             $totalCob = $billings->sum(fn($b) => $b->cob);
             $totalDeposit = $billings->sum(fn($b) => $b->deposit);
             $totalBiayaEselon = $billings->sum(fn($b) => $b->total_biaya_eselon);
-            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->total_biaya_eselon) : ($totalBiayaEselon - $totalDeposit) - $totalCob;
+            $totalTagihan = $totalDeposit - $totalCob;
             $sp3->update([
                 'total_tagihan' => $totalTagihan,
             ]);
