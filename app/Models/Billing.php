@@ -116,8 +116,21 @@ class Billing extends Model
             ->where('no_reg', $this->no_registrasi)
             ->where('payment', NULL)
             ->get();
+        $dataEmbalace = [];
 
-        $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + ($embalace->sum('ppn'));
+        // Logic utama tanpa dibatasi no_registrasi
+        if ($embalace->count() == 0) {
+            $dataEmbalace['ppn'] = $resepRawatJalan->sum(fn($b) => $b->harga_jual * $b->jumlah_dijual) * (11 / 100);
+        } else {
+            $dataEmbalace['ppn'] = $embalace->sum(fn($b) => $b->ppn);
+        }
+
+        // // Block debug taruh SETELAH assignment, bisa dihapus kalau sudah selesai debug
+        // if ($this->no_registrasi == 'A052602758') {
+        //     dd((int)ceil($dataEmbalace['ppn']));
+        // }
+
+        $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + (int) $dataEmbalace['ppn'];
         if ($resepRawatInap->count() > 0 || $kamar->count() > 0) {
             $ref_adm = ReferensiAdmSimrs::select(['besar_fee', 'max_besar'])->where('kode_eselon', $this->eselon->nama)->first();
             $biayaAdm = ceil($totalEselon * ($ref_adm->besar_fee / 100));
@@ -133,9 +146,10 @@ class Billing extends Model
 
     public function countDeposit(): int
     {
-        $deposit = DepositKamarSimrs::select('jumlah_deposit')->where('no_reg', $this->no_registrasi)->first();
+        $deposit = DepositKamarSimrs::select('jumlah_deposit')->where('no_reg', $this->no_registrasi)->get();
         if ($deposit) {
-            return $deposit->jumlah_deposit;
+            $total = $deposit->sum(fn($b) => $b->jumlah_deposit);
+            return $total;
         }
         return 0;
     }
@@ -183,9 +197,9 @@ class Billing extends Model
 
     public function getDepositAttribute()
     {
-        $deposit = DepositKamarSimrs::select('jumlah_deposit')->where('no_reg', $this->no_registrasi)->first();
+        $deposit = DepositKamarSimrs::select('jumlah_deposit')->where('no_reg', $this->no_registrasi)->get();
         if ($deposit) {
-            return $deposit->jumlah_deposit;
+            return $deposit->sum(fn($b) => $b->jumlah_deposit);
         }
         return 0;
     }

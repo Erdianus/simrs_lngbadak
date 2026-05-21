@@ -763,9 +763,13 @@ class Sp3Controller extends Controller
                 ->orWhereHas('registrasi', function ($q) use ($searchValue) {
                     $q->where('nama', 'like', '%' . $searchValue . '%');
                 });
-        })->count();
+        })
+            ->get()
+            ->unique('no_reg')
+            ->count();
 
         $records = DepositKamarSimrs::with('registrasi')
+            ->orderByDesc('update_date')
             ->where(function ($query) use ($searchValue) {
                 $query->where('no_reg', 'like', '%' . $searchValue . '%')
                     ->orWhere('jumlah_deposit', 'like', '%' . $searchValue . '%')
@@ -778,10 +782,10 @@ class Sp3Controller extends Controller
                     });
             })
             ->orderBy($columnName, $columnSortOrder)
-            ->orderByDesc('update_date')
             ->skip($start)
             ->take($rowPerPage)
-            ->get();
+            ->get()
+            ->unique('no_reg');
         $data_arr = [];
         $sp3Slug = $request->get('sp3_slug');
         foreach ($records as $key => $record) {
@@ -796,10 +800,12 @@ class Sp3Controller extends Controller
                     </div>
                 </td>
             ';
+            $deposit =  DepositKamarSimrs::where('no_reg', $record->no_reg)->get();
+            $jumlah_deposit = (int) ceil($deposit->sum(fn($b) => $b->jumlah_deposit));
             $data_arr[] = [
                 "no_reg"         => $record->no_reg,
                 "nama"         => $record->registrasi->nama ?? '-',
-                "jumlah_deposit"     => 'Rp ' . number_format($record->jumlah_deposit, 0, ',', '.'),
+                "jumlah_deposit"     => 'Rp ' . number_format($jumlah_deposit, 0, ',', '.'),
                 "update_date"    => \Carbon\Carbon::parse($record->update_date)->translatedFormat('d M Y'),
                 // "no_deposit"    => $record->no_deposit,
                 // "cara_bayar"    => $record->cara_bayar,

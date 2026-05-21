@@ -26,6 +26,7 @@ class BillingService
                 $tempBilling->eslon_id = $eselon->id;
 
                 // Hitung sekali, simpan hasilnya
+                // dd($tempBilling);
                 $totalBiayaEselon = (int)ceil($tempBilling->countTotalBiayaEselon());
                 $deposit          = (int)ceil($tempBilling->countDeposit());
 
@@ -191,7 +192,7 @@ class BillingService
         }
     }
 
-    public static function createBillDeposito($sp3, $deposit)
+    public static function createBillDeposito($sp3, $deposit, $totalDeposit)
     {
         DB::beginTransaction();
         try {
@@ -204,14 +205,13 @@ class BillingService
                 'tanggal_masuk'  => $deposit->update_date,
                 'tanggal_keluar' => $deposit->update_date,
                 'keterangan' => $deposit->keterangan,
-                'biaya' => (int) ceil($deposit->jumlah_deposit)
+                'biaya_deposit' => (int) ceil($totalDeposit)
             ];
-            // dd($billingData);
             Billing::create($billingData);
             $sp3->refresh();
             $billings = $sp3->billings;
             $totalCob = $billings->sum(fn($b) => $b->cob);
-            $totalDeposit = $billings->sum(fn($b) => $b->deposit);
+            $totalDeposit = $billings->sum(fn($b) => $b->biaya_deposit);
             $totalBiayaEselon = $billings->sum(fn($b) => $b->total_biaya_eselon);
             $totalTagihan = $totalDeposit - $totalCob;
             $sp3->update([

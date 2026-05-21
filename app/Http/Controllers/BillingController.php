@@ -105,7 +105,12 @@ class BillingController extends Controller
 
     public function storeDeposit($slugSp3, $noReg)
     {
-        $deposit = DepositKamarSimrs::where('no_reg', $noReg)->first();
+        $allDeposit = DepositKamarSimrs::where('no_reg', $noReg)->get();
+        $deposit = $allDeposit->unique(function ($item) {
+            return strtoupper($item->no_reg);
+        });
+        $totalDeposit = $allDeposit->sum(fn($b) => $b->jumlah_deposit);
+        $deposit = $deposit->unique('no_reg')->first();
         $sp3 = Sp3::with('billings')->where('slug', $slugSp3)->first();
         $billSp3 = $sp3->billings()->where('no_registrasi', $noReg)->first();
         if (!is_null($billSp3)) {
@@ -114,8 +119,7 @@ class BillingController extends Controller
                 'message' => 'Deposit sudah diinputkan.'
             ]);
         }
-
-        $createDeposit = BillingService::createBillDeposito($sp3, $deposit);
+        $createDeposit = BillingService::createBillDeposito($sp3, $deposit, $totalDeposit);
         if ($createDeposit['status'] === 'success') {
             return response()->json([
                 'success' => true,
