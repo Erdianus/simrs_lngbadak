@@ -564,7 +564,7 @@ class Sp3Controller extends Controller
             $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon) - $deposit;
             $jumlah_pembayaran = $tagihan - $cob;
         } else if ($sp3->jenis_sp3 === 'deposito') {
-            $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon);
+            $tagihan = $sp3->billings->sum(fn($b) => $b->deposit);
             $deposit = 0;
             $jumlah_pembayaran = $tagihan - $cob;
         } else {
