@@ -561,10 +561,10 @@ class Sp3Controller extends Controller
         $jenis_pembayaran = $sp3->ket_pembayaran == 'Pembayaran Biaya' ? 'Pembayaran' : 'Penagihan';
         if ($sp3->jenis_sp3 === 'billing' || $sp3->jenis_sp3 === 'mcu') {
             $deposit = $sp3->billings->sum(fn($b) => $b->deposit);
-            $tagihan = $sp3->billings->sum(fn($b) => $b->total_biaya_eselon) - $deposit;
+            $tagihan = $sp3->total_tagihan;
             $jumlah_pembayaran = $tagihan - $cob;
         } else if ($sp3->jenis_sp3 === 'deposito') {
-            $tagihan = $sp3->billings->sum(fn($b) => $b->deposit);
+            $tagihan = $sp3->billings->sum(fn($b) => $b->biaya_deposit);
             $deposit = 0;
             $jumlah_pembayaran = $tagihan - $cob;
         } else {
@@ -595,7 +595,6 @@ class Sp3Controller extends Controller
             'ttd_path' => '',
             'keterangan' => $sp3->keterangan,
             'jenis_pembayaran' => $jenis_pembayaran
-
         ];
         // dd($data);
         $pdf = Pdf::loadView('pdf.sp3', [

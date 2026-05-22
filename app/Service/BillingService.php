@@ -12,7 +12,6 @@ class BillingService
 {
     public static function createBilling($getDataReg, $sp3, $eselon)
     {
-        // dd($getDataReg);
         DB::beginTransaction();
         try {
             $billingData = $getDataReg->map(function ($value) use ($sp3, $eselon) {
@@ -25,8 +24,6 @@ class BillingService
                 $tempBilling = new Billing(['no_registrasi' => $value->reg_no]);
                 $tempBilling->eslon_id = $eselon->id;
 
-                // Hitung sekali, simpan hasilnya
-                // dd($tempBilling);
                 $totalBiayaEselon = (int)ceil($tempBilling->countTotalBiayaEselon());
                 $deposit          = (int)ceil($tempBilling->countDeposit());
 
@@ -73,8 +70,8 @@ class BillingService
         try {
             $billing = Billing::where('slug', $slug)->first();
             $billing->update([
-                'total_biaya_eselon' => $billing->countTotalBiayaEselon(),
-                'deposit' => $billing->countDeposit()
+                'biaya_eselon' => $billing->countTotalBiayaEselon(),
+                'biaya_deposit' => $billing->countDeposit()
             ]);
             DB::commit();
             return [
@@ -245,7 +242,7 @@ class BillingService
                 'tanggal_masuk'  => $mcu->tanggal_registrasi,
                 'tanggal_keluar' => $mcu->tanggal_registrasi,
                 'keterangan' => $mcu->keterangan,
-                'biaya' => (int) ceil($mcu->total_biaya_eselon)
+                'biaya_eselon' => (int) ceil($mcu->total_biaya_eselon)
             ];
             // dd($billingData);
             Billing::create($billingData);
