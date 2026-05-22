@@ -242,15 +242,16 @@ class BillingService
                 'tanggal_masuk'  => $mcu->tanggal_registrasi,
                 'tanggal_keluar' => $mcu->tanggal_registrasi,
                 'keterangan' => $mcu->keterangan,
+                'biaya_deposit' => (int) ceil($mcu->deposit),
                 'biaya_eselon' => (int) ceil($mcu->total_biaya_eselon)
             ];
             // dd($billingData);
             Billing::create($billingData);
             $billings = Billing::where('sp3_id', $sp3->id)->get();
             $totalCob = $billings->sum(fn($b) => $b->cob);
-            $totalDeposit = $billings->sum(fn($b) => $b->deposit);
-            $totalBiayaEselon = $billings->sum(fn($b) => $b->total_biaya_eselon);
-            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->total_biaya_eselon) : ($totalBiayaEselon - $totalDeposit) - $totalCob;
+            $totalDeposit = $billings->sum(fn($b) => $b->biaya_deposit);
+            $totalBiayaEselon = $billings->sum(fn($b) => $b->biaya_eselon);
+            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->sum(fn($b) => $b->biaya_eselon) : ($totalBiayaEselon - $totalDeposit) - $totalCob;
             $sp3->update([
                 'total_tagihan' => $totalTagihan,
             ]);
@@ -280,9 +281,9 @@ class BillingService
             ]);
             $sp3 = $bill->sp3;
             $billings = Billing::where('sp3_id', $sp3->id)->get();
-            $totalDeposit = $billings->sum(fn($b) => $b->deposit);
+            $totalDeposit = $billings->sum(fn($b) => $b->biaya_deposit);
             $totalCob = $billings->sum(fn($b) => $b->cob);
-            $totalBiayaEselon = $billings->sum(fn($b) => $sp3->jenis_sp3 === 'deposito' ? $b->biaya : $b->total_biaya_eselon);
+            $totalBiayaEselon = $billings->sum(fn($b) => $sp3->jenis_sp3 === 'deposito' ? $b->biaya_deposit : $b->biaya_eselon);
             log::info('Billing data inserted: ' . count($billings) . ' records'); // ← tambahkan log
             $totalTagihan = ($sp3->jenis_sp3 === 'deposito' ? $totalBiayaEselon : $totalBiayaEselon - $totalDeposit) - $totalCob;
             $sp3->update([

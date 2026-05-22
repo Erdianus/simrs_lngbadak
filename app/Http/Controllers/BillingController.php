@@ -134,7 +134,7 @@ class BillingController extends Controller
 
     public function storeMcu($slugSp3, $noReg)
     {
-        $deposit = RegMultiPoliSimrs::where('reg_no', $noReg)->first();
+        $bill = RegMultiPoliSimrs::where('reg_no', $noReg)->first();
         $sp3 = Sp3::with('billings')->where('slug', $slugSp3)->first();
         $billSp3 = $sp3->billings()->where('no_registrasi', $noReg)->first();
         if (!is_null($billSp3)) {
@@ -143,7 +143,7 @@ class BillingController extends Controller
                 'message' => 'Billing sudah diinputkan.'
             ]);
         }
-        $createBillMcu = BillingService::createBillMcu($sp3, $deposit);
+        $createBillMcu = BillingService::createBillMcu($sp3, $bill);
         if ($createBillMcu['status'] === 'success') {
             return response()->json([
                 'success' => true,
