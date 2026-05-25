@@ -42,13 +42,13 @@ class BillingService
                 ];
             })->toArray();
             Billing::insert($billingData);
-            $billings = Billing::where('sp3_id', $sp3->id)
+            $billing = Billing::where('sp3_id', $sp3->id)
                 ->selectRaw('
                     SUM(biaya_deposit) as total_deposit,
                     SUM(biaya_eselon) as total_eselon    
                 ')
                 ->first();
-            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? $billings->total_eselon : $billings->total_eselon - $billings->total_deposit;
+            $totalTagihan = $sp3->jenis_sp3 === 'deposito' ? (int)ceil($billing->total_eselon) : (int)ceil($billing->total_eselon - $billing->total_deposit);
             $sp3->update([
                 'total_tagihan' => (int)$totalTagihan,
                 'total_kunjungan' => $sp3->total_kunjungan,

@@ -124,13 +124,7 @@ class Billing extends Model
         } else {
             $dataEmbalace['ppn'] = $embalace->sum(fn($b) => $b->ppn);
         }
-
-        // // Block debug taruh SETELAH assignment, bisa dihapus kalau sudah selesai debug
-        // if ($this->no_registrasi == 'A052602758') {
-        //     dd((int)ceil($dataEmbalace['ppn']));
-        // }
-
-        $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + (int) $dataEmbalace['ppn'];
+        $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + (int) ceil($dataEmbalace['ppn']);
         if ($resepRawatInap->count() > 0 || $kamar->count() > 0) {
             $ref_adm = ReferensiAdmSimrs::select(['besar_fee', 'max_besar'])->where('kode_eselon', $this->eselon->nama)->first();
             $biayaAdm = ceil($totalEselon * ($ref_adm->besar_fee / 100));
@@ -141,6 +135,7 @@ class Billing extends Model
                 $totalEselon = $total;
             }
         }
+
         return $totalEselon;
     }
 
@@ -192,6 +187,7 @@ class Billing extends Model
                 $totalEselon = $total;
             }
         }
+
         return $totalEselon;
     }
 
