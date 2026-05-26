@@ -215,6 +215,7 @@
             <tr>
                 <td class="text-left">
                     <div class="box" style="width: 60px; height: 12px;">
+                        REVISI {{ $data['revisi'] }}
                     </div>
                 </td>
                 <td class="text-right">

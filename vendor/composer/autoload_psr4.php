@@ -75,6 +75,7 @@ return array(
     'Laravel\\Sail\\' => array($vendorDir . '/laravel/sail/src'),
     'Laravel\\Prompts\\' => array($vendorDir . '/laravel/prompts/src'),
     'LaravelPdoOdbc\\' => array($vendorDir . '/yoramdelangen/laravel-pdo-odbc/src'),
+    'JasonGuru\\LaravelMakeRepository\\' => array($vendorDir . '/jason-guru/laravel-make-repository/src'),
     'Illuminate\\Support\\' => array($vendorDir . '/laravel/framework/src/Illuminate/Macroable', $vendorDir . '/laravel/framework/src/Illuminate/Collections', $vendorDir . '/laravel/framework/src/Illuminate/Conditionable'),
     'Illuminate\\Foundation\\Auth\\' => array($vendorDir . '/laravel/ui/auth-backend'),
     'Illuminate\\' => array($vendorDir . '/laravel/framework/src/Illuminate'),

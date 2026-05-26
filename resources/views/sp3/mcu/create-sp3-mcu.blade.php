@@ -73,20 +73,6 @@
                                         </div>
                                     </div>
                                     <div class="col-12 col-sm-4">
-                                        <div class="form-group local-forms calendar-icon">
-                                            <label>Tanggal Terima Keuangan <span class="login-danger">*</span></label>
-                                            <input type="text"
-                                                class="form-control datetimepicker @error('tgl_terima_keu') is-invalid @enderror"
-                                                name="tgl_terima_keu" placeholder="DD-MM-YYYY"
-                                                value="{{ old('tgl_terima_keu') }}">
-                                            @error('tgl_terima_keu')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Kode Tagihan <span class="login-danger">*</span></label>
                                             <select
@@ -200,8 +186,8 @@
                                         <div class="form-group local-forms">
                                             <label>Nama RS / Klinik Dokter <span class="login-danger">*</span></label>
                                             <input type="text"
-                                                class="form-control @error('nama_rs') is-invalid @enderror"
-                                                name="nama_rs" placeholder="Enter Nama RS/Klinik Dokter"
+                                                class="form-control @error('nama_rs') is-invalid @enderror" name="nama_rs"
+                                                placeholder="Enter Nama RS/Klinik Dokter"
                                                 value="{{ old('nama_rs', 'RS LNG BADAK') }}">
                                             @error('nama_rs')
                                                 <span class="invalid-feedback" role="alert">
@@ -223,6 +209,8 @@
                                             @enderror
                                         </div>
                                     </div>
+                                </div>
+                                <div class = "row">
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms calendar-icon">
                                             <label>Dari Tanggal <span class="login-danger">*</span></label>

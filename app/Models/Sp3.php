@@ -41,6 +41,8 @@ class Sp3 extends Model
         'is_approved_by_verifikator',
         'is_approved_by_keuangan',
         'slug',
+        'revisi',
+        'alasan_rev'
     ];
 
     protected $appends = [

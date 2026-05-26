@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1c5343c09780bce5f5f1e3e06bd6d31e089687a4',
+        'reference' => 'f58c43ba906d035e184f86e9084ee538dff5f4ac',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -427,6 +427,15 @@
                 0 => 'v10.48.25',
             ),
         ),
+        'jason-guru/laravel-make-repository' => array(
+            'pretty_version' => '0.0.3',
+            'version' => '0.0.3.0',
+            'reference' => '693d3d189c0b19262a896eb888c3a7b870a2de43',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../jason-guru/laravel-make-repository',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
         'kodova/hamcrest-php' => array(
             'dev_requirement' => true,
             'replaced' => array(
@@ -445,7 +454,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1c5343c09780bce5f5f1e3e06bd6d31e089687a4',
+            'reference' => 'f58c43ba906d035e184f86e9084ee538dff5f4ac',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

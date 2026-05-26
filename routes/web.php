@@ -144,7 +144,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
 
         //sp3 Keuangan
-        Route::get('sp3-keuangan/list', 'index')->middleware('auth')->name('sp3-keuangan/list'); // list sp3
+        Route::get('sp3/receive/{slug}', 'receiveSp3')->middleware('auth'); // receive sp3
+        Route::post('sp3/revisi/{slug}', 'revisiSp3')->middleware('auth')->name('sp3/revisi'); // revisi sp3
+        Route::get('sp3-keuangan/list', 'indexKeu')->middleware('auth')->name('sp3-keuangan/list'); // list sp3
         Route::get('get-sp3-keuangan-data', 'getSp3KeuanganData')->middleware('auth')->name('get-sp3-keuangan-data'); // get data sp3
     });
 

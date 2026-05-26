@@ -81,20 +81,6 @@
                                         </div>
                                     </div>
                                     <div class="col-12 col-sm-4">
-                                        <div class="form-group local-forms calendar-icon">
-                                            <label>Tanggal Terima Keuangan <span class="login-danger">*</span></label>
-                                            <input type="text"
-                                                class="form-control datetimepicker @error('tgl_terima_keu') is-invalid @enderror"
-                                                name="tgl_terima_keu" placeholder="DD-MM-YYYY"
-                                                value="{{ $sp3->tgl_terima_keu ? \Carbon\Carbon::parse($sp3->tgl_terima_keu)->format('d-m-Y') : '' }}">
-                                            @error('tgl_terima_keu')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Kode Tagihan <span class="login-danger">*</span></label>
                                             <select
@@ -170,8 +156,7 @@
                                         <div class="col-12 col-sm-4">
                                             <div class="form-group local-forms">
                                                 <label>Kunjungan <span class="login-danger">*</span></label>
-                                                <input type="number" name="kunjungan" id="kunjungan"
-                                                    class="form-control"
+                                                <input type="number" name="kunjungan" id="kunjungan" class="form-control"
                                                     value="{{ $sp3->kunjungan ?? old('kunjungan', 0) }}">
                                                 @error('kunjungan')
                                                     <span class="invalid-feedback" role="alert">
@@ -241,9 +226,8 @@
                                         <div class="form-group local-forms">
                                             <label>Nama RS / Klinik Dokter <span class="login-danger">*</span></label>
                                             <input type="text"
-                                                class="form-control @error('nama_rs') is-invalid @enderror"
-                                                name="nama_rs" placeholder="Enter Nama RS/Klinik Dokter"
-                                                value="{{ $sp3->nama_rs }}">
+                                                class="form-control @error('nama_rs') is-invalid @enderror" name="nama_rs"
+                                                placeholder="Enter Nama RS/Klinik Dokter" value="{{ $sp3->nama_rs }}">
                                             @error('nama_rs')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -287,6 +271,8 @@
                                             </div>
                                         </div>
                                     @endif
+                                </div>
+                                <div class = "row">
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms calendar-icon">
                                             <label>Tanggal Masuk <span class="login-danger">*</span></label>

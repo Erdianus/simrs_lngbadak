@@ -78,7 +78,7 @@
                                             <tr>
                                                 <td><b>Total Biaya Eselon</b></td>
                                                 <td>:
-                                                    <b>{{ 'Rp ' . number_format($billing->total_biaya_eselon, 0, ',', '.') }}</b>
+                                                    <b>{{ 'Rp ' . number_format($billing->total_tagihan ?? $billing->total_biaya_eselon, 0, ',', '.') }}</b>
                                                 </td>
                                             </tr>
                                         </table>
