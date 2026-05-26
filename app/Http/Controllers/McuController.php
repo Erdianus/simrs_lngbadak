@@ -36,7 +36,7 @@ class McuController extends Controller
             : 'desc';
 
         // ✅ Base query — reusable
-        $baseQuery = RegMultiPoliSimrs::whereIn('kode_poli', ['MCU01', 'LAB01'])
+        $baseQuery = RegMultiPoliSimrs::whereIn('kode_poli', ['MCU01', 'LAB01', 'TND01'])
             ->whereRaw("DATE(tanggal_registrasi) BETWEEN ? AND ?", [$sp3->tgl_masuk, $sp3->tgl_keluar])
             ->where('eselon', $sp3->eselon->nama);
 
