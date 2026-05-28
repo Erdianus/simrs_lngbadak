@@ -17,12 +17,12 @@
             </div>
             {{-- message --}}
             {!! Toastr::message() !!}
-            <div class="row align-items-start mb-3">
+            {{-- <div class="row align-items-start mb-3">
                 <div class="col">
                     <a href="{{ route('sp3-verifikasi/list') }}" type="button" class="btn btn-primary"><i
                             class="fa fa-arrow-left" aria-hidden="true"></i> Kembali</a>
                 </div>
-            </div>
+            </div> --}}
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card card-table comman-shadow">
@@ -190,7 +190,7 @@
         </div>
     </div>
 
-    {{-- modal add COB --}}
+    {{-- Modal Add COB --}}
     <div class="modal custom-modal fade" id="cob" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -198,21 +198,26 @@
                     <div class="form-header">
                         <h3>Input COB Billing</h3>
                     </div>
+
                     <div class="modal-btn delete-action">
-                        <div class="row">
-                            <form id="form-cob" action="{{ route('billing/add/save/cob') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="slug" id="slug-cob" value="">
+                        <form id="form-cob" action="{{ route('billing/add/save/cob') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="slug" id="slug-cob" value="">
+
+                            <div class="row">
                                 <div class="col-12">
                                     <div class="form-group local-forms">
-                                        <label>Total COB <span class="login-danger">*</span></label>
-                                        <input type="text"
+                                        <label>
+                                            Total COB
+                                            <span class="login-danger">*</span>
+                                        </label>
+                                        <input type="text" name="total_cob_display" id="total_cob_display"
                                             class="form-control @error('total_cob') is-invalid @enderror"
-                                            name="total_cob_display" id="total_cob_display" placeholder="Rp 0"
+                                            placeholder="Rp 0"
                                             value="{{ old('total_cob') ? number_format(old('total_cob'), 0, ',', '.') : '' }}"
                                             autocomplete="off">
 
-                                        {{-- Hidden input yang dikirim sebagai integer --}}
+                                        {{-- Hidden input integer --}}
                                         <input type="hidden" name="total_cob" id="total_cob"
                                             value="{{ old('total_cob') }}">
 
@@ -223,19 +228,23 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <button type="submit" class="btn btn-primary paid-continue-btn"
-                                            style="width: 100%;">Add</button>
-                                    </div>
-                                    <div class="col-6">
-                                        <a data-bs-dismiss="modal" class="btn btn-primary paid-cancel-btn">Cancel
-                                        </a>
-                                    </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <button type="submit" class="btn btn-primary paid-continue-btn w-100">
+                                        Simpan
+                                    </button>
                                 </div>
-                            </form>
-                        </div>
+                                <div class="col-6">
+                                    <a data-bs-dismiss="modal" class="btn btn-primary paid-cancel-btn w-100">
+                                        Batal
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -279,12 +288,9 @@
 
     <script>
         $('#cob').on('show.bs.modal', function(e) {
-            e.preventDefault();
-            console.log('relatedTarget:', e.relatedTarget);
-            console.log('button data:', $(e.relatedTarget).data());
-            var button = $(e.relatedTarget); // tombol yang diklik
-            var slug = button.data('slug');
-            console.log('slug:', slug); // pastikan muncul
+            var $button = $(e.relatedTarget);
+            var slug = $button.data('slug');
+
             $(this).find('#slug-cob').val(slug);
         });
     </script>

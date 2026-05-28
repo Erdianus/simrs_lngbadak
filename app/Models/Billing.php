@@ -127,7 +127,7 @@ class Billing extends Model
         $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + (int) ceil($dataEmbalace['ppn']);
         if ($resepRawatInap->count() > 0 || $kamar->count() > 0) {
             $ref_adm = ReferensiAdmSimrs::select(['besar_fee', 'max_besar'])->where('kode_eselon', $this->eselon->nama)->first();
-            $biayaAdm = ceil($totalEselon * ($ref_adm->besar_fee / 100));
+            $biayaAdm = $kamar->sum('tarif_sewa') == 0 ? 0 : ceil($totalEselon * ($ref_adm->besar_fee / 100));
             $total = $totalEselon + $biayaAdm;
             if ($biayaAdm > $ref_adm->max_besar) {
                 $totalEselon = $totalEselon + ($ref_adm->max_besar);
@@ -179,7 +179,7 @@ class Billing extends Model
         $totalEselon = ($tindakan->sum('total_biaya')) + ($alkes->sum('total_biaya')) + ($resepRawatJalan->sum('total_biaya')) + ($resepRawatInap->sum('total_biaya')) + ($kamar->sum('total_biaya')) + ($embalace->sum('ppn'));
         if ($resepRawatInap->count() > 0 || $kamar->count() > 0) {
             $ref_adm = ReferensiAdmSimrs::select(['besar_fee', 'max_besar'])->where('kode_eselon', $this->eselon->nama)->first();
-            $biayaAdm = ceil($totalEselon * ($ref_adm->besar_fee / 100));
+            $biayaAdm = $kamar->sum('tarif_sewa') == 0 ? 0 : ceil($totalEselon * ($ref_adm->besar_fee / 100));
             $total = $totalEselon + $biayaAdm;
             if ($biayaAdm > $ref_adm->max_besar) {
                 $totalEselon = $totalEselon + ($ref_adm->max_besar);
