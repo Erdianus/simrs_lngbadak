@@ -219,6 +219,10 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
             'Laravel\\Prompts\\' => 16,
             'LaravelPdoOdbc\\' => 15,
         ),
+        'J' =>
+        array (
+            'JasonGuru\\LaravelMakeRepository\\' => 32,
+        ),
         'I' =>
         array (
             'Illuminate\\Support\\' => 19,
@@ -554,6 +558,10 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
         array (
             0 => __DIR__ . '/..' . '/yoramdelangen/laravel-pdo-odbc/src',
         ),
+        'JasonGuru\\LaravelMakeRepository\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/jason-guru/laravel-make-repository/src',
+        ),
         'Illuminate\\Support\\' =>
         array (
             0 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Macroable',
@@ -702,6 +710,7 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
         'App\\Http\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Http/Controllers/HomeController.php',
         'App\\Http\\Controllers\\InvoiceController' => __DIR__ . '/../..' . '/app/Http/Controllers/InvoiceController.php',
         'App\\Http\\Controllers\\LayananController' => __DIR__ . '/../..' . '/app/Http/Controllers/LayananController.php',
+        'App\\Http\\Controllers\\McuController' => __DIR__ . '/../..' . '/app/Http/Controllers/McuController.php',
         'App\\Http\\Controllers\\MenuController' => __DIR__ . '/../..' . '/app/Http/Controllers/MenuController.php',
         'App\\Http\\Controllers\\PerihalTagihanController' => __DIR__ . '/../..' . '/app/Http/Controllers/PerihalTagihanController.php',
         'App\\Http\\Controllers\\Setting' => __DIR__ . '/../..' . '/app/Http/Controllers/Setting.php',
@@ -742,6 +751,7 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
         'App\\Models\\Menu' => __DIR__ . '/../..' . '/app/Models/Menu.php',
         'App\\Models\\PerihalTagihan' => __DIR__ . '/../..' . '/app/Models/PerihalTagihan.php',
         'App\\Models\\Simrs\\BillingSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/BillingSimrs.php',
+        'App\\Models\\Simrs\\DepositKamarSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/DepositKamarSimrs.php',
         'App\\Models\\Simrs\\EselonSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/EselonSimrs.php',
         'App\\Models\\Simrs\\FarmalkesSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/FarmalkesSimrs.php',
         'App\\Models\\Simrs\\KabupatenSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/KabupatenSimrs.php',
@@ -749,12 +759,14 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
         'App\\Models\\Simrs\\KipKirimanSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/KipKirimanSimrs.php',
         'App\\Models\\Simrs\\KuKodeEselonGroupSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/KuKodeEselonGroupSimrs.php',
         'App\\Models\\Simrs\\KuKodeEselonSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/KuKodeEselonSimrs.php',
+        'App\\Models\\Simrs\\MasterPoliSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/MasterPoliSimrs.php',
         'App\\Models\\Simrs\\MasterTindakanPerusahaanSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/MasterTindakanPerusahaanSimrs.php',
         'App\\Models\\Simrs\\MasterTindakanSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/MasterTindakanSimrs.php',
         'App\\Models\\Simrs\\PasienSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/PasienSimrs.php',
         'App\\Models\\Simrs\\PropinsiSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/PropinsiSimrs.php',
         'App\\Models\\Simrs\\ReferensiAdmSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/ReferensiAdmSimrs.php',
         'App\\Models\\Simrs\\RegMultiPoliSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/RegMultiPoliSimrs.php',
+        'App\\Models\\Simrs\\RegSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/RegSimrs.php',
         'App\\Models\\Simrs\\TindakanSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/TindakanSimrs.php',
         'App\\Models\\Simrs\\TransaksiAlkesSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/TransaksiAlkesSimrs.php',
         'App\\Models\\Simrs\\TransaksiEmbalaceSimrs' => __DIR__ . '/../..' . '/app/Models/Simrs/TransaksiEmbalaceSimrs.php',
@@ -968,6 +980,7 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
         'DASPRiD\\Enum\\Exception\\UnserializeNotSupportedException' => __DIR__ . '/..' . '/dasprid/enum/src/Exception/UnserializeNotSupportedException.php',
         'DASPRiD\\Enum\\NullValue' => __DIR__ . '/..' . '/dasprid/enum/src/NullValue.php',
         'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
+        'Database\\Seeders\\AddNewEselonSeeder' => __DIR__ . '/../..' . '/database/seeders/AddNewEselonSeeder.php',
         'Database\\Seeders\\BillingSeeder' => __DIR__ . '/../..' . '/database/seeders/BillingSeeder.php',
         'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
         'Database\\Seeders\\EslonSeeder' => __DIR__ . '/../..' . '/database/seeders/EslonSeeder.php',
@@ -3213,6 +3226,11 @@ class ComposerStaticInitf0a56bfd606c1903d605f2aea8728a14
         'Illuminate\\View\\ViewFinderInterface' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewFinderInterface.php',
         'Illuminate\\View\\ViewName' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewName.php',
         'Illuminate\\View\\ViewServiceProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewServiceProvider.php',
+        'JasonGuru\\LaravelMakeRepository\\Exceptions\\GeneralException' => __DIR__ . '/..' . '/jason-guru/laravel-make-repository/src/exceptions/GeneralException.php',
+        'JasonGuru\\LaravelMakeRepository\\MakeRepository' => __DIR__ . '/..' . '/jason-guru/laravel-make-repository/src/MakeRepository.php',
+        'JasonGuru\\LaravelMakeRepository\\RepositoryServiceProvider' => __DIR__ . '/..' . '/jason-guru/laravel-make-repository/src/RepositoryServiceProvider.php',
+        'JasonGuru\\LaravelMakeRepository\\Repository\\BaseRepository' => __DIR__ . '/..' . '/jason-guru/laravel-make-repository/src/repository/BaseRepository.php',
+        'JasonGuru\\LaravelMakeRepository\\Repository\\RepositoryContract' => __DIR__ . '/..' . '/jason-guru/laravel-make-repository/src/repository/RepositoryContract.php',
         'LaravelPdoOdbc\\Contracts\\OdbcDriver' => __DIR__ . '/..' . '/yoramdelangen/laravel-pdo-odbc/src/Contracts/OdbcDriver.php',
         'LaravelPdoOdbc\\Flavours\\Snowflake\\Builders\\Schema' => __DIR__ . '/..' . '/yoramdelangen/laravel-pdo-odbc/src/Flavours/Snowflake/Builders/Schema.php',
         'LaravelPdoOdbc\\Flavours\\Snowflake\\Concerns\\GrammarHelper' => __DIR__ . '/..' . '/yoramdelangen/laravel-pdo-odbc/src/Flavours/Snowflake/Concerns/GrammarHelper.php',

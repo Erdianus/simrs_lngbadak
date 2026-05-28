@@ -26,7 +26,7 @@ class Sp3Request extends FormRequest
             'tgl_sp3' => ['required', 'date'],
             'jenis_surat' => ['required', 'string'],
             'nomor_tagihan' => ['required', 'string'],
-            'tgl_terima_keu' => ['required', 'date'],
+            // 'tgl_terima_keu' => ['required', 'date'],
             'perihal_tagihan_id' => ['required', 'integer'],
             'ket_inv_pasien' => ['required', 'string'],
             'ket_inv_rs' => ['required', 'string'],
