@@ -74,11 +74,11 @@ class Sp3Service
             $modify = '
                 <td class="text-end"> 
                     <div class="actions">
-                        <a href="' . url('sp3/detail/' . $record->slug) . '" class="btn btn-sm bg-success-light">
+                        <a href="' . url('sp3-verifikasi/detail/' . $record->slug) . '" class="btn btn-sm bg-success-light">
                             <i class="far fa-eye me-2"></i>
                         </a>
                         ' . ($record->is_approved_by_verifikator != true ? '
-                        <a href="' . url('sp3/edit/' . $record->slug) . '" class="btn btn-sm bg-danger-light">
+                        <a href="' . url('sp3-verifikasi/edit/' . $record->slug) . '" class="btn btn-sm bg-danger-light">
                             <i class="far fa-edit me-2"></i>
                         </a> 
                         <a class="btn btn-sm bg-danger-light delete slug" data-bs-toggle="modal" data-slug="' . $record->slug . '" data-bs-target="#delete">
@@ -196,7 +196,7 @@ class Sp3Service
             $modify = '
         <td class="text-end">
             <div class="actions">
-                <a href="' . url('sp3/detail/' . $record->slug) . '" class="btn btn-sm bg-success-light">
+                <a href="' . url('sp3-keuangan/detail/' . $record->slug) . '" class="btn btn-sm bg-success-light">
                     <i class="far fa-eye me-2"></i>
                 </a>
                 <a href="' . url('/sp3/' . $record->slug . '/preview') . '" class="btn btn-sm bg-success-light">

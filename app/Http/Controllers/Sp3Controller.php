@@ -504,6 +504,14 @@ class Sp3Controller extends Controller
         return view('sp3.billing.detail-list-bill', compact('sp3', 'verified', 'unverified'));
     }
 
+    public function listBillKeuSp3($sp3_slug)
+    {
+        $sp3 = Sp3::where('slug', $sp3_slug)->first();
+        $verified   = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 1)->count();
+        $unverified = Billing::where('sp3_id', $sp3->id)->where('is_verified_by_verifikator', 0)->count();
+        return view('sp3.billing.detail-list-bill-keu', compact('sp3', 'verified', 'unverified'));
+    }
+
     public function approveSp3($slug)
     {
         $sp3 = Sp3::with('billings')->where('slug', $slug)->first();

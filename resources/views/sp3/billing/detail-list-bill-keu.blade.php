@@ -19,7 +19,7 @@
             {!! Toastr::message() !!}
             <div class="row align-items-start mb-3">
                 <div class="col">
-                    <a href="{{ route('sp3-verifikasi/list') }}" type="button" class="btn btn-primary"><i
+                    <a href="{{ route('sp3-keuangan/list') }}" type="button" class="btn btn-primary"><i
                             class="fa fa-arrow-left" aria-hidden="true"></i> Kembali</a>
                 </div>
             </div>
