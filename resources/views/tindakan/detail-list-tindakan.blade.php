@@ -17,12 +17,12 @@
                     </div>
                 </div>
             </div>
-            <div class="row align-items-start mb-3">
+            {{-- <div class="row align-items-start mb-3">
                 <div class="col">
                     <a href="{{ route('sp3/detail', $billing->sp3->slug) }}" type="button" class="btn btn-primary"><i
                             class="fa fa-arrow-left" aria-hidden="true"></i> Kembali</a>
                 </div>
-            </div>
+            </div> --}}
             {{-- message --}}
             {{-- {!! Toastr::message() !!}
             <div class="student-group-form">

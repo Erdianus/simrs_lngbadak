@@ -48,7 +48,7 @@
                         </ul>
                     </li>
                 @endif
-                @if (Session::get('role_name') === 'keuangan' ||
+                @if (Session::get('role_name') === 'Keuangan Admin' ||
                         Session::get('role_name') === 'Super Admin' ||
                         Session::get('role_name') === 'Admin')
                     <li
