@@ -18,6 +18,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Brian2694\Toastr\Facades\Toastr;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class Sp3Controller extends Controller
 {
@@ -662,6 +663,11 @@ class Sp3Controller extends Controller
     /** get sp3 data */
     public function getSp3VerifikasiData(Request $request)
     {
+        Log::info('Filter tanggal:', [
+            'dari_tgl'   => $request->get('dari_tgl'),
+            'sampai_tgl' => $request->get('sampai_tgl'),
+            'filter_eselon' => (int)$request->get('filter_eselon'),
+        ]);
         $response = Sp3Service::getSp3VerifikasiData($request);
         return response()->json($response);
     }

@@ -17,21 +17,34 @@
             </div>
             {{-- message --}}
             {!! Toastr::message() !!}
-            {{-- <div class="student-group-form mb-3">
+            <div class="student-group-form mb-3">
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
-                            <label>Dari Tanggal (tgl_masuk)</label>
+                            <label>Dari Tanggal</label>
                             <input type="text" class="form-control datetimepicker" id="filter_dari_tgl"
-                                placeholder="Dari Tanggal"
-                                value="{{ \Carbon\Carbon::now()->subDays(30)->format('d-M-Y') }}">
+                                placeholder="Dari Tanggal" value="">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
-                            <label>Sampai Tanggal (tgl_keluar)</label>
+                            <label>Sampai Tanggal</label>
                             <input type="text" class="form-control datetimepicker" id="filter_sampai_tgl"
-                                placeholder="Sampai Tanggal" value="{{ \Carbon\Carbon::now()->format('d-M-Y') }}">
+                                placeholder="Sampai Tanggal" value="">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="form-group">
+                            <label>Eselon</label>
+                            <select class="form-control select select2" id="filter_eselon" name="filter_eselon">
+                                <option selected value="" disabled>Select Eselon</option>
+                                @foreach ($eselon as $item)
+                                    <option value="{{ $item->id }}""
+                                        {{ old('eslon_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->nama . ' / ' . $item->deskripsi }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 d-flex align-items-end">
@@ -45,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-            </div> --}}
+            </div>
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card card-table comman-shadow">
@@ -169,6 +182,7 @@
     {{-- get user all js --}}
     <script type="text/javascript">
         $(document).ready(function() {
+            $('.select2').select2();
             $('#Sp3List').DataTable({
                 processing: true,
                 serverSide: true,
@@ -179,6 +193,7 @@
                     data: function(d) {
                         d.dari_tgl = $('#filter_dari_tgl').val();
                         d.sampai_tgl = $('#filter_sampai_tgl').val();
+                        d.filter_eselon = $('#filter_eselon').val();
                     }
                 },
                 columns: [{
@@ -262,8 +277,9 @@
 
         // Tombol Reset: kembalikan nilai filter ke default, lalu reload
         $('#btn_reset').on('click', function() {
-            $('#filter_dari_tgl').val('{{ \Carbon\Carbon::now()->subDays(30)->format('d-M-Y') }}');
-            $('#filter_sampai_tgl').val('{{ \Carbon\Carbon::now()->format('d-M-Y') }}');
+            $('#filter_dari_tgl').val('');
+            $('#filter_sampai_tgl').val('');
+            $('#filter_eselon').val('').trigger('change');
             $('#Sp3List').DataTable().ajax.reload(null, false);
         });
 
