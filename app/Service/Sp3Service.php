@@ -609,18 +609,20 @@ class Sp3Service
 
     public static function revisiSp3($sp3, $request)
     {
-        $validated = $request->validate([
-            'alasan_rev' => 'required|string',
-        ]);
-        if (!$validated) {
-            return [
-                'status' => 'failed',
-                'message' => 'Alasan revisi harus diisi'
-            ];
-        }
-
         DB::beginTransaction();
         try {
+            $validated = $request->validate([
+                'alasan_rev' => 'required|string',
+            ], [
+                'alasan_rev.required' => 'Alasan revisi harus diisi',
+                'alasan_rev.string' => 'Alasan revisi harus berupa string',
+            ]);
+            if (!$validated) {
+                return [
+                    'status' => 'failed',
+                    'message' => $validated->errors()->first()
+                ];
+            }
             $sp3->update([
                 'revisi' => $sp3->revisi + 1,
                 'alasan_rev' => $validated['alasan_rev'],
@@ -634,6 +636,7 @@ class Sp3Service
             ];
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error('Error revisi Sp3: ' . $th->getMessage());
             return [
                 'status' => 'failed',
                 'message' => $th->getMessage()
